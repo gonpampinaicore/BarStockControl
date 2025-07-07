@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE data SYSTEM "data.dtd">
+<data>
+    <users>
+    <user id="1" name="Gonzalo" lastname="Pampin" email="gonza@pampin.com" password="MQAyADMANAA1ADYA" active="true">
+      <roleRef ref="1" />
+    </user>
+  </users>
+
+   <permissionItems>
+    <!-- USER -->
+    <permissionItem id="1" name="user_create" description="Crear usuario" isActive="true" />
+    <permissionItem id="2" name="user_read" description="Ver usuarios" isActive="true" />
+    <permissionItem id="3" name="user_update" description="Modificar usuario" isActive="true" />
+    <permissionItem id="4" name="user_delete" description="Eliminar usuario" isActive="true" />
+    <!-- PRODUCT -->
+    <permissionItem id="5" name="product_create" description="Crear producto" isActive="true" />
+    <permissionItem id="6" name="product_read" description="Ver productos" isActive="true" />
+    <permissionItem id="7" name="product_update" description="Modificar producto" isActive="true" />
+    <permissionItem id="8" name="product_delete" description="Eliminar producto" isActive="true" />
+    <!-- ROLE -->
+    <permissionItem id="9" name="role_create" description="Crear rol" isActive="true" />
+    <permissionItem id="10" name="role_read" description="Ver roles" isActive="true" />
+    <permissionItem id="11" name="role_update" description="Modificar rol" isActive="true" />
+    <permissionItem id="12" name="role_delete" description="Eliminar rol" isActive="true" />
+    <!-- PERMISSION -->
+    <permissionItem id="13" name="permission_create" description="Crear permiso" isActive="true" />
+    <permissionItem id="14" name="permission_read" description="Ver permisos" isActive="true" />
+    <permissionItem id="15" name="permission_update" description="Modificar permiso" isActive="true" />
+    <permissionItem id="16" name="permission_delete" description="Eliminar permiso" isActive="true" />
+    <!-- PERMISSION ITEM -->
+    <permissionItem id="17" name="permissionItem_create" description="Crear permission item" isActive="true" />
+    <permissionItem id="18" name="permissionItem_read" description="Ver permission items" isActive="true" />
+    <permissionItem id="19" name="permissionItem_update" description="Modificar permission item" isActive="true" />
+    <permissionItem id="20" name="permissionItem_delete" description="Eliminar permission item" isActive="true" />
+
+    <!-- STOCK -->
+    <permissionItem id="24" name="stock_create" description="Crear stock" isActive="true" />
+    <permissionItem id="25" name="stock_read" description="Ver stock" isActive="true" />
+    <permissionItem id="26" name="stock_update" description="Modificar stock" isActive="true" />
+    <permissionItem id="27" name="stock_delete" description="Eliminar stock" isActive="true" />
+
+    <!-- DEPOSIT -->
+    <permissionItem id="28" name="deposit_create" description="Crear depósito" isActive="true" />
+    <permissionItem id="29" name="deposit_read" description="Ver depósitos" isActive="true" />
+    <permissionItem id="30" name="deposit_update" description="Modificar depósito" isActive="true" />
+    <permissionItem id="31" name="deposit_delete" description="Eliminar depósito" isActive="true" />
+
+    <!-- STATION -->
+    <permissionItem id="32" name="station_create" description="Crear estación" isActive="true" />
+    <permissionItem id="33" name="station_read" description="Ver estaciones" isActive="true" />
+    <permissionItem id="34" name="station_update" description="Modificar estación" isActive="true" />
+    <permissionItem id="35" name="station_delete" description="Eliminar estación" isActive="true" />
+
+    <!-- Backup -->
+    <permissionItem id="21" name="backup_create" description="Crear backup" isActive="true" />
+    <permissionItem id="22" name="backup_restore" description="Restaurar backup" isActive="true" />
+    <permissionItem id="23" name="backup_delete" description="Eliminar archivo backup" isActive="true" />
+  </permissionItems>
+
+    <permissionDefs>
+    <!-- USER -->
+    <permission id="1" name="User_full_access" description="Manejo total del form de usuario" isActive="true">
+      <permissionItemRef ref="1" />
+      <permissionItemRef ref="2" />
+      <permissionItemRef ref="3" />
+      <permissionItemRef ref="4" />
+    </permission>
+    <!-- PRODUCT -->
+    <permission id="2" name="Product_full_access" description="Manejo total del form de productos" isActive="true">
+      <permissionItemRef ref="5" />
+      <permissionItemRef ref="6" />
+      <permissionItemRef ref="7" />
+      <permissionItemRef ref="8" />
+    </permission>
+    <!-- ROLE -->
+    <permission id="3" name="Role_full_access" description="Manejo total del form de roles" isActive="true">
+      <permissionItemRef ref="9" />
+      <permissionItemRef ref="10" />
+      <permissionItemRef ref="11" />
+      <permissionItemRef ref="12" />
+    </permission>
+    <!-- PERMISSION -->
+    <permission id="4" name="Permission_full_access" description="Manejo total del form de permisos" isActive="true">
+      <permissionItemRef ref="13" />
+      <permissionItemRef ref="14" />
+      <permissionItemRef ref="15" />
+      <permissionItemRef ref="16" />
+    </permission>
+    <!-- PERMISSION ITEM -->
+    <permission id="5" name="PermissionItem_full_access" description="Manejo total del form de permission items" isActive="true">
+      <permissionItemRef ref="17" />
+      <permissionItemRef ref="18" />
+      <permissionItemRef ref="19" />
+      <permissionItemRef ref="20" />
+    </permission>
+
+    <!-- STOCK -->
+    <permission id="7" name="Stock_full_access" description="Manejo total del form de stock" isActive="true">
+      <permissionItemRef ref="24" />
+      <permissionItemRef ref="25" />
+      <permissionItemRef ref="26" />
+      <permissionItemRef ref="27" />
+    </permission>
+
+    <!-- DEPOSIT -->
+    <permission id="8" name="Deposit_full_access" description="Manejo total del form de depósitos" isActive="true">
+      <permissionItemRef ref="28" />
+      <permissionItemRef ref="29" />
+      <permissionItemRef ref="30" />
+      <permissionItemRef ref="31" />
+    </permission>
+
+    <!-- STATION -->
+    <permission id="9" name="Station_full_access" description="Manejo total del form de estaciones" isActive="true">
+      <permissionItemRef ref="32" />
+      <permissionItemRef ref="33" />
+      <permissionItemRef ref="34" />
+      <permissionItemRef ref="35" />
+    </permission>
+
+    <!-- Backup -->
+    <permission id="6" name="Backup_full_access" description="Manejo total del form de backup" isActive="true">
+      <permissionItemRef ref="21" />
+      <permissionItemRef ref="22" />
+      <permissionItemRef ref="23" />
+    </permission>
+  </permissionDefs>
+
+    <roles>
+    <role id="1" name="AdminAdmin" description="Acceso a toda la aplicacion" isActive="true">
+      <rolePermissionRef ref="1" />
+      <rolePermissionRef ref="2" />
+      <rolePermissionRef ref="3" />
+      <rolePermissionRef ref="4" />
+      <rolePermissionRef ref="5" />
+      <rolePermissionRef ref="6" />
+      <rolePermissionRef ref="7" />
+      <rolePermissionRef ref="8" />
+      <rolePermissionRef ref="9" />
+    </role>
+    <role id="2" name="Gerente" description="Rol de gestión sin acceso a configuración" isActive="true">
+      <rolePermissionRef ref="1" />
+      <!-- User_full_access -->
+      <rolePermissionRef ref="2" />
+      <!-- Product_full_access -->
+      <rolePermissionRef ref="3" />
+      <!-- Role_full_access -->
+    </role>
+  </roles>
+
+    <products>
+    </products>
+    <stations>
+    </stations>
+    <deposits>
+    </deposits>
+    <stocks>
+    </stocks>
+</data>

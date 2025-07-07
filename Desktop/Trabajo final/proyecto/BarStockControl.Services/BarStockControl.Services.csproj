@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BarStockControl.Data\BarStockControl.Data.csproj" />
+    <ProjectReference Include="..\BarStockControl.DTOs\BarStockControl.DTOs.csproj" />
+    <ProjectReference Include="..\BarStockControl.Mappers\BarStockControl.Mappers.csproj" />
+    <ProjectReference Include="..\BarStockControl.Models\BarStockControl.Models.csproj" />
+  </ItemGroup>
+
+</Project>

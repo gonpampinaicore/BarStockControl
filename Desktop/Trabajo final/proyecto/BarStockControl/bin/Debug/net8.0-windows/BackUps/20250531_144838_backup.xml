@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE data SYSTEM "data.dtd"[]>
+<data>
+  <permissionItems>
+    <!-- USER -->
+    <permissionItem id="1" name="user_create" description="Crear usuario" isActive="true" />
+    <permissionItem id="2" name="user_read" description="Ver usuarios" isActive="true" />
+    <permissionItem id="3" name="user_update" description="Modificar usuario" isActive="true" />
+    <permissionItem id="4" name="user_delete" description="Eliminar usuario" isActive="true" />
+    <!-- PRODUCT -->
+    <permissionItem id="5" name="product_create" description="Crear producto" isActive="true" />
+    <permissionItem id="6" name="product_read" description="Ver productos" isActive="true" />
+    <permissionItem id="7" name="product_update" description="Modificar producto" isActive="true" />
+    <permissionItem id="8" name="product_delete" description="Eliminar producto" isActive="true" />
+    <!-- ROLE -->
+    <permissionItem id="9" name="role_create" description="Crear rol" isActive="true" />
+    <permissionItem id="10" name="role_read" description="Ver roles" isActive="true" />
+    <permissionItem id="11" name="role_update" description="Modificar rol" isActive="true" />
+    <permissionItem id="12" name="role_delete" description="Eliminar rol" isActive="true" />
+    <!-- PERMISSION -->
+    <permissionItem id="13" name="permission_create" description="Crear permiso" isActive="true" />
+    <permissionItem id="14" name="permission_read" description="Ver permisos" isActive="true" />
+    <permissionItem id="15" name="permission_update" description="Modificar permiso" isActive="true" />
+    <permissionItem id="16" name="permission_delete" description="Eliminar permiso" isActive="true" />
+    <!-- PERMISSION ITEM -->
+    <permissionItem id="17" name="permissionItem_create" description="Crear permission item" isActive="true" />
+    <permissionItem id="18" name="permissionItem_read" description="Ver permission items" isActive="true" />
+    <permissionItem id="19" name="permissionItem_update" description="Modificar permission item" isActive="true" />
+    <permissionItem id="20" name="permissionItem_delete" description="Eliminar permission item" isActive="true" />
+
+<!-- Backup -->
+<permissionItem id="21" name="backup_create" description="Crear backup" isActive="true" />
+<permissionItem id="22" name="backup_restore" description="Restaurar backup" isActive="true" />
+<permissionItem id="23" name="backup_delete" description="Eliminar archivo backup" isActive="true" />
+
+  </permissionItems>
+  <permissionDefs>
+    <!-- USER -->
+    <permission id="1" name="User_full_access" description="Manejo total del form de usuario" isActive="true">
+      <permissionItemRef ref="1" />
+      <permissionItemRef ref="2" />
+      <permissionItemRef ref="3" />
+      <permissionItemRef ref="4" />
+    </permission>
+    <!-- PRODUCT -->
+    <permission id="2" name="Product_full_access" description="Manejo total del form de productos" isActive="true">
+      <permissionItemRef ref="5" />
+      <permissionItemRef ref="6" />
+      <permissionItemRef ref="7" />
+      <permissionItemRef ref="8" />
+    </permission>
+    <!-- ROLE -->
+    <permission id="3" name="Role_full_access" description="Manejo total del form de roles" isActive="true">
+      <permissionItemRef ref="9" />
+      <permissionItemRef ref="10" />
+      <permissionItemRef ref="11" />
+      <permissionItemRef ref="12" />
+    </permission>
+    <!-- PERMISSION -->
+    <permission id="4" name="Permission_full_access" description="Manejo total del form de permisos" isActive="true">
+      <permissionItemRef ref="13" />
+      <permissionItemRef ref="14" />
+      <permissionItemRef ref="15" />
+      <permissionItemRef ref="16" />
+    </permission>
+    <!-- PERMISSION ITEM -->
+    <permission id="5" name="PermissionItem_full_access" description="Manejo total del form de permission items" isActive="true">
+      <permissionItemRef ref="17" />
+      <permissionItemRef ref="18" />
+      <permissionItemRef ref="19" />
+      <permissionItemRef ref="20" />
+    </permission>
+<!-- Backup -->
+<permission id="6" name="Backup_full_access" description="Manejo total del form de backup" isActive="true">
+  <permissionItemRef ref="21" />
+  <permissionItemRef ref="22" />
+  <permissionItemRef ref="23" />
+</permission>
+
+  </permissionDefs>
+  <roles>
+    <role id="1" name="AdminAdmin" description="Acceso a toda la aplicacion" isActive="true">
+      <rolePermissionRef ref="1" />
+      <rolePermissionRef ref="2" />
+      <rolePermissionRef ref="3" />
+      <rolePermissionRef ref="4" />
+      <rolePermissionRef ref="5" />
+      <rolePermissionRef ref="6" />
+    </role>
+    <role id="2" name="Gerente" description="Rol de gestión sin acceso a configuración" isActive="true">
+      <rolePermissionRef ref="1" />
+      <!-- User_full_access -->
+      <rolePermissionRef ref="2" />
+      <!-- Product_full_access -->
+      <rolePermissionRef ref="3" />
+      <!-- Role_full_access -->
+    </role>
+  </roles>
+  <users>
+    <user id="1" name="Gonzalo" lastname="Pampin" email="gonza@pampin.com" password="MQAyADMANAA1ADYA" active="true">
+      <roleRef ref="1" />
+    </user>
+  </users>
+  <products></products>
+</data>

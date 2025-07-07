@@ -1,0 +1,208 @@
+<!ELEMENT data (
+    permissionItems?,
+    permissionDefs?,
+    roles?,
+    users?,
+    products?,
+    bars?,
+    stations?,
+    cashRegisters?,
+    deposits?,
+    stocks?,
+    events?,
+    resourceAssignments?,
+    stockMovements?,
+    drinks?,
+    recipes?,
+    recipeItems?
+    )
+>
+
+<!-- ========== PERMISSION ITEMS (hojas) ========== -->
+<!ELEMENT permissionItems (permissionItem*)>
+<!ELEMENT permissionItem EMPTY>
+<!ATTLIST permissionItem
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #IMPLIED
+    isActive (true|false) "true"
+>
+
+<!-- ========== PERMISSIONS (compuestos) ========== -->
+<!ELEMENT permissionDefs (permission*)>
+<!ELEMENT permission (permissionItemRef*)>
+<!ATTLIST permission
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #IMPLIED
+    isActive (true|false) "true"
+>
+
+<!ELEMENT permissionItemRef EMPTY>
+<!ATTLIST permissionItemRef ref IDREF #REQUIRED>
+
+<!-- ========== ROLES ========== -->
+<!ELEMENT roles (role*)>
+<!ELEMENT role (rolePermissionRef*)>
+<!ATTLIST role
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #IMPLIED
+    isActive (true|false) "true"
+>
+
+<!ELEMENT rolePermissionRef EMPTY>
+<!ATTLIST rolePermissionRef ref IDREF #REQUIRED>
+
+<!-- ========== USERS ========== -->
+<!ELEMENT users (user*)>
+<!ELEMENT user (roleRef*)>
+<!ATTLIST user
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    lastname CDATA #REQUIRED
+    email CDATA #REQUIRED
+    password CDATA #REQUIRED
+    active (true|false) "true"
+>
+
+<!ELEMENT roleRef EMPTY>
+<!ATTLIST roleRef ref IDREF #REQUIRED>
+
+<!-- ========== PRODUCTS ========== -->
+<!ELEMENT products (product*)>
+<!ELEMENT product EMPTY>
+<!ATTLIST product
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    unit CDATA #REQUIRED
+    category CDATA #REQUIRED
+    capacity CDATA #REQUIRED
+    precio CDATA #REQUIRED
+    estimatedServings CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== BARS ========== -->
+<!ELEMENT bars (bar*)>
+<!ELEMENT bar EMPTY>
+<!ATTLIST bar
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    active (true|false) "true"
+>
+<!-- ========== STATIONS ========== -->
+<!ELEMENT stations (station*)>
+<!ELEMENT station EMPTY>
+<!ATTLIST station
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    status (in_preparation|ready_to_work|working|waiting_audit|in_audit) #REQUIRED
+    active (true|false) "true"
+    barId IDREF #REQUIRED
+    comment CDATA #IMPLIED
+>
+<!-- ========== CASHREGISTERS ========== -->
+<!ELEMENT cashRegisters (cashRegister*)>
+<!ELEMENT cashRegister EMPTY>
+<!ATTLIST cashRegister
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    active (true|false) "true"
+    barId IDREF #REQUIRED
+>
+
+
+<!-- ========== DEPOSITS ========== -->
+<!ELEMENT deposits (deposit*)>
+<!ELEMENT deposit EMPTY>
+<!ATTLIST deposit
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    active (true|false) "true"
+>
+
+<!-- ========== STOCK ========== -->
+<!ELEMENT stocks (stock*)>
+<!ELEMENT stock EMPTY>
+<!ATTLIST stock
+    id ID #REQUIRED
+    productId IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+    depositId IDREF #IMPLIED
+    stationId IDREF #IMPLIED
+>
+
+<!-- ========== EVENTS ========== -->
+<!ELEMENT events (event*)>
+<!ELEMENT event EMPTY>
+<!ATTLIST event
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #IMPLIED
+    startDate CDATA #REQUIRED
+    endDate CDATA #IMPLIED
+    status (in_preparation|waiting_to_start|started|closing|closed|cancelled|paused) #REQUIRED
+    active (true|false) "true"
+>
+
+<!-- ========== RESOURCE ASSIGNMENTS ========== -->
+<!ELEMENT resourceAssignments (resourceAssignment*)>
+<!ELEMENT resourceAssignment EMPTY>
+<!ATTLIST resourceAssignment
+    id ID #REQUIRED
+    eventId IDREF #REQUIRED
+    resourceId IDREF #REQUIRED
+    resourceType (bar|station|deposit|cash_register) #REQUIRED
+    userId IDREF #REQUIRED
+>
+
+<!-- ========== STOCK MOVEMENTS ========== -->
+<!ELEMENT stockMovements (stockMovement*)>
+<!ELEMENT stockMovement EMPTY>
+<!ATTLIST stockMovement
+    id ID #REQUIRED
+    productId IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+    eventId IDREF #REQUIRED
+    requestedByUserId IDREF #REQUIRED
+    confirmedByUserId IDREF #IMPLIED
+    fromDepositId IDREF #IMPLIED
+    fromStationId IDREF #IMPLIED
+    toDepositId IDREF #IMPLIED
+    toStationId IDREF #IMPLIED
+    timestamp CDATA #REQUIRED
+    comment CDATA #IMPLIED
+    status (created|in_process|delivered|received|cancelled_by_requester|rejected_out_of_stock) #REQUIRED
+>
+
+<!-- ========== DRINKS ========== -->
+<!ELEMENT drinks (drink*)>
+<!ELEMENT drink EMPTY>
+<!ATTLIST drink
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    price CDATA #REQUIRED
+    isComposed (true|false) "false"
+    isActive (true|false) "true"
+>
+
+<!-- ========== RECIPES ========== -->
+<!ELEMENT recipes (recipe*)>
+<!ELEMENT recipe EMPTY>
+<!ATTLIST recipe
+    id ID #REQUIRED
+    drinkId IDREF #REQUIRED
+    name CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== RECIPE ITEMS ========== -->
+<!ELEMENT recipeItems (recipeItem*)>
+<!ELEMENT recipeItem EMPTY>
+<!ATTLIST recipeItem
+    id ID #REQUIRED
+    recipeId IDREF #REQUIRED
+    productId IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+>

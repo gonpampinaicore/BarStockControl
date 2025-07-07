@@ -1,0 +1,105 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "BarStockControl/1.0.0": {
+        "dependencies": {
+          "BarStockControl.DTOs": "1.0.0",
+          "BarStockControl.Models": "1.0.0",
+          "BarStockControl.Services": "1.0.0"
+        },
+        "runtime": {
+          "BarStockControl.dll": {}
+        }
+      },
+      "BarStockControl.Data/1.0.0": {
+        "dependencies": {
+          "BarStockControl.Models": "1.0.0"
+        },
+        "runtime": {
+          "BarStockControl.Data.dll": {}
+        }
+      },
+      "BarStockControl.DTOs/1.0.0": {
+        "dependencies": {
+          "BarStockControl.Models": "1.0.0"
+        },
+        "runtime": {
+          "BarStockControl.DTOs.dll": {}
+        }
+      },
+      "BarStockControl.Mappers/1.0.0": {
+        "dependencies": {
+          "BarStockControl.DTOs": "1.0.0",
+          "BarStockControl.Models": "1.0.0",
+          "BarStockControl.Security": "1.0.0"
+        },
+        "runtime": {
+          "BarStockControl.Mappers.dll": {}
+        }
+      },
+      "BarStockControl.Models/1.0.0": {
+        "runtime": {
+          "BarStockControl.Models.dll": {}
+        }
+      },
+      "BarStockControl.Security/1.0.0": {
+        "runtime": {
+          "BarStockControl.Security.dll": {}
+        }
+      },
+      "BarStockControl.Services/1.0.0": {
+        "dependencies": {
+          "BarStockControl.DTOs": "1.0.0",
+          "BarStockControl.Data": "1.0.0",
+          "BarStockControl.Mappers": "1.0.0",
+          "BarStockControl.Models": "1.0.0"
+        },
+        "runtime": {
+          "BarStockControl.Services.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BarStockControl/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BarStockControl.Data/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BarStockControl.DTOs/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BarStockControl.Mappers/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BarStockControl.Models/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BarStockControl.Security/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BarStockControl.Services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

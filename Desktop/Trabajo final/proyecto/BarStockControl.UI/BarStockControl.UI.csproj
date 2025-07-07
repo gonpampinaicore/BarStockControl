@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\BarStockControl.DTOs\BarStockControl.DTOs.csproj" />
+		<ProjectReference Include="..\BarStockControl.Models\BarStockControl.Models.csproj" />
+		<ProjectReference Include="..\BarStockControl.Services\BarStockControl.Services.csproj" />
+		<ProjectReference Include="..\BarStockControl.Mappers\BarStockControl.Mappers.csproj" />
+		<ProjectReference Include="..\BarStockControl.Security\BarStockControl.Security.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="PDFsharp" Version="6.2.0" />
+	  <PackageReference Include="QuestPDF" Version="2025.7.0" />
+	  <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+	  <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+	</ItemGroup>
+</Project>

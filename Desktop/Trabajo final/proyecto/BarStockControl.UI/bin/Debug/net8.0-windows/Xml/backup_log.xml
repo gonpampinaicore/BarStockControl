@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <backups>
+    <backup id="1" date="2025-05-31T14:52:32" detail="Backup" userId="1" />
+    <backup id="2" date="2025-06-02T17:55:13" detail="Backup" userId="1" />
+    <backup id="3" date="2025-06-28T16:22:11" detail="Backup" userId="1" />
+    <backup id="4" date="2025-06-28T16:24:07" detail="Restore" userId="1" />
+    <backup id="5" date="2025-06-28T16:26:49" detail="Restore" userId="1" />
+  </backups>
+</data>
