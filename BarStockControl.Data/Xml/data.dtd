@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT data (
+    users?,
+    permissionItems?,
+    permissionDefs?,
+    roles?,
+    products?,
+    bars?,
+    stations?,
+    deposits?,
+    stocks?,
+    events?,
+    drinks?,
+    recipes?,
+    recipeItems?,
+    resourceAssignments?
+)>
+
+<!-- ========== USERS ========== -->
+<!ELEMENT users (user*)>
+<!ELEMENT user (roleRef)>
+<!ATTLIST user
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    lastname CDATA #REQUIRED
+    email CDATA #REQUIRED
+    password CDATA #REQUIRED
+    active (true|false) "true"
+>
+
+<!-- ========== PERMISSION ITEMS ========== -->
+<!ELEMENT permissionItems (permissionItem*)>
+<!ELEMENT permissionItem EMPTY>
+<!ATTLIST permissionItem
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== PERMISSIONS ========== -->
+<!ELEMENT permissionDefs (permission*)>
+<!ELEMENT permission (permissionItemRef*)>
+<!ATTLIST permission
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== ROLES ========== -->
+<!ELEMENT roles (role*)>
+<!ELEMENT role (rolePermissionRef*)>
+<!ATTLIST role
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== PRODUCTS ========== -->
+<!ELEMENT products (product*)>
+<!ELEMENT product EMPTY>
+<!ATTLIST product
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    unit CDATA #REQUIRED
+    category (Gaseosa|BebidaAlcoholica|Energizante|Hielo|Descartable) #REQUIRED
+    capacity CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== BARS ========== -->
+<!ELEMENT bars (bar*)>
+<!ELEMENT bar EMPTY>
+<!ATTLIST bar
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== STATIONS ========== -->
+<!ELEMENT stations (station*)>
+<!ELEMENT station EMPTY>
+<!ATTLIST station
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    barRef IDREF #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== DEPOSITS ========== -->
+<!ELEMENT deposits (deposit*)>
+<!ELEMENT deposit EMPTY>
+<!ATTLIST deposit
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== STOCKS ========== -->
+<!ELEMENT stocks (stock*)>
+<!ELEMENT stock EMPTY>
+<!ATTLIST stock
+    id ID #REQUIRED
+    productRef IDREF #REQUIRED
+    depositRef IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== EVENTS ========== -->
+<!ELEMENT events (event*)>
+<!ELEMENT event EMPTY>
+<!ATTLIST event
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    description CDATA #REQUIRED
+    startDate CDATA #REQUIRED
+    endDate CDATA #REQUIRED
+    status (Planificado|EnCurso|Finalizado|Cancelado) #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== DRINKS ========== -->
+<!ELEMENT drinks (drink*)>
+<!ELEMENT drink EMPTY>
+<!ATTLIST drink
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    price CDATA #REQUIRED
+    isComposed (true|false) "false"
+    isActive (true|false) "true"
+>
+
+<!-- ========== RECIPES ========== -->
+<!ELEMENT recipes (recipe*)>
+<!ELEMENT recipe EMPTY>
+<!ATTLIST recipe
+    id ID #REQUIRED
+    drinkRef IDREF #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== RECIPE ITEMS ========== -->
+<!ELEMENT recipeItems (recipeItem*)>
+<!ELEMENT recipeItem EMPTY>
+<!ATTLIST recipeItem
+    id ID #REQUIRED
+    recipeRef IDREF #REQUIRED
+    productRef IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== RESOURCE ASSIGNMENTS ========== -->
+<!ELEMENT resourceAssignments (resourceAssignment*)>
+<!ELEMENT resourceAssignment EMPTY>
+<!ATTLIST resourceAssignment
+    id ID #REQUIRED
+    eventRef IDREF #REQUIRED
+    userRef IDREF #REQUIRED
+    stationRef IDREF #REQUIRED
+    startDate CDATA #REQUIRED
+    endDate CDATA #REQUIRED
+    isActive (true|false) "true"
+>
+
+<!-- ========== REFERENCES ========== -->
+<!ELEMENT roleRef EMPTY>
+<!ATTLIST roleRef ref IDREF #REQUIRED>
+
+<!ELEMENT permissionItemRef EMPTY>
+<!ATTLIST permissionItemRef ref IDREF #REQUIRED>
+
+<!ELEMENT rolePermissionRef EMPTY>
+<!ATTLIST rolePermissionRef ref IDREF #REQUIRED>

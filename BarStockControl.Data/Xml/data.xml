@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE data SYSTEM "data.dtd">
+<data>
+    <users>
+    </users>
+    <permissionItems>
+    </permissionItems>
+    <permissionDefs>
+    </permissionDefs>
+    <roles>
+    </roles>
+    <products>
+    </products>
+    <bars>
+    </bars>
+    <stations>
+    </stations>
+    <deposits>
+    </deposits>
+    <stocks>
+    </stocks>
+    <events>
+    </events>
+    <drinks>
+    </drinks>
+    <recipes>
+    </recipes>
+    <recipeItems>
+    </recipeItems>
+    <resourceAssignments>
+    </resourceAssignments>
+    <cashRegisters>
+    </cashRegisters>
+    <resourceRolePermissions>
+    </resourceRolePermissions>
+</data>
