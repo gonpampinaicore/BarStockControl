@@ -33,4 +33,6 @@
     </cashRegisters>
     <resourceRolePermissions>
     </resourceRolePermissions>
+    <barmanOrders>
+    </barmanOrders>
 </data>

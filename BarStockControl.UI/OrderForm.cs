@@ -6,6 +6,8 @@ using BarStockControl.DTOs;
 using BarStockControl.Models;
 using BarStockControl.Services;
 using BarStockControl.Forms.Invoices;
+using BarStockControl.Models.Enums;
+using BarStockControl.Core;
 
 namespace BarStockControl.Forms.Orders
 {
@@ -19,15 +21,16 @@ namespace BarStockControl.Forms.Orders
 
         private List<OrderItemDto> _items = new();
         private List<DrinkDto> _drinks;
-        private int _currentUserId = 1;
-        private int _currentEventId = 1;
+        private int _currentUserId;
+        private EventDto _currentEvent;
         private DrinkDto _selectedDrink;
 
         public OrderForm(DrinkService drinkService,
                          OrderService orderService,
                          OrderItemService orderItemService,
                          EventService eventService,
-                         UserService userService)
+                         UserService userService,
+                         EventDto currentEvent)
         {
             InitializeComponent();
             _drinkService = drinkService;
@@ -35,6 +38,8 @@ namespace BarStockControl.Forms.Orders
             _orderItemService = orderItemService;
             _eventService = eventService;
             _userService = userService;
+            _currentEvent = currentEvent;
+            _currentUserId = SessionContext.Instance.LoggedUser.Id;
             dgvDrinks.SelectionChanged += dgvDrinks_SelectionChanged;
             LoadDrinks();
             UpdateTotal();
@@ -141,11 +146,11 @@ namespace BarStockControl.Forms.Orders
                 var total = _items.Sum(i => i.Subtotal);
                 var order = new Order
                 {
-                    EventId = _currentEventId,
+                    EventId = _currentEvent.Id,
                     UserId = _currentUserId,
                     CreatedAt = DateTime.Now,
                     PaymentMethod = "Efectivo",
-                    Status = "Pagado",
+                    Status = OrderStatus.PendienteDePago,
                     Total = total
                 };
                 order.Id = _orderService.GetAll().Any() ? _orderService.GetAll().Max(o => o.Id) + 1 : 1;
@@ -165,6 +170,9 @@ namespace BarStockControl.Forms.Orders
                     };
                     _orderItemService.CreateOrderItem(orderItem);
                 }
+                // Al facturar, actualizar el estado a Pagado
+                order.Status = OrderStatus.Pagado;
+                _orderService.UpdateOrder(order.Id, order);
                 var orderObj = _orderService.GetOrderById(orderId);
                 var user = _userService.GetById(orderObj.UserId);
                 var eventObj = _eventService.GetById(orderObj.EventId);
@@ -193,7 +201,7 @@ namespace BarStockControl.Forms.Orders
                     CashRegisterName = "Caja no asignada",
                     CashierName = user?.ToString() ?? "Usuario desconocido",
                     PaymentMethod = orderObj.PaymentMethod,
-                    Status = orderObj.Status,
+                    Status = orderObj.Status.ToString(),
                     Total = totalFactura,
                     Items = invoiceItems
                 };

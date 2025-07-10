@@ -8,6 +8,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label lblTotalVentas;
         private System.Windows.Forms.Label lblTotalTragos;
+        private System.Windows.Forms.ComboBox cboEventos;
 
         protected override void Dispose(bool disposing)
         {
@@ -25,6 +26,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.lblTotalVentas = new System.Windows.Forms.Label();
             this.lblTotalTragos = new System.Windows.Forms.Label();
+            this.cboEventos = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.chartSales)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartPie)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -33,16 +35,19 @@
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 90F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Controls.Add(this.chartSales, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.chartPie, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.lblTotalVentas, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.lblTotalTragos, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.cboEventos, 0, 0);
+            this.tableLayoutPanel1.SetColumnSpan(this.cboEventos, 2);
+            this.tableLayoutPanel1.Controls.Add(this.chartSales, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.chartPie, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.lblTotalVentas, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.lblTotalTragos, 1, 2);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1000, 500);

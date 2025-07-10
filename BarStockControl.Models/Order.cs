@@ -1,4 +1,5 @@
 using System;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl.Models
 {
@@ -8,7 +9,7 @@ namespace BarStockControl.Models
         public int EventId { get; set; }
         public int UserId { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string Status { get; set; } = "Paid";
+        public OrderStatus Status { get; set; } = OrderStatus.PendienteDePago;
         public string PaymentMethod { get; set; } = "Efectivo";
         public decimal Total { get; set; }
     }

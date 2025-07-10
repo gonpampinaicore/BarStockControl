@@ -31,6 +31,7 @@ namespace BarStockControl.Forms.Invoices
 
         private void LoadInvoice()
         {
+            lblOrderId.Text = $"NÚMERO DE ORDEN: {_invoice.OrderId}";
             lblEvent.Text = _invoice.EventName;
             lblCashier.Text = _invoice.CashierName;
             lblCashRegister.Text = _invoice.CashRegisterName;
@@ -88,7 +89,11 @@ namespace BarStockControl.Forms.Invoices
                     page.Margin(30);
                     page.Size(PageSizes.A4);
                     page.DefaultTextStyle(x => x.FontSize(12));
-                    page.Header().Text("Factura").FontSize(20).Bold().AlignCenter();
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Text($"NÚMERO DE ORDEN: {invoice.OrderId}").FontSize(22).Bold().AlignCenter();
+                        col.Item().Text("Factura").FontSize(20).Bold().AlignCenter();
+                    });
                     page.Content().Column(col =>
                     {
                         col.Item().Text($"Evento: {invoice.EventName}");

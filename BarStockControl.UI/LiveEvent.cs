@@ -3,6 +3,7 @@ using BarStockControl.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Services;
 using System.Data;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl
 {
@@ -42,6 +43,7 @@ namespace BarStockControl
                 return;
             }
 
+            lblTitle.Text = _currentEvent.Status.ToFriendlyString();
             lblEventName.Text = _currentEvent.Name;
             lblEventDate.Text = $"{_currentEvent.StartDate:dd/MM/yyyy HH:mm} - {_currentEvent.EndDate:dd/MM/yyyy HH:mm}";
 
@@ -98,7 +100,6 @@ namespace BarStockControl
                 return;
             }
 
-            // Permitir acceso si el logueado es el asignado, o si tiene rol de super acceso
             bool esSuper = loggedUser.RoleIds.Any(rid => ROLES_SUPER_ACCESO.Contains(rid));
             if (!esSuper && user.Id != loggedUser.Id)
             {
@@ -113,20 +114,19 @@ namespace BarStockControl
                 return;
             }
 
-            // Redirigir al formulario correspondiente según el sector/rol
             switch (assignment.ResourceType)
             {
                 case "deposit":
-                    // new DepositWorkForm(_currentEvent, user, assignment).ShowDialog();
-                    MessageBox.Show("(Demo) Iría al formulario de trabajo de Depósito.");
+                    var stockMovementForm = new BarStockControl.Forms.StockMovements.StockMovementForm();
+                    stockMovementForm.ShowDialog();
                     break;
                 case "bar":
-                    // new BarWorkForm(_currentEvent, user, assignment).ShowDialog();
-                    MessageBox.Show("(Demo) Iría al formulario de trabajo de Barra.");
+                    var liveBarForm = new BarStockControl.UI.LiveBarForm(_currentEvent);
+                    liveBarForm.ShowDialog();
                     break;
                 case "station":
-                    // new StationWorkForm(_currentEvent, user, assignment).ShowDialog();
-                    MessageBox.Show("(Demo) Iría al formulario de trabajo de Estación.");
+                    var liveStationForm = new BarStockControl.UI.LiveStationForm();
+                    liveStationForm.ShowDialog();
                     break;
                 case "cash_register":
                     var dataManager = new XmlDataManager(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Xml", "data.xml"));
@@ -135,7 +135,7 @@ namespace BarStockControl
                     var orderItemService = new OrderItemService(dataManager);
                     var eventService = new EventService(dataManager);
                     var userService = new UserService(dataManager);
-                    var orderForm = new BarStockControl.Forms.Orders.OrderForm(drinkService, orderService, orderItemService, eventService, userService);
+                    var orderForm = new BarStockControl.Forms.Orders.OrderForm(drinkService, orderService, orderItemService, eventService, userService, _currentEvent);
                     orderForm.ShowDialog();
                     break;
                 default:

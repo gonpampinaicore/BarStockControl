@@ -60,6 +60,11 @@ namespace BarStockControl.Services
                 .ToList();
         }
 
+        public List<ResourceAssignmentDto> GetAssignmentsByEventId(int eventId)
+        {
+            return GetByEvent(eventId);
+        }
+
         public ResourceAssignmentDto GetByIdDto(int id)
         {
             var entity = GetById(id);
@@ -73,6 +78,11 @@ namespace BarStockControl.Services
         }
 
         public void DeleteById(int id)
+        {
+            Delete(id);
+        }
+
+        public void DeleteAssignment(int id)
         {
             Delete(id);
         }

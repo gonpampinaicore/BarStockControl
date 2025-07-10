@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using BarStockControl.Models;
 using BarStockControl.DTOs;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl.Mappers
 {
@@ -45,7 +46,7 @@ namespace BarStockControl.Mappers
                 EventId = (int)element.Attribute("eventId"),
                 UserId = (int)element.Attribute("userId"),
                 CreatedAt = DateTime.Parse((string)element.Attribute("createdAt")),
-                Status = (string)element.Attribute("status"),
+                Status = Enum.TryParse((string)element.Attribute("status"), out OrderStatus status) ? status : OrderStatus.PendienteDePago,
                 PaymentMethod = (string)element.Attribute("paymentMethod"),
                 Total = (decimal)element.Attribute("total")
             };
@@ -59,7 +60,7 @@ namespace BarStockControl.Mappers
                 new XAttribute("eventId", order.EventId),
                 new XAttribute("userId", order.UserId),
                 new XAttribute("createdAt", order.CreatedAt.ToString("o")),
-                new XAttribute("status", order.Status),
+                new XAttribute("status", order.Status.ToString()),
                 new XAttribute("paymentMethod", order.PaymentMethod),
                 new XAttribute("total", order.Total)
             );

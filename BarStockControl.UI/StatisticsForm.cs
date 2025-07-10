@@ -1,5 +1,7 @@
-﻿using BarStockControl.Services;
+﻿using BarStockControl.Models.Enums;
+using BarStockControl.Services;
 using System.Windows.Forms.DataVisualization.Charting;
+using BarStockControl.DTOs;
 
 namespace BarStockControl
 {
@@ -8,6 +10,9 @@ namespace BarStockControl
         private readonly OrderService _orderService;
         private readonly DrinkService _drinkService;
         private readonly OrderItemService _orderItemService;
+        private readonly EventService _eventService;
+        private List<EventDto> _eventos;
+        private int? _selectedEventId = null;
 
         public StatisticsForm(OrderService orderService, DrinkService drinkService, OrderItemService orderItemService)
         {
@@ -15,6 +20,29 @@ namespace BarStockControl
             _orderService = orderService;
             _drinkService = drinkService;
             _orderItemService = orderItemService;
+            _eventService = new EventService(new Data.XmlDataManager("Xml/data.xml"));
+            SetupEventSelector();
+            LoadSalesChart();
+            LoadPieChart();
+        }
+
+        private void SetupEventSelector()
+        {
+            cboEventos.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboEventos.SelectedIndexChanged += CboEventos_SelectedIndexChanged;
+            _eventos = _eventService.GetAllEventDtos().OrderByDescending(e => e.StartDate).ToList();
+            var lista = new List<EventDto> { new EventDto { Id = -1, Name = "Todos los eventos" } };
+            lista.AddRange(_eventos);
+            cboEventos.DataSource = lista;
+            cboEventos.DisplayMember = "Name";
+            cboEventos.ValueMember = "Id";
+            cboEventos.SelectedIndex = 0;
+        }
+
+        private void CboEventos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selected = cboEventos.SelectedItem as EventDto;
+            _selectedEventId = (selected != null && selected.Id != -1) ? selected.Id : (int?)null;
             LoadSalesChart();
             LoadPieChart();
         }
@@ -22,7 +50,8 @@ namespace BarStockControl
         private void LoadSalesChart()
         {
             var orders = _orderService.GetAll()
-                .Where(o => o.Status == "Paid" || o.Status == "Pagado")
+                .Where(o => (o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago)
+                    && (!_selectedEventId.HasValue || o.EventId == _selectedEventId.Value))
                 .GroupBy(o => o.CreatedAt.Date)
                 .OrderBy(g => g.Key)
                 .Select(g => new
@@ -63,7 +92,9 @@ namespace BarStockControl
         private void LoadPieChart()
         {
             var orders = _orderService.GetAll()
-                .Where(o => (o.Status == "Paid" || o.Status == "Pagado") && o.CreatedAt.Month == DateTime.Now.Month && o.CreatedAt.Year == DateTime.Now.Year)
+                .Where(o => (o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago)
+                    && o.CreatedAt.Month == DateTime.Now.Month && o.CreatedAt.Year == DateTime.Now.Year
+                    && (!_selectedEventId.HasValue || o.EventId == _selectedEventId.Value))
                 .ToList();
             var orderIds = orders.Select(o => o.Id).ToList();
             var items = _orderItemService.GetAll().Where(oi => orderIds.Contains(oi.OrderId)).ToList();

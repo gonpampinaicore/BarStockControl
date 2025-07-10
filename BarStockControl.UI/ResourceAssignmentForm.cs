@@ -33,15 +33,21 @@ namespace BarStockControl.Forms.Assignments
             LoadEvents();
             LoadUsers();
             LoadResourceTypes();
+            SetupEventHandlers();
         }
 
         private void LoadEvents()
         {
             try
             {
-                cmbEvent.DataSource = _eventService.GetAllEvents();
+                var events = _eventService.GetAllEventDtos()
+                    .Where(e => e.IsActive && e.StartDate >= DateTime.Now)
+                    .OrderBy(e => e.StartDate)
+                    .ToList();
+                cmbEvent.DataSource = events;
                 cmbEvent.DisplayMember = "Name";
                 cmbEvent.ValueMember = "Id";
+                cmbEvent.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
@@ -239,13 +245,75 @@ namespace BarStockControl.Forms.Assignments
             };
         }
 
+        private void SetupEventHandlers()
+        {
+            try
+            {
+                cmbEvent.SelectedIndexChanged += cmbEvent_SelectedIndexChanged;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al configurar eventos: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void cmbEvent_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (cmbEvent.SelectedItem == null) return;
+
+                var selectedEvent = cmbEvent.SelectedItem as EventDto;
+                if (selectedEvent == null) return;
+                LoadExistingAssignments(selectedEvent.Id);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar asignaciones del evento: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void LoadExistingAssignments(int eventId)
+        {
+            try
+            {
+                _assignments.Clear();
+                var existingAssignments = _assignmentService.GetAssignmentsByEventId(eventId);
+                _assignments.AddRange(existingAssignments);
+                RefreshAssignmentGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar asignaciones existentes: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
             try
             {
+                if (cmbEvent.SelectedItem == null)
+                {
+                    MessageBox.Show("Debe seleccionar un evento para guardar las asignaciones.", "Validación", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var selectedEvent = (EventDto)cmbEvent.SelectedItem;
                 var errores = new List<string>();
+
+                var existingAssignments = _assignmentService.GetAssignmentsByEventId(selectedEvent.Id);
+                foreach (var existing in existingAssignments)
+                {
+                    _assignmentService.DeleteAssignment(existing.Id);
+                }
+
                 foreach (var a in _assignments)
                 {
+                    a.EventId = selectedEvent.Id;
                     var result = _assignmentService.CreateAssignment(a);
                     if (result.Any())
                         errores.AddRange(result);
@@ -258,8 +326,7 @@ namespace BarStockControl.Forms.Assignments
                 else
                 {
                     MessageBox.Show("Asignaciones guardadas correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    _assignments.Clear();
-                    RefreshAssignmentGrid();
+                    LoadExistingAssignments(selectedEvent.Id);
                 }
             }
             catch (Exception ex)
