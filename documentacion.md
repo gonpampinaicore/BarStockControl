@@ -3,32 +3,40 @@
 
 A continuación se listan todos los formularios principales del sistema. Se irá marcando cuáles ya fueron revisados y se deja un resumen de su lógica principal (especialmente lo que ocurre en el constructor y por qué):
 
-- [x] LoginForm:
-- [x] MainMenuForm:
-- [x] UserForm:
-- [x] UserProfileForm:
-- [x] RoleForm:
-- [x] PermissionForm:
-- [x] PermissionItemForm:
-- [x] BackupForm:
-- [x] UserManagementForm:
-- [ ] ProductForm:
-- [ ] StockMovementForm:
-- [ ] StockForm:
-- [ ] StatisticsForm:
-- [ ] StationForm:
-- [ ] ResourceAssignmentForm:
-- [ ] RecipeForm:
-- [ ] OrderForm:
-- [ ] InvoiceForm:
-- [ ] InventoryManagementForm:
-- [ ] InfrastructureManagementForm:
-- [ ] EventManagementForm:
-- [ ] EventForm:
-- [ ] DrinkForm:
-- [ ] DepositForm:
-- [ ] CashRegisterForm:
-- [ ] BarForm:
+**FORMULARIOS REVISADOS Y DOCUMENTADOS:**
+- [x] LoginForm: Autenticación de usuarios, manejo de sesión, arquitectura en capas
+- [x] MainMenuForm: Menú principal, gestión de permisos, navegación
+- [x] UserForm: CRUD de usuarios, trabajo exclusivo con DTOs
+- [x] UserProfileForm: Perfil de usuario, actualización de datos
+- [x] RoleForm: Gestión de roles y permisos
+- [x] PermissionForm: Administración de permisos
+- [x] PermissionItemForm: Gestión de ítems de permisos
+- [x] BackupForm: Sistema de respaldos con DTOs
+- [x] UserManagementForm: Gestión avanzada de usuarios
+
+**FORMULARIOS PENDIENTES DE REVISIÓN:**
+- [ ] ProductForm: Gestión de productos con tipos y categorías
+- [ ] StockMovementForm: Movimientos de stock
+- [ ] StockForm: Gestión de inventario
+- [ ] StatisticsForm: Reportes y estadísticas
+- [ ] StationForm: Gestión de estaciones/puestos
+- [ ] ResourceAssignmentForm: Asignación de recursos a usuarios
+- [ ] RecipeForm: Gestión de recetas
+- [ ] OrderForm: Gestión de pedidos
+- [ ] InvoiceForm: Generación de facturas
+- [ ] InventoryManagementForm: Gestión de inventario
+- [ ] InfrastructureManagementForm: Gestión de infraestructura
+- [ ] EventManagementForm: Gestión de eventos
+- [ ] EventForm: Creación y edición de eventos
+- [ ] DrinkForm: Gestión de tragos/bebidas
+- [ ] DepositForm: Gestión de depósitos
+- [ ] CashRegisterForm: Gestión de cajas registradoras
+- [ ] BarForm: Gestión de bares
+- [ ] LiveEvent: Eventos en vivo (nuevo)
+
+**PROBLEMAS DETECTADOS:**
+- Inconsistencia en namespaces: Algunos formularios usan `BarStockControl.Forms` y otros `BarStockControl.Forms.[Subcategoria]`
+- Documentación incompleta: Faltan 17 formularios por revisar y documentar
 
 Se irá completando y marcando cada uno a medida que se revisen sus flujos y lógica principal.
 
