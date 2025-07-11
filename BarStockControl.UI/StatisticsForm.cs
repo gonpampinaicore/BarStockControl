@@ -1,7 +1,11 @@
-﻿using BarStockControl.Models.Enums;
+﻿using System;
+using BarStockControl.Models.Enums;
 using BarStockControl.Services;
 using System.Windows.Forms.DataVisualization.Charting;
 using BarStockControl.DTOs;
+using System.Linq;
+using System.Collections.Generic;
+using BarStockControl.Mappers;
 
 namespace BarStockControl
 {
@@ -11,19 +15,28 @@ namespace BarStockControl
         private readonly DrinkService _drinkService;
         private readonly OrderItemService _orderItemService;
         private readonly EventService _eventService;
+        private readonly BarService _barService;
+        private readonly BarmanOrderService _barmanOrderService;
         private List<EventDto> _eventos;
         private int? _selectedEventId = null;
+        private readonly ProductService _productService;
+        private readonly RecipeService _recipeService;
+        private readonly RecipeItemService _recipeItemService;
 
         public StatisticsForm(OrderService orderService, DrinkService drinkService, OrderItemService orderItemService)
         {
             InitializeComponent();
+            WindowState = FormWindowState.Maximized;
             _orderService = orderService;
             _drinkService = drinkService;
             _orderItemService = orderItemService;
             _eventService = new EventService(new Data.XmlDataManager("Xml/data.xml"));
-            SetupEventSelector();
-            LoadSalesChart();
-            LoadPieChart();
+            _barService = new BarService(new Data.XmlDataManager("Xml/data.xml"));
+            _barmanOrderService = new BarmanOrderService(new Data.XmlDataManager("Xml/data.xml"));
+            _productService = new ProductService(new Data.XmlDataManager("Xml/data.xml"));
+            _recipeService = new RecipeService(new Data.XmlDataManager("Xml/data.xml"));
+            _recipeItemService = new RecipeItemService(new Data.XmlDataManager("Xml/data.xml"));
+            this.Shown += StatisticsForm_Shown;
         }
 
         private void SetupEventSelector()
@@ -39,94 +52,396 @@ namespace BarStockControl
             cboEventos.SelectedIndex = 0;
         }
 
+        private void SetupBarChartSelector()
+        {
+            cboTipoBarra.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboTipoBarra.Items.AddRange(new object[] { "Ventas por estación", "Ventas por barra", "Ventas por barman" });
+            cboTipoBarra.SelectedIndex = 0;
+            cboTipoBarra.SelectedIndexChanged += CboTipoBarra_SelectedIndexChanged;
+        }
+
+        private void SetupMesesSelector()
+        {
+            cboMeses.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboMeses.SelectedIndexChanged += CboMeses_SelectedIndexChanged;
+            
+            var meses = new List<string>();
+            var añoActual = DateTime.Now.Year;
+            
+            for (int mes = 1; mes <= 12; mes++)
+            {
+                var fecha = new DateTime(añoActual, mes, 1);
+                meses.Add(fecha.ToString("MMMM yyyy"));
+            }
+            
+            meses.Reverse();
+            cboMeses.Items.Clear();
+            cboMeses.Items.Add("Últimos 30 días");
+            foreach (var mes in meses)
+            {
+                cboMeses.Items.Add(mes);
+            }
+            cboMeses.SelectedIndex = 0;
+        }
+
         private void CboEventos_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selected = cboEventos.SelectedItem as EventDto;
             _selectedEventId = (selected != null && selected.Id != -1) ? selected.Id : (int?)null;
             LoadSalesChart();
             LoadPieChart();
+            LoadBarChart();
+        }
+
+        private void CboTipoBarra_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadBarChart();
+        }
+
+        private void CboMeses_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadSalesChart();
         }
 
         private void LoadSalesChart()
         {
-            var orders = _orderService.GetAll()
-                .Where(o => (o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago)
-                    && (!_selectedEventId.HasValue || o.EventId == _selectedEventId.Value))
-                .GroupBy(o => o.CreatedAt.Date)
-                .OrderBy(g => g.Key)
-                .Select(g => new
+            try
+            {
+                chartSales.Series.Clear();
+                chartSales.Titles.Clear();
+                if (chartSales.ChartAreas.Count == 0)
+                    chartSales.ChartAreas.Add(new ChartArea());
+                var series = new Series("Ventas por Evento")
                 {
-                    Date = g.Key,
-                    Total = g.Sum(o => o.Total)
-                })
-                .ToList();
-
-            chartSales.Series.Clear();
-            chartSales.Titles.Clear();
-            chartSales.ChartAreas[0].AxisX.LabelStyle.Format = "dd/MM";
-            chartSales.ChartAreas[0].AxisX.Title = "Fecha";
-            chartSales.ChartAreas[0].AxisY.Title = "Total Vendido";
-
-            var series = new Series("Ventas")
-            {
-                ChartType = SeriesChartType.Line,
-                Color = System.Drawing.Color.Orange,
-                BorderWidth = 2,
-                MarkerStyle = MarkerStyle.Circle,
-                MarkerSize = 8,
-                MarkerColor = System.Drawing.Color.Orange
-            };
-
-            decimal totalVentas = 0;
-            foreach (var item in orders)
-            {
-                series.Points.AddXY(item.Date, item.Total);
-                totalVentas += item.Total;
+                    ChartType = SeriesChartType.Column,
+                    Color = System.Drawing.Color.MediumSlateBlue,
+                    IsValueShownAsLabel = true
+                };
+                var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
+                var eventos = _eventService.GetAllEventDtos();
+                DateTime desde, hasta;
+                if (cboMeses.SelectedIndex == 0 || cboMeses.SelectedItem == null)
+                {
+                    hasta = DateTime.Now;
+                    desde = hasta.AddDays(-30);
+                }
+                else
+                {
+                    var mesTexto = cboMeses.SelectedItem.ToString();
+                    DateTime fecha;
+                    if (!DateTime.TryParseExact(mesTexto, "MMMM yyyy", System.Globalization.CultureInfo.CurrentCulture, System.Globalization.DateTimeStyles.None, out fecha))
+                    {
+                        MessageBox.Show("No se pudo interpretar el mes seleccionado. Intente nuevamente.");
+                        return;
+                    }
+                    desde = new DateTime(fecha.Year, fecha.Month, 1);
+                    hasta = desde.AddMonths(1).AddDays(-1);
+                }
+                
+                var eventosFiltrados = eventos
+                    .Where(e => e.StartDate <= hasta && e.EndDate >= desde)
+                    .OrderBy(e => e.StartDate)
+                    .ToList();
+                
+                if (eventosFiltrados.Count == 0)
+                {
+                    MessageBox.Show($"No hay eventos en el período seleccionado (desde {desde:dd/MM/yyyy} hasta {hasta:dd/MM/yyyy}).");
+                    return;
+                }
+                
+                decimal totalVentas = 0;
+                foreach (var evento in eventosFiltrados)
+                {
+                    var total = orders.Where(o => o.EventId == evento.Id).Sum(o => o.Total);
+                    series.Points.AddXY(evento.Name, total);
+                    totalVentas += total;
+                }
+                
+                if (series.Points.Count == 0)
+                {
+                    MessageBox.Show($"No hay ventas registradas para los eventos en el período seleccionado. Total de órdenes: {orders.Count}");
+                    return;
+                }
+                
+                chartSales.Series.Add(series);
+                chartSales.Titles.Add("Ventas por evento en el período seleccionado");
+                chartSales.ChartAreas[0].AxisX.Title = "Evento";
+                chartSales.ChartAreas[0].AxisY.Title = "Total Vendido";
+                lblTotalVentas.Text = $"Total de ventas: ${totalVentas:N2}";
             }
-
-            chartSales.Series.Add(series);
-            chartSales.Titles.Add("Total de Ventas por Día");
-            lblTotalVentas.Text = $"Total de ventas: ${totalVentas:N2}";
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar el gráfico de ventas por evento: {ex.Message}");
+            }
         }
 
         private void LoadPieChart()
         {
-            var orders = _orderService.GetAll()
-                .Where(o => (o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago)
-                    && o.CreatedAt.Month == DateTime.Now.Month && o.CreatedAt.Year == DateTime.Now.Year
-                    && (!_selectedEventId.HasValue || o.EventId == _selectedEventId.Value))
-                .ToList();
-            var orderIds = orders.Select(o => o.Id).ToList();
-            var items = _orderItemService.GetAll().Where(oi => orderIds.Contains(oi.OrderId)).ToList();
-            var salesByDrink = items
-                .GroupBy(i => i.DrinkId)
-                .Select(g => new
+            try
+            {
+                var orders = _orderService.GetAll()
+                    .Where(o => (o.Status == OrderStatus.Pagado || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado)
+                        && (!_selectedEventId.HasValue || o.EventId == _selectedEventId.Value))
+                    .ToList();
+                var orderIds = orders.Select(o => o.Id).ToList();
+                var items = _orderItemService.GetAll().Where(oi => orderIds.Contains(oi.OrderId)).ToList();
+                var salesByDrink = items
+                    .GroupBy(i => i.DrinkId)
+                    .Select(g => new
+                    {
+                        DrinkId = g.Key,
+                        Total = g.Sum(i => i.Subtotal),
+                        Cantidad = g.Sum(i => i.Quantity)
+                    })
+                    .ToList();
+                chartPie.Series.Clear();
+                chartPie.Titles.Clear();
+                if (chartPie.ChartAreas.Count == 0)
+                    chartPie.ChartAreas.Add(new ChartArea());
+                if (chartPie.Legends.Count == 0)
+                    chartPie.Legends.Add(new Legend("Leyenda") { Docking = Docking.Right });
+                chartPie.Legends[0].Enabled = true;
+                var series = new Series("Ventas por Trago")
                 {
-                    DrinkId = g.Key,
-                    Total = g.Sum(i => i.Subtotal),
-                    Cantidad = g.Sum(i => i.Quantity)
-                })
-                .ToList();
-            chartPie.Series.Clear();
-            chartPie.Titles.Clear();
-            var series = new Series("Ventas por Trago")
-            {
-                ChartType = SeriesChartType.Pie
-            };
-            int totalTragos = 0;
-            foreach (var item in salesByDrink)
-            {
-                var drink = _drinkService.GetById(item.DrinkId);
-                var name = drink != null ? drink.Name : $"Trago {item.DrinkId}";
-                series.Points.AddXY(name, item.Total);
-                totalTragos += item.Cantidad;
+                    ChartType = SeriesChartType.Pie,
+                    Legend = "Leyenda"
+                };
+                int totalTragos = 0;
+                foreach (var item in salesByDrink)
+                {
+                    var drink = _drinkService.GetById(item.DrinkId);
+                    var name = drink != null ? drink.Name : $"Trago {item.DrinkId}";
+                    var pointIndex = series.Points.AddXY(name, item.Total);
+                    series.Points[pointIndex].LegendText = name;
+                    totalTragos += item.Cantidad;
+                }
+                
+
+                chartPie.Series.Add(series);
+                chartPie.Titles.Add(_selectedEventId.HasValue ? "Ventas por Trago (Evento Seleccionado)" : "Ventas por Trago (Todos los Eventos)");
+                series.LabelForeColor = System.Drawing.Color.Black;
+                series.IsValueShownAsLabel = true;
+                series.Label = "#PERCENT{P2} (#VAL{N0})";
+                lblTotalTragos.Text = $"Total de tragos vendidos: {totalTragos}";
             }
-            chartPie.Series.Add(series);
-            chartPie.Titles.Add("Ventas por Trago (Mes Actual)");
-            series.LabelForeColor = System.Drawing.Color.Black;
-            series.IsValueShownAsLabel = true;
-            series.Label = "#PERCENT{P2} (#VAL{N0})";
-            lblTotalTragos.Text = $"Total de tragos vendidos: {totalTragos}";
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar el gráfico de tragos: {ex.Message}");
+            }
+        }
+
+        private void LoadPieChartEventos()
+        {
+            try
+            {
+                chartPieEventos.Series.Clear();
+                chartPieEventos.Titles.Clear();
+                if (chartPieEventos.ChartAreas.Count == 0)
+                    chartPieEventos.ChartAreas.Add(new ChartArea());
+                if (chartPieEventos.Legends.Count == 0)
+                    chartPieEventos.Legends.Add(new Legend("Leyenda") { Docking = Docking.Right });
+                chartPieEventos.Legends[0].Enabled = true;
+                var series = new Series("Ventas por Evento")
+                {
+                    ChartType = SeriesChartType.Pie,
+                    Legend = "Leyenda"
+                };
+                var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
+                var salesByEvent = orders
+                    .GroupBy(o => o.EventId)
+                    .Select(g => new
+                    {
+                        EventId = g.Key,
+                        Total = g.Sum(o => o.Total)
+                    })
+                    .OrderByDescending(x => x.Total)
+                    .ToList();
+                var eventos = _eventService.GetAllEventDtos();
+                foreach (var item in salesByEvent)
+                {
+                    var evento = eventos.FirstOrDefault(e => e.Id == item.EventId);
+                    var eventName = evento != null ? evento.Name : $"Evento {item.EventId}";
+                    var pointIndex = series.Points.AddXY(eventName, item.Total);
+                    series.Points[pointIndex].LegendText = eventName;
+                }
+                chartPieEventos.Series.Add(series);
+                chartPieEventos.Titles.Add("Ventas por Evento (Total)");
+                series.LabelForeColor = System.Drawing.Color.Black;
+                series.IsValueShownAsLabel = true;
+                series.Label = "#PERCENT{P2} (#VAL{N0})";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar el gráfico de ventas por evento: {ex.Message}");
+            }
+        }
+
+        private void LoadBarChart()
+        {
+            try
+            {
+                chartBarras.Series.Clear();
+                chartBarras.Titles.Clear();
+                chartBarras.ChartAreas.Clear();
+                chartBarras.ChartAreas.Add(new ChartArea("BarChartArea"));
+
+                var chartArea = chartBarras.ChartAreas[0];
+                chartArea.AxisX.Title = "Total Vendido";
+                chartArea.AxisY.Title = "Categoría";
+
+                var series = new Series("Ventas")
+                {
+                    ChartType = SeriesChartType.Bar,
+                    Color = System.Drawing.Color.SteelBlue
+                };
+
+                var selectedOption = cboTipoBarra.SelectedItem?.ToString();
+                var barmanOrders = _barmanOrderService.GetAllBarmanOrders();
+                if (_selectedEventId.HasValue)
+                    barmanOrders = barmanOrders.Where(bo => bo.EventId == _selectedEventId.Value).ToList();
+                // Solo órdenes en preparación o entregadas
+                var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
+
+                switch (selectedOption)
+                {
+                    case "Ventas por estación":
+                        var salesByStation = barmanOrders
+                            .GroupBy(bo => bo.StationId)
+                            .Select(g => new
+                            {
+                                StationId = g.Key,
+                                Total = g.Sum(bo => orders.FirstOrDefault(o => o.Id == bo.OrderId)?.Total ?? 0)
+                            })
+                            .OrderByDescending(x => x.Total)
+                            .ToList();
+                        foreach (var item in salesByStation)
+                        {
+                            series.Points.AddXY($"Estación {item.StationId}", item.Total);
+                        }
+                        chartBarras.Titles.Add("Ventas por Estación");
+                        break;
+                    case "Ventas por barra":
+                        var salesByBar = barmanOrders
+                            .GroupBy(bo => bo.BarId)
+                            .Select(g => new
+                            {
+                                BarId = g.Key,
+                                Total = g.Sum(bo => orders.FirstOrDefault(o => o.Id == bo.OrderId)?.Total ?? 0)
+                            })
+                            .OrderByDescending(x => x.Total)
+                            .ToList();
+                        var bars = _barService.GetAllBarDtos();
+                        foreach (var item in salesByBar)
+                        {
+                            var bar = bars.FirstOrDefault(b => b.Id == item.BarId);
+                            var barName = bar != null ? bar.Name : $"Barra {item.BarId}";
+                            series.Points.AddXY(barName, item.Total);
+                        }
+                        chartBarras.Titles.Add("Ventas por Barra");
+                        break;
+                    case "Ventas por barman":
+                        var salesByBarman = barmanOrders
+                            .GroupBy(bo => bo.BarmanId)
+                            .Select(g => new
+                            {
+                                BarmanId = g.Key,
+                                Total = g.Sum(bo => orders.FirstOrDefault(o => o.Id == bo.OrderId)?.Total ?? 0)
+                            })
+                            .OrderByDescending(x => x.Total)
+                            .ToList();
+                        var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
+                        foreach (var item in salesByBarman)
+                        {
+                            var user = userService.GetById(item.BarmanId);
+                            var barmanName = user != null ? user.FirstName + " " + user.LastName : $"Barman {item.BarmanId}";
+                            series.Points.AddXY(barmanName, item.Total);
+                        }
+                        chartBarras.Titles.Add("Ventas por Barman");
+                        break;
+                }
+                chartBarras.Series.Add(series);
+                series.IsValueShownAsLabel = true;
+                series.Label = "#VAL{N0}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar el gráfico de barras: {ex.Message}");
+            }
+        }
+
+        private void LoadProductSelector()
+        {
+            clbProductos.Items.Clear();
+            var productos = _productService.GetAll();
+            var productosDto = productos.Select(ProductMapper.ToDto).ToList();
+            foreach (var p in productosDto)
+                clbProductos.Items.Add(p, true);
+        }
+
+        private void LoadCostVsSalesChart()
+        {
+            chartCostVsSales.Series.Clear();
+            chartCostVsSales.Titles.Clear();
+            if (chartCostVsSales.ChartAreas.Count == 0)
+                chartCostVsSales.ChartAreas.Add(new ChartArea());
+
+            var selectedEvent = cboEventos.SelectedItem as EventDto;
+            int? eventId = (selectedEvent != null && selectedEvent.Id != -1) ? selectedEvent.Id : (int?)null;
+
+            var selectedProducts = clbProductos.CheckedItems.Cast<ProductDto>().ToList();
+            if (!selectedProducts.Any())
+                selectedProducts = clbProductos.Items.Cast<ProductDto>().ToList();
+
+            var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.Entregado);
+            if (eventId.HasValue)
+                orders = orders.Where(o => o.EventId == eventId.Value);
+
+            var orderItems = _orderItemService.GetAll().Where(oi => orders.Any(o => o.Id == oi.OrderId)).ToList();
+            var recipes = _recipeService.GetAll().ToList();
+            var recipeItems = _recipeItemService.GetAll().ToList();
+            var productos = _productService.GetAll();
+
+            var seriesCosto = new Series("Costo total") { ChartType = SeriesChartType.Column, Color = System.Drawing.Color.Red };
+            var seriesVenta = new Series("Total vendido") { ChartType = SeriesChartType.Column, Color = System.Drawing.Color.Green };
+
+            foreach (var prod in selectedProducts)
+            {
+                decimal totalVendido = 0;
+                decimal costoTotal = 0;
+                foreach (var oi in orderItems)
+                {
+                    var recipe = recipes.FirstOrDefault(r => r.DrinkId == oi.DrinkId);
+                    if (recipe == null) continue;
+                    var recItem = recipeItems.FirstOrDefault(ri => ri.RecipeId == recipe.Id && ri.ProductId == prod.Id);
+                    if (recItem == null) continue;
+                    // El producto está en la receta de este trago
+                    totalVendido += oi.Subtotal;
+                    var costoUnitario = prod.Precio; // O el campo de costo real si lo tenés
+                    costoTotal += (decimal)recItem.Quantity * oi.Quantity * costoUnitario;
+                }
+                seriesCosto.Points.AddXY(prod.Name, costoTotal);
+                seriesVenta.Points.AddXY(prod.Name, totalVendido);
+            }
+            chartCostVsSales.Series.Add(seriesCosto);
+            chartCostVsSales.Series.Add(seriesVenta);
+            chartCostVsSales.Titles.Add("Costo vs. Venta por producto");
+            chartCostVsSales.ChartAreas[0].AxisX.Title = "Producto";
+            chartCostVsSales.ChartAreas[0].AxisY.Title = "Monto ($)";
+        }
+
+        private void StatisticsForm_Shown(object sender, EventArgs e)
+        {
+            SetupEventSelector();
+            SetupBarChartSelector();
+            SetupMesesSelector();
+            LoadProductSelector();
+            clbProductos.ItemCheck += (s, e2) => BeginInvoke((Action)LoadCostVsSalesChart);
+            cboEventos.SelectedIndexChanged += (s, e2) => LoadCostVsSalesChart();
+            LoadSalesChart();
+            LoadPieChart();
+            LoadPieChartEventos();
+            LoadBarChart();
+            LoadCostVsSalesChart();
         }
     }
 }

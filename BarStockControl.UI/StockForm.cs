@@ -25,13 +25,14 @@ namespace BarStockControl.Forms
         public StockForm()
         {
             InitializeComponent();
-
+            dgvStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgvLocations.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             var dataManager = new XmlDataManager("Xml/data.xml");
             _stockService = new StockService(dataManager);
             _productService = new ProductService(dataManager);
             _depositService = new DepositService(dataManager);
             _stationService = new StationService(dataManager);
-
             LoadProducts();
             LoadStock();
         }
@@ -45,10 +46,11 @@ namespace BarStockControl.Forms
                 var deposits = _depositService.GetAll();
                 var stations = _stationService.GetAll();
 
-                var selectedProductId = cmbProductFilter.SelectedItem is Product p ? p.Id : (int?)null;
+                var selectedProduct = cmbProductFilter.SelectedItem as Product;
+                int? selectedProductId = (selectedProduct != null && selectedProduct.Id != -1) ? selectedProduct.Id : (int?)null;
 
                 var filteredStock = stockList
-                    .Where(s => !selectedProductId.HasValue || s.ProductId == selectedProductId.Value)
+                    .Where(s => (!selectedProductId.HasValue || s.ProductId == selectedProductId.Value))
                     .Select(s => new
                     {
                         s.Id,
@@ -73,17 +75,14 @@ namespace BarStockControl.Forms
             try
             {
                 _products = _productService.GetAll();
-
-                dgvProducts.DataSource = _products.Select(p => new
-                {
-                    p.Id,
-                    p.Name
-                }).ToList();
-
-                cmbProductFilter.DataSource = _products.ToList();
+                dgvProducts.DataSource = _products.Select(p => new { p.Id, p.Name }).ToList();
+                var productosFiltro = new List<Product>();
+                productosFiltro.Add(new Product { Id = -1, Name = "Todos los productos" });
+                productosFiltro.AddRange(_products);
+                cmbProductFilter.DataSource = productosFiltro;
                 cmbProductFilter.DisplayMember = "Name";
                 cmbProductFilter.ValueMember = "Id";
-                cmbProductFilter.SelectedIndex = -1;
+                cmbProductFilter.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -258,10 +257,6 @@ namespace BarStockControl.Forms
             LoadLocations();
         }
 
-        private void rdoStation_CheckedChanged(object sender, EventArgs e)
-        {
-            LoadLocations();
-        }
 
         private void ClearForm()
         {

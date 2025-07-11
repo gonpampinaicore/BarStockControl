@@ -20,106 +20,143 @@
 
         private void InitializeComponent()
         {
-            dgvStock = new System.Windows.Forms.DataGridView();
-            dgvProducts = new System.Windows.Forms.DataGridView();
-            dgvLocations = new System.Windows.Forms.DataGridView();
-            txtQuantity = new System.Windows.Forms.TextBox();
-            lblQuantity = new System.Windows.Forms.Label();
-            rdoDeposit = new System.Windows.Forms.RadioButton();
-            rdoStation = new System.Windows.Forms.RadioButton();
-            btnCreate = new System.Windows.Forms.Button();
-            btnUpdate = new System.Windows.Forms.Button();
-            btnDelete = new System.Windows.Forms.Button();
-            lblSelectedProduct = new System.Windows.Forms.Label();
-            lblSelectedLocation = new System.Windows.Forms.Label();
-            cmbProductFilter = new System.Windows.Forms.ComboBox();
-            lblProductFilter = new System.Windows.Forms.Label();
-
-            ((System.ComponentModel.ISupportInitialize)(dgvStock)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(dgvProducts)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(dgvLocations)).BeginInit();
+            dgvStock = new DataGridView();
+            dgvProducts = new DataGridView();
+            dgvLocations = new DataGridView();
+            txtQuantity = new TextBox();
+            lblQuantity = new Label();
+            rdoDeposit = new RadioButton();
+            rdoStation = new RadioButton();
+            btnCreate = new Button();
+            btnUpdate = new Button();
+            btnDelete = new Button();
+            lblSelectedProduct = new Label();
+            lblSelectedLocation = new Label();
+            cmbProductFilter = new ComboBox();
+            lblProductFilter = new Label();
+            ((System.ComponentModel.ISupportInitialize)dgvStock).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvProducts).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvLocations).BeginInit();
             SuspendLayout();
-
-            dgvStock.Location = new System.Drawing.Point(20, 50);
+            // 
+            // dgvStock
+            // 
+            dgvStock.Location = new Point(540, 39);
             dgvStock.Name = "dgvStock";
-            dgvStock.Size = new System.Drawing.Size(500, 200);
+            dgvStock.Size = new Size(459, 433);
             dgvStock.TabIndex = 0;
             dgvStock.CellClick += dgvStock_CellClick;
-
-            lblProductFilter.Text = "Filtrar por producto:";
-            lblProductFilter.Location = new System.Drawing.Point(20, 20);
-            lblProductFilter.Size = new System.Drawing.Size(120, 20);
-
-            cmbProductFilter.Location = new System.Drawing.Point(140, 20);
-            cmbProductFilter.Size = new System.Drawing.Size(200, 23);
-            cmbProductFilter.SelectedIndexChanged += cmbProductFilter_SelectedIndexChanged;
-
-            dgvProducts.Location = new System.Drawing.Point(540, 40);
+            // 
+            // dgvProducts
+            // 
+            dgvProducts.Location = new Point(20, 42);
             dgvProducts.Name = "dgvProducts";
-            dgvProducts.Size = new System.Drawing.Size(250, 120);
+            dgvProducts.Size = new Size(390, 197);
             dgvProducts.TabIndex = 1;
             dgvProducts.CellClick += dgvProducts_CellClick;
-
-            lblSelectedProduct.Location = new System.Drawing.Point(540, 20);
-            lblSelectedProduct.Size = new System.Drawing.Size(240, 20);
-            lblSelectedProduct.Text = "Producto seleccionado:";
-
-            rdoDeposit.Location = new System.Drawing.Point(540, 170);
+            // 
+            // dgvLocations
+            // 
+            dgvLocations.Location = new Point(20, 369);
+            dgvLocations.Name = "dgvLocations";
+            dgvLocations.Size = new Size(314, 103);
+            dgvLocations.TabIndex = 4;
+            dgvLocations.CellClick += dgvLocations_CellClick;
+            // 
+            // txtQuantity
+            // 
+            txtQuantity.Location = new Point(129, 256);
+            txtQuantity.Name = "txtQuantity";
+            txtQuantity.Size = new Size(100, 23);
+            txtQuantity.TabIndex = 5;
+            // 
+            // lblQuantity
+            // 
+            lblQuantity.Location = new Point(20, 256);
+            lblQuantity.Name = "lblQuantity";
+            lblQuantity.Size = new Size(60, 23);
+            lblQuantity.TabIndex = 5;
+            lblQuantity.Text = "Cantidad:";
+            // 
+            // rdoDeposit
+            // 
+            rdoDeposit.Location = new Point(20, 297);
             rdoDeposit.Name = "rdoDeposit";
-            rdoDeposit.Size = new System.Drawing.Size(80, 24);
+            rdoDeposit.Size = new Size(80, 24);
             rdoDeposit.TabIndex = 2;
             rdoDeposit.Text = "Depósito";
             rdoDeposit.CheckedChanged += rdoDeposit_CheckedChanged;
-
-            rdoStation.Location = new System.Drawing.Point(630, 170);
+            // 
+            // rdoStation
+            // 
+            rdoStation.Location = new Point(115, 297);
             rdoStation.Name = "rdoStation";
-            rdoStation.Size = new System.Drawing.Size(80, 24);
+            rdoStation.Size = new Size(80, 24);
             rdoStation.TabIndex = 3;
             rdoStation.Text = "Estación";
-            rdoStation.CheckedChanged += rdoStation_CheckedChanged;
-
-            dgvLocations.Location = new System.Drawing.Point(540, 230);
-            dgvLocations.Name = "dgvLocations";
-            dgvLocations.Size = new System.Drawing.Size(240, 100);
-            dgvLocations.TabIndex = 4;
-            dgvLocations.CellClick += dgvLocations_CellClick;
-
-            lblSelectedLocation.Location = new System.Drawing.Point(540, 210);
-            lblSelectedLocation.Size = new System.Drawing.Size(240, 20);
-            lblSelectedLocation.Text = "Ubicación seleccionada:";
-
-            lblQuantity.Location = new System.Drawing.Point(20, 270);
-            lblQuantity.Name = "lblQuantity";
-            lblQuantity.Size = new System.Drawing.Size(60, 23);
-            lblQuantity.Text = "Cantidad:";
-
-            txtQuantity.Location = new System.Drawing.Point(90, 270);
-            txtQuantity.Name = "txtQuantity";
-            txtQuantity.Size = new System.Drawing.Size(100, 23);
-            txtQuantity.TabIndex = 5;
-
-            btnCreate.Location = new System.Drawing.Point(20, 310);
+            // 
+            // btnCreate
+            // 
+            btnCreate.Location = new Point(20, 511);
             btnCreate.Name = "btnCreate";
-            btnCreate.Size = new System.Drawing.Size(75, 23);
+            btnCreate.Size = new Size(75, 23);
             btnCreate.TabIndex = 6;
             btnCreate.Text = "Crear";
             btnCreate.Click += btnCreate_Click;
-
-            btnUpdate.Location = new System.Drawing.Point(110, 310);
+            // 
+            // btnUpdate
+            // 
+            btnUpdate.Location = new Point(139, 511);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new System.Drawing.Size(75, 23);
+            btnUpdate.Size = new Size(75, 23);
             btnUpdate.TabIndex = 7;
             btnUpdate.Text = "Actualizar";
             btnUpdate.Click += btnUpdate_Click;
-
-            btnDelete.Location = new System.Drawing.Point(200, 310);
+            // 
+            // btnDelete
+            // 
+            btnDelete.Location = new Point(259, 511);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new System.Drawing.Size(75, 23);
+            btnDelete.Size = new Size(75, 23);
             btnDelete.TabIndex = 8;
             btnDelete.Text = "Eliminar";
             btnDelete.Click += btnDelete_Click;
-
-            ClientSize = new System.Drawing.Size(800, 360);
+            // 
+            // lblSelectedProduct
+            // 
+            lblSelectedProduct.Location = new Point(20, 9);
+            lblSelectedProduct.Name = "lblSelectedProduct";
+            lblSelectedProduct.Size = new Size(240, 20);
+            lblSelectedProduct.TabIndex = 3;
+            lblSelectedProduct.Text = "Producto seleccionado:";
+            // 
+            // lblSelectedLocation
+            // 
+            lblSelectedLocation.Location = new Point(20, 336);
+            lblSelectedLocation.Name = "lblSelectedLocation";
+            lblSelectedLocation.Size = new Size(240, 20);
+            lblSelectedLocation.TabIndex = 4;
+            lblSelectedLocation.Text = "Ubicación seleccionada:";
+            // 
+            // cmbProductFilter
+            // 
+            cmbProductFilter.Location = new Point(666, 6);
+            cmbProductFilter.Name = "cmbProductFilter";
+            cmbProductFilter.Size = new Size(200, 23);
+            cmbProductFilter.TabIndex = 2;
+            cmbProductFilter.SelectedIndexChanged += cmbProductFilter_SelectedIndexChanged;
+            // 
+            // lblProductFilter
+            // 
+            lblProductFilter.Location = new Point(540, 9);
+            lblProductFilter.Name = "lblProductFilter";
+            lblProductFilter.Size = new Size(120, 20);
+            lblProductFilter.TabIndex = 1;
+            lblProductFilter.Text = "Filtrar por producto:";
+            // 
+            // StockForm
+            // 
+            ClientSize = new Size(1022, 548);
             Controls.Add(dgvStock);
             Controls.Add(lblProductFilter);
             Controls.Add(cmbProductFilter);
@@ -136,10 +173,9 @@
             Controls.Add(btnDelete);
             Name = "StockForm";
             Text = "Gestión de Stock";
-
-            ((System.ComponentModel.ISupportInitialize)(dgvStock)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(dgvProducts)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(dgvLocations)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvStock).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvProducts).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvLocations).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }

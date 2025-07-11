@@ -28,4 +28,6 @@
 
 - Siempre que se realice un repaso o revisión, se debe buscar y reportar: métodos no usados, métodos sin try-catch, comentarios innecesarios y cualquier texto visible para el usuario en inglés (botones, labels, alertas, etc.), ya que todos los mensajes al usuario deben estar en español.
 
+- Todos los DataGridView deben tener AutoSizeColumnsMode = AllCells para que las columnas se ajusten automáticamente al contenido más ancho.
+
 (Agrega aquí nuevas reglas a medida que las necesites) 

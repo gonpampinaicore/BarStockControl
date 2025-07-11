@@ -130,25 +130,13 @@ namespace BarStockControl.UI
         {
             try
             {
-                // Obtener los barman asignados a la estación en el evento actual
-                var assignments = _assignmentService.GetByEvent(_currentEvent.Id);
-                var barmanIds = assignments
-                    .Where(a => a.ResourceType == "station" && a.ResourceId == stationId)
-                    .Select(a => a.UserId)
-                    .Distinct()
-                    .ToList();
-                if (!barmanIds.Any())
-                {
-                    dgvBarmanOrders.DataSource = null;
-                    return;
-                }
                 var barmanOrderService = new BarmanOrderService(new Data.XmlDataManager("Xml/data.xml"));
                 var allBarmanOrders = barmanOrderService.GetAllBarmanOrders();
-                var orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
                 var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
+                var orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
                 var orders = orderService.GetAllOrders();
                 var barmanOrders = allBarmanOrders
-                    .Where(bo => barmanIds.Contains(bo.BarmanId))
+                    .Where(bo => bo.StationId == stationId && bo.EventId == _currentEvent.Id)
                     .Select(bo => new
                     {
                         Orden = bo.OrderId,
@@ -172,14 +160,20 @@ namespace BarStockControl.UI
             try
             {
                 var stock = _stockService.GetAll().Where(s => s.StationId == stationId).ToList();
-                var stockDisplay = stock.Select(s => new
-                {
-                    Producto = _productService.GetAllProducts().FirstOrDefault(p => p.Id == s.ProductId)?.Name ?? "Desconocido",
-                    Cantidad = s.Quantity,
-                    Estación = _stationService.GetAll().FirstOrDefault(st => st.Id == s.StationId)?.Name ?? "Desconocida"
+                var productos = _productService.GetAllProducts();
+                var stockDisplay = stock.Select(s => {
+                    var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
+                    var estimados = prod != null ? prod.EstimatedServings * s.Quantity : 0;
+                    return new {
+                        Producto = prod?.Name ?? "Desconocido",
+                        Cantidad = s.Quantity,
+                        TragosEstimados = estimados,
+                        Estación = _stationService.GetAll().FirstOrDefault(st => st.Id == s.StationId)?.Name ?? "Desconocida"
+                    };
                 }).ToList();
-
                 dgvStationStock.DataSource = stockDisplay;
+                if (dgvStationStock.Columns["TragosEstimados"] != null)
+                    dgvStationStock.Columns["TragosEstimados"].HeaderText = "Tragos estimados";
             }
             catch (Exception ex)
             {

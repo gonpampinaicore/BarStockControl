@@ -300,7 +300,10 @@ namespace BarStockControl.Forms.StockMovements
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var detalle = ex.Message;
+                if (ex.InnerException != null)
+                    detalle += "\nDetalle: " + ex.InnerException.Message;
+                MessageBox.Show($"Ocurrió un error al registrar el movimiento de stock:\n{detalle}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

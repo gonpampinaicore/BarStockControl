@@ -13,7 +13,10 @@ namespace BarStockControl.Mappers
             {
                 Id = entity.Id,
                 OrderId = entity.OrderId,
-                BarmanId = entity.BarmanId
+                BarmanId = entity.BarmanId,
+                StationId = entity.StationId,
+                BarId = entity.BarId,
+                EventId = entity.EventId
             };
         }
 
@@ -24,7 +27,10 @@ namespace BarStockControl.Mappers
             {
                 Id = dto.Id,
                 OrderId = dto.OrderId,
-                BarmanId = dto.BarmanId
+                BarmanId = dto.BarmanId,
+                StationId = dto.StationId,
+                BarId = dto.BarId,
+                EventId = dto.EventId
             };
         }
 
@@ -35,7 +41,10 @@ namespace BarStockControl.Mappers
             {
                 Id = (int)element.Attribute("id"),
                 OrderId = (int)element.Attribute("orderId"),
-                BarmanId = (int)element.Attribute("barmanId")
+                BarmanId = (int)element.Attribute("barmanId"),
+                StationId = (int)element.Attribute("stationId"),
+                BarId = (int)element.Attribute("barId"),
+                EventId = (int)element.Attribute("eventId")
             };
         }
 
@@ -45,7 +54,10 @@ namespace BarStockControl.Mappers
             return new XElement("barmanOrder",
                 new XAttribute("id", entity.Id),
                 new XAttribute("orderId", entity.OrderId),
-                new XAttribute("barmanId", entity.BarmanId)
+                new XAttribute("barmanId", entity.BarmanId),
+                new XAttribute("stationId", entity.StationId),
+                new XAttribute("barId", entity.BarId),
+                new XAttribute("eventId", entity.EventId)
             );
         }
     }
