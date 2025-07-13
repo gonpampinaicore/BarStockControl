@@ -243,19 +243,17 @@ namespace BarStockControl.Forms.Drinks
                 txtSearch.TextChanged += (s, e) => LoadDrinks();
                 dgvDrinks.CellClick += dgvDrinks_CellClick;
                 
-                chkIsComposed.CheckedChanged += (s, e) => 
+                // Eliminar la lógica que oculta o limpia la receta al cambiar el check
+                chkIsComposed.CheckedChanged += (s, e) =>
                 {
-                    UpdateRecipePanel();
-                    if (!chkIsComposed.Checked)
-                    {
-                        _currentRecipeItems.Clear();
-                        RefreshRecipeGrid();
-                    }
+                    // Solo actualizar el panel si hay lógica visual, pero no ocultar ni limpiar
+                    // UpdateRecipePanel();
                 };
 
                 btnCreate.Click += btnCreate_Click;
                 btnUpdate.Click += btnUpdate_Click;
                 btnDelete.Click += btnDelete_Click;
+                btnClear.Click += btnClear_Click;
 
                 btnAddProduct.Click += btnAddProduct_Click;
                 btnRemoveProduct.Click += btnRemoveProduct_Click;
@@ -298,18 +296,12 @@ namespace BarStockControl.Forms.Drinks
             numPrice.Value = drink.Price;
             chkIsComposed.Checked = drink.IsComposed;
             
-            if (drink.IsComposed)
-            {
-                _currentRecipeItems = _drinkService.GetRecipeItems(drink.Id).ToList();
-            }
-            else
-            {
-                _currentRecipeItems.Clear();
-            }
+            // Siempre cargar la receta, sin importar si es compuesto o no
+            _currentRecipeItems = _drinkService.GetRecipeItems(drink.Id).ToList();
 
             RefreshRecipeGrid();
             UpdateEstimatedCost();
-            UpdateRecipePanel();
+            // No ocultar el panel de receta
         }
 
         private void ClearForm()
@@ -321,6 +313,7 @@ namespace BarStockControl.Forms.Drinks
             RefreshRecipeGrid();
             _selectedDrink = null;
             txtName.Focus();
+            // No ocultar el panel de receta
         }
 
         private bool ValidateForm()
@@ -616,7 +609,7 @@ namespace BarStockControl.Forms.Drinks
 
         private void UpdateRecipePanel()
         {
-            pnlRecipe.Visible = chkIsComposed.Checked;
+            pnlRecipe.Visible = true;
         }
 
         private void dgvRecipeItems_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -680,6 +673,11 @@ namespace BarStockControl.Forms.Drinks
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
             }
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ClearForm();
         }
     }
 }

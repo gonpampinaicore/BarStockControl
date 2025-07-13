@@ -7,17 +7,33 @@ using System.Xml.Linq;
 
 namespace BarStockControl.Models
 {
-    public class Permission
+    public class Permission : Component
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; } = true;
-        public List<int> PermissionItemIds { get; set; } = new();
 
-    public override string ToString()
-    {
-        return Name;
-    }
+        //get all permissions
+        public override IList<Component> Children
+        {
+            get
+            {
+                return new List<Component>();
+            }
+        }
+
+        //doesn't add because permissions are static
+        public override void AddChild(Component c)
+        {
+        }
+
+        //doesn't delete because permissions are static
+        public override void ClearChildren()
+        {
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

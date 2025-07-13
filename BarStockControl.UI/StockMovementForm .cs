@@ -56,7 +56,7 @@ namespace BarStockControl.Forms.StockMovements
         {
             try
             {
-                cmbEvent.DataSource = _eventService.GetAllEvents().Where(e => e.IsActive).ToList();
+                cmbEvent.DataSource = _eventService.GetAllEvents().Where(e => e.IsActive && e.StartDate > DateTime.Now).ToList();
                 cmbEvent.DisplayMember = "Name";
                 cmbEvent.ValueMember = "Id";
             }
@@ -123,7 +123,42 @@ namespace BarStockControl.Forms.StockMovements
             try
             {
                 var type = rdoToDeposit.Checked ? "deposit" : "station";
-                cmbToLocation.DataSource = _toOptions.Where(x => x.Type == type).ToList();
+                var selectedEvent = cmbEvent.SelectedItem as Event;
+                if (selectedEvent == null)
+                {
+                    cmbToLocation.DataSource = null;
+                    return;
+                }
+
+                var dataManager = new XmlDataManager("Xml/data.xml");
+                var assignmentService = new ResourceAssignmentService(dataManager);
+                var assignments = assignmentService.GetAssignmentsByEventId(selectedEvent.Id)
+                    .Where(a => a.ResourceType == type)
+                    .ToList();
+
+                List<ResourceSelectorOption> options;
+                if (type == "deposit")
+                {
+                    var allDeposits = _depositService.Search(d => d.Active).ToList();
+                    options = allDeposits
+                        .Where(d => assignments.Any(a => a.ResourceId == d.Id))
+                        .Select(d => new ResourceSelectorOption { Id = d.Id, Type = "deposit", Name = "Depósito - " + d.Name })
+                        .ToList();
+                }
+                else
+                {
+                    var allStations = _stationService.Search(s => s.Active).ToList();
+                    options = allStations
+                        .Where(s => assignments.Any(a => a.ResourceId == s.Id))
+                        .Select(s => {
+                            var bar = _barService.GetById(s.BarId);
+                            var barName = bar != null ? bar.Name : "Sin Barra";
+                            return new ResourceSelectorOption { Id = s.Id, Type = "station", Name = $"Estación - {s.Name} ({barName})" };
+                        })
+                        .ToList();
+                }
+
+                cmbToLocation.DataSource = options;
                 cmbToLocation.DisplayMember = "Name";
                 cmbToLocation.ValueMember = "Id";
                 cmbToLocation.SelectedIndex = -1;
@@ -131,8 +166,7 @@ namespace BarStockControl.Forms.StockMovements
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar opciones de destino: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar opciones de destino: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -339,6 +373,75 @@ namespace BarStockControl.Forms.StockMovements
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void btnRollback_Click(object sender, EventArgs e)
+        {
+            if (dgvMovements.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Seleccioná un movimiento para deshacer.");
+                return;
+            }
+
+            var id = Convert.ToInt32(dgvMovements.SelectedRows[0].Cells["Id"].Value);
+            var movimiento = _movementService.GetAll().FirstOrDefault(m => m.Id == id);
+            if (movimiento == null)
+            {
+                MessageBox.Show("No se encontró el movimiento seleccionado.");
+                return;
+            }
+
+            var evento = _eventService.GetById(movimiento.EventId);
+            if (evento != null && evento.StartDate <= DateTime.Now)
+            {
+                MessageBox.Show("No se puede deshacer un movimiento de un evento pasado.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var fromStock = _stockService.Search(s =>
+                s.ProductId == movimiento.ProductId &&
+                s.DepositId == movimiento.FromDepositId &&
+                s.StationId == movimiento.FromStationId
+            ).FirstOrDefault();
+
+            var toStock = _stockService.Search(s =>
+                s.ProductId == movimiento.ProductId &&
+                s.DepositId == movimiento.ToDepositId &&
+                s.StationId == movimiento.ToStationId
+            ).FirstOrDefault();
+
+            if (toStock == null || toStock.Quantity < movimiento.Quantity)
+            {
+                MessageBox.Show("No hay suficiente stock en el destino para deshacer el movimiento.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (fromStock != null)
+            {
+                fromStock.Quantity += movimiento.Quantity;
+                _stockService.UpdateStock(fromStock);
+            }
+            else
+            {
+                var nuevoStock = new Stock
+                {
+                    ProductId = movimiento.ProductId,
+                    Quantity = movimiento.Quantity,
+                    DepositId = movimiento.FromDepositId,
+                    StationId = movimiento.FromStationId
+                };
+                _stockService.CreateStock(nuevoStock);
+            }
+
+            toStock.Quantity -= movimiento.Quantity;
+            _stockService.UpdateStock(toStock);
+
+            _movementService.Delete(movimiento.Id);
+
+            MessageBox.Show("Movimiento deshecho correctamente.");
+            LoadFromStock();
+            LoadToStock();
+            LoadMovements();
         }
     }
 

@@ -9,17 +9,14 @@
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.CheckBox chkActive;
-        private System.Windows.Forms.CheckedListBox clbPermissionItems;
         private System.Windows.Forms.Button btnCreate;
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Label lblName;
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.Label lblSearch;
-        private System.Windows.Forms.Label lblPermissionItems;
         private System.Windows.Forms.Button btnGoToUsers;
         private System.Windows.Forms.Button btnGoToRoles;
-        private System.Windows.Forms.Button btnGoToPermissionItems;
         private System.Windows.Forms.Button btnGoToMainMenu;
 
         private void InitializeComponent()
@@ -30,32 +27,29 @@
             txtName = new TextBox();
             txtDescription = new TextBox();
             chkActive = new CheckBox();
-            clbPermissionItems = new CheckedListBox();
             btnCreate = new Button();
             btnUpdate = new Button();
             btnDelete = new Button();
             lblName = new Label();
             lblDescription = new Label();
             lblSearch = new Label();
-            lblPermissionItems = new Label();
             btnGoToUsers = new Button();
             btnGoToRoles = new Button();
-            btnGoToPermissionItems = new Button();
             btnGoToMainMenu = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvPermissions).BeginInit();
             SuspendLayout();
             // 
             // dgvPermissions
             // 
-            dgvPermissions.Location = new Point(20, 315);
+            dgvPermissions.Location = new Point(20, 150);
             dgvPermissions.Name = "dgvPermissions";
-            dgvPermissions.Size = new Size(615, 246);
+            dgvPermissions.Size = new Size(615, 411);
             dgvPermissions.TabIndex = 0;
             dgvPermissions.CellClick += dgvPermissions_CellClick;
             // 
             // txtSearch
             // 
-            txtSearch.Location = new Point(100, 274);
+            txtSearch.Location = new Point(100, 109);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new Size(200, 23);
             txtSearch.TabIndex = 1;
@@ -63,7 +57,7 @@
             // 
             // chkOnlyActive
             // 
-            chkOnlyActive.Location = new Point(360, 274);
+            chkOnlyActive.Location = new Point(360, 109);
             chkOnlyActive.Name = "chkOnlyActive";
             chkOnlyActive.Size = new Size(104, 24);
             chkOnlyActive.TabIndex = 2;
@@ -86,19 +80,11 @@
             // 
             // chkActive
             // 
-            chkActive.Location = new Point(100, 89);
+            chkActive.Location = new Point(100, 79);
             chkActive.Name = "chkActive";
             chkActive.Size = new Size(104, 24);
             chkActive.TabIndex = 5;
             chkActive.Text = "Activo";
-            // 
-            // clbPermissionItems
-            // 
-            clbPermissionItems.CheckOnClick = true;
-            clbPermissionItems.Location = new Point(100, 123);
-            clbPermissionItems.Name = "clbPermissionItems";
-            clbPermissionItems.Size = new Size(223, 112);
-            clbPermissionItems.TabIndex = 6;
             // 
             // btnCreate
             // 
@@ -111,7 +97,7 @@
             // 
             // btnUpdate
             // 
-            btnUpdate.Location = new Point(344, 60);
+            btnUpdate.Location = new Point(344, 50);
             btnUpdate.Name = "btnUpdate";
             btnUpdate.Size = new Size(75, 23);
             btnUpdate.TabIndex = 8;
@@ -120,7 +106,7 @@
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(344, 107);
+            btnDelete.Location = new Point(344, 88);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(75, 23);
             btnDelete.TabIndex = 9;
@@ -145,23 +131,15 @@
             // 
             // lblSearch
             // 
-            lblSearch.Location = new Point(20, 274);
+            lblSearch.Location = new Point(20, 109);
             lblSearch.Name = "lblSearch";
             lblSearch.Size = new Size(100, 23);
             lblSearch.TabIndex = 10;
             lblSearch.Text = "Buscar:";
             // 
-            // lblPermissionItems
-            // 
-            lblPermissionItems.Location = new Point(20, 123);
-            lblPermissionItems.Name = "lblPermissionItems";
-            lblPermissionItems.Size = new Size(100, 23);
-            lblPermissionItems.TabIndex = 13;
-            lblPermissionItems.Text = "Permisos:";
-            // 
             // btnGoToUsers
             // 
-            btnGoToUsers.Location = new Point(467, 123);
+            btnGoToUsers.Location = new Point(467, 12);
             btnGoToUsers.Name = "btnGoToUsers";
             btnGoToUsers.Size = new Size(134, 41);
             btnGoToUsers.TabIndex = 14;
@@ -170,25 +148,16 @@
             // 
             // btnGoToRoles
             // 
-            btnGoToRoles.Location = new Point(467, 190);
+            btnGoToRoles.Location = new Point(467, 59);
             btnGoToRoles.Name = "btnGoToRoles";
             btnGoToRoles.Size = new Size(131, 41);
             btnGoToRoles.TabIndex = 15;
             btnGoToRoles.Text = "Ir a Roles";
             btnGoToRoles.Click += btnGoToRoles_Click;
             // 
-            // btnGoToPermissionItems
-            // 
-            btnGoToPermissionItems.Location = new Point(467, 60);
-            btnGoToPermissionItems.Name = "btnGoToPermissionItems";
-            btnGoToPermissionItems.Size = new Size(137, 40);
-            btnGoToPermissionItems.TabIndex = 16;
-            btnGoToPermissionItems.Text = "Ir a Elementos de Permisos";
-            btnGoToPermissionItems.Click += btnGoToPermissionItems_Click;
-            // 
             // btnGoToMainMenu
             // 
-            btnGoToMainMenu.Location = new Point(467, 12);
+            btnGoToMainMenu.Location = new Point(467, 106);
             btnGoToMainMenu.Name = "btnGoToMainMenu";
             btnGoToMainMenu.Size = new Size(137, 23);
             btnGoToMainMenu.TabIndex = 17;
@@ -198,24 +167,21 @@
             // PermissionForm
             // 
             ClientSize = new Size(656, 573);
-            Controls.Add(dgvPermissions);
-            Controls.Add(txtSearch);
-            Controls.Add(chkOnlyActive);
-            Controls.Add(txtName);
-            Controls.Add(txtDescription);
-            Controls.Add(chkActive);
-            Controls.Add(clbPermissionItems);
-            Controls.Add(btnCreate);
-            Controls.Add(btnUpdate);
-            Controls.Add(btnDelete);
-            Controls.Add(lblSearch);
-            Controls.Add(lblName);
-            Controls.Add(lblDescription);
-            Controls.Add(lblPermissionItems);
-            Controls.Add(btnGoToUsers);
-            Controls.Add(btnGoToRoles);
-            Controls.Add(btnGoToPermissionItems);
             Controls.Add(btnGoToMainMenu);
+            Controls.Add(btnGoToRoles);
+            Controls.Add(btnGoToUsers);
+            Controls.Add(lblDescription);
+            Controls.Add(lblName);
+            Controls.Add(btnDelete);
+            Controls.Add(btnUpdate);
+            Controls.Add(btnCreate);
+            Controls.Add(chkActive);
+            Controls.Add(txtDescription);
+            Controls.Add(txtName);
+            Controls.Add(chkOnlyActive);
+            Controls.Add(txtSearch);
+            Controls.Add(lblSearch);
+            Controls.Add(dgvPermissions);
             Name = "PermissionForm";
             Text = "Gestión de Permisos";
             ((System.ComponentModel.ISupportInitialize)dgvPermissions).EndInit();

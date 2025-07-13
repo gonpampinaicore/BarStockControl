@@ -32,8 +32,8 @@ namespace BarStockControl
             var now = DateTime.Now;
             var events = _eventService.GetAllEventDtos();
             _currentEvent = events
-                .Where(e => e.IsActive && e.StartDate > now)
-                .OrderBy(e => e.StartDate)
+                .Where(e => e.IsActive && e.EndDate > now)
+                .OrderBy(e => e.EndDate)
                 .FirstOrDefault();
 
             if (_currentEvent == null)

@@ -12,6 +12,8 @@ namespace BarStockControl.DTOs
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
+
         public List<int> PermissionIds { get; set; } = new List<int>();
+        public List<int> RoleIds { get; set; } = new List<int>();    
     }
 }

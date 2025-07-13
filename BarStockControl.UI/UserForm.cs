@@ -1,226 +1,163 @@
-﻿using BarStockControl.Services;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.DTOs;
-using BarStockControl.Forms.Roles;
-using BarStockControl.Forms.Permissions;
 
-namespace BarStockControl.Forms.Users
+namespace BarStockControl.Forms
 {
     public partial class UserForm : Form
     {
         private readonly UserService _userService;
         private readonly RoleService _roleService;
-        private UserDto _selectedUserDto;
-        private List<RoleDto> _allRoles;
+        private readonly PermissionService _permissionService;
+        private UserDto _selectedUser;
 
         public UserForm()
         {
             InitializeComponent();
             _userService = new UserService(new XmlDataManager("Xml/data.xml"));
             _roleService = new RoleService(new XmlDataManager("Xml/data.xml"));
+            _permissionService = new PermissionService(new XmlDataManager("Xml/data.xml"));
+
             LoadUsers();
             LoadRoles();
+            LoadPermissions();
         }
 
         private void LoadUsers()
         {
-            try
+            var users = _userService.GetAllUsers();
+
+            if (chkOnlyActive.Checked)
+                users = users.Where(u => u.Active).ToList();
+
+            if (!string.IsNullOrWhiteSpace(txtSearch.Text))
             {
-                var userDtos = _userService.GetAllUsers();
-
-                if (chkOnlyActive.Checked)
-                    userDtos = userDtos.Where(u => u.Active).ToList();
-
-                if (!string.IsNullOrWhiteSpace(txtSearch.Text))
-                {
-                    string filter = txtSearch.Text.ToLower();
-                    userDtos = userDtos.Where(u =>
-                        u.FirstName.ToLower().Contains(filter) ||
-                        u.LastName.ToLower().Contains(filter) ||
-                        u.Email.ToLower().Contains(filter)).ToList();
-                }
-
-                dgvUsers.DataSource = userDtos;
+                var filter = txtSearch.Text.ToLower();
+                users = users.Where(u =>
+                    u.FirstName.ToLower().Contains(filter) ||
+                    u.LastName.ToLower().Contains(filter) ||
+                    u.Email.ToLower().Contains(filter)).ToList();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar usuarios: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+
+            dgvUsers.DataSource = users;
         }
 
         private void LoadRoles()
         {
-            try
+            clbRoles.Items.Clear();
+            var roles = _roleService.GetAllRoles();
+            foreach (var r in roles)
+                clbRoles.Items.Add(r, false);
+            clbRoles.DisplayMember = "Name";
+        }
+
+        private void LoadPermissions()
+        {
+            clbPermissions.Items.Clear();
+            var permissions = _permissionService.GetAllPermissions().Select(_permissionService.ToDto).ToList();
+            foreach (var p in permissions)
+                clbPermissions.Items.Add(p, false);
+        }
+
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            var userDto = GetUserFromForm();
+            var errors = _userService.CreateUser(userDto);
+            if (errors.Any())
             {
-                _allRoles = _roleService.GetAllRoles();
-                FilterRoles();
+                MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            catch (Exception ex)
+
+            ClearForm();
+            LoadUsers();
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (_selectedUser == null)
             {
-                MessageBox.Show($"Error al cargar roles: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Seleccioná un usuario para actualizar.");
+                return;
+            }
+
+            var userDto = GetUserFromForm();
+            userDto.Id = _selectedUser.Id;
+
+            var errors = _userService.UpdateUser(userDto);
+            if (errors.Any())
+            {
+                MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            ClearForm();
+            LoadUsers();
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (_selectedUser == null)
+            {
+                MessageBox.Show("Seleccioná un usuario para eliminar.");
+                return;
+            }
+
+            var confirm = MessageBox.Show("¿Estás seguro de eliminar este usuario?", "Confirmar", MessageBoxButtons.YesNo);
+            if (confirm == DialogResult.Yes)
+            {
+                _userService.DeleteUser(_selectedUser.Id);
+                ClearForm();
+                LoadUsers();
             }
         }
 
-        private void FilterRoles()
+        private void dgvUsers_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            try
+            if (e.RowIndex >= 0)
             {
-                var filter = txtRoleSearch.Text.ToLower();
-                var filtered = string.IsNullOrWhiteSpace(filter)
-                    ? _allRoles
-                    : _allRoles.Where(r => r.Name.ToLower().Contains(filter)).ToList();
+                _selectedUser = (UserDto)dgvUsers.Rows[e.RowIndex].DataBoundItem;
 
-                var selectedRoleIds = _selectedUserDto?.RoleIds ?? new List<int>();
+                txtFirstName.Text = _selectedUser.FirstName;
+                txtLastName.Text = _selectedUser.LastName;
+                txtEmail.Text = _selectedUser.Email;
+                txtPassword.Text = _selectedUser.Password;
+                chkActive.Checked = _selectedUser.Active;
 
-                dgvRoles.Rows.Clear();
-
-                foreach (var role in filtered)
+                for (int i = 0; i < clbRoles.Items.Count; i++)
                 {
-                    dgvRoles.Rows.Add(
-                        selectedRoleIds.Contains(role.Id),
-                        role.Id,
-                        role.Name
-                    );
+                    if (clbRoles.Items[i] is RoleDto r)
+                        clbRoles.SetItemChecked(i, _selectedUser.RoleIds.Contains(r.Id));
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al filtrar roles: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                for (int i = 0; i < clbPermissions.Items.Count; i++)
+                {
+                    if (clbPermissions.Items[i] is PermissionDto p)
+                        clbPermissions.SetItemChecked(i, _selectedUser.PermissionIds.Contains(p.Id));
+                }
             }
         }
 
         private UserDto GetUserFromForm()
         {
-            var dto = new UserDto
+            var selectedRoleIds = clbRoles.CheckedItems.Cast<RoleDto>().Select(r => r.Id).ToList();
+            var selectedPermissionIds = clbPermissions.CheckedItems.Cast<PermissionDto>().Select(p => p.Id).ToList();
+
+            return new UserDto
             {
-                Id = _selectedUserDto?.Id ?? 0,
+                Id = _selectedUser?.Id ?? 0,
                 FirstName = txtFirstName.Text,
                 LastName = txtLastName.Text,
                 Email = txtEmail.Text,
-                Active = chkActive.Checked,
                 Password = txtPassword.Text,
-                RoleIds = new List<int>()
+                Active = chkActive.Checked,
+                RoleIds = selectedRoleIds,
+                PermissionIds = selectedPermissionIds
             };
-
-            foreach (DataGridViewRow row in dgvRoles.Rows)
-            {
-                if (Convert.ToBoolean(row.Cells["Selected"].Value))
-                {
-                    dto.RoleIds.Add(Convert.ToInt32(row.Cells["Id"].Value));
-                }
-            }
-
-            return dto;
-        }
-
-        private void btnCreate_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var userDto = GetUserFromForm();
-                var errors = _userService.CreateUser(userDto);
-
-                if (errors.Any())
-                {
-                    MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                ClearForm();
-                LoadUsers();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnUpdate_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (_selectedUserDto == null)
-                {
-                    MessageBox.Show("Seleccioná un usuario para actualizar.");
-                    return;
-                }
-
-                var userDto = GetUserFromForm();
-                userDto.Id = _selectedUserDto.Id;
-                var errors = _userService.UpdateUser(userDto);
-
-                if (errors.Any())
-                {
-                    MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                ClearForm();
-                LoadUsers();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error técnico: {ex.Message}\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (_selectedUserDto == null)
-                {
-                    MessageBox.Show("Seleccioná un usuario para eliminar.");
-                    return;
-                }
-
-                var confirm = MessageBox.Show("¿Estás seguro de eliminar este usuario?", "Confirmar", MessageBoxButtons.YesNo);
-                if (confirm == DialogResult.Yes)
-                {
-                    _userService.DeleteUser(_selectedUserDto.Id);
-                    ClearForm();
-                    LoadUsers();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            ClearForm();
-            dgvUsers.ClearSelection();
-            _selectedUserDto = null;
-        }
-
-        private void dgvUsers_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            try
-            {
-                if (e.RowIndex >= 0)
-                {
-                    var selectedRow = (UserDto)dgvUsers.Rows[e.RowIndex].DataBoundItem;
-
-                    _selectedUserDto = _userService.GetUserDtoById(selectedRow.Id);
-
-                    txtFirstName.Text = _selectedUserDto.FirstName;
-                    txtLastName.Text = _selectedUserDto.LastName;
-                    txtEmail.Text = _selectedUserDto.Email;
-                    chkActive.Checked = _selectedUserDto.Active;
-                    txtPassword.Text = _selectedUserDto.Password;
-
-                    FilterRoles();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void ClearForm()
@@ -230,93 +167,17 @@ namespace BarStockControl.Forms.Users
             txtEmail.Clear();
             txtPassword.Clear();
             chkActive.Checked = true;
-            _selectedUserDto = null;
+            _selectedUser = null;
+
+            for (int i = 0; i < clbRoles.Items.Count; i++)
+                clbRoles.SetItemChecked(i, false);
+
+            for (int i = 0; i < clbPermissions.Items.Count; i++)
+                clbPermissions.SetItemChecked(i, false);
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            LoadUsers();
-        }
-
-        private void chkOnlyActive_CheckedChanged(object sender, EventArgs e)
-        {
-            LoadUsers();
-        }
-
-        private void txtRoleSearch_TextChanged(object sender, EventArgs e)
-        {
-            FilterRoles();
-        }
-
-        private void btnGoToRoles_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var roleForm = new RoleForm();
-                roleForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Roles: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToPermissions_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var permissionForm = new PermissionForm();
-                permissionForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Permisos: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToPermissionItems_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var permissionItemForm = new PermissionItemForm();
-                permissionItemForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Elementos de Permisos: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToMainMenu_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var mainMenuForm = new MainMenuForm();
-                mainMenuForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Menú Principal: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-            
-            if (Application.OpenForms.Count == 1 && Application.OpenForms[0] == this)
-            {
-                var mainMenuForm = new MainMenuForm();
-                mainMenuForm.Show();
-            }
-        }
+        private void txtSearch_TextChanged(object sender, EventArgs e) => LoadUsers();
+        private void chkOnlyActive_CheckedChanged(object sender, EventArgs e) => LoadUsers();
+        private void btnClear_Click(object sender, EventArgs e) => ClearForm();
     }
 }

@@ -16,8 +16,7 @@ namespace BarStockControl.Mappers
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
-                IsActive = entity.IsActive,
-                PermissionItemIds = new List<int>(entity.PermissionItemIds)
+                IsActive = entity.IsActive
             };
         }
 
@@ -28,8 +27,7 @@ namespace BarStockControl.Mappers
                 Id = dto.Id,
                 Name = dto.Name,
                 Description = dto.Description,
-                IsActive = dto.IsActive,
-                PermissionItemIds = new List<int>(dto.PermissionItemIds)
+                IsActive = dto.IsActive
             };
         }
 
@@ -40,29 +38,19 @@ namespace BarStockControl.Mappers
                 Id = int.Parse((string)element.Attribute("id")),
                 Name = (string)element.Attribute("name"),
                 Description = (string)element.Attribute("description"),
-                IsActive = bool.Parse((string)element.Attribute("isActive") ?? "true"),
-                PermissionItemIds = element.Elements("permissionItemRef")
-                                           .Select(e => int.Parse((string)e.Attribute("ref")))
-                                           .ToList()
+                IsActive = bool.Parse((string)element.Attribute("isActive") ?? "true")
             };
         }
 
         public static XElement ToXml(Permission permission)
         {
-            var element = new XElement("permission",
+            return new XElement("permission",
                 new XAttribute("id", permission.Id),
                 new XAttribute("name", permission.Name),
                 new XAttribute("description", permission.Description),
                 new XAttribute("isActive", permission.IsActive.ToString().ToLower())
             );
-
-            foreach (var itemId in permission.PermissionItemIds)
-            {
-                element.Add(new XElement("permissionItemRef",
-                    new XAttribute("ref", itemId.ToString())));
-            }
-
-            return element;
         }
     }
+
 }

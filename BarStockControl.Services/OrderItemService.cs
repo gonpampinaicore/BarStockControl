@@ -2,6 +2,7 @@ using BarStockControl.Models;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
 using System.Xml.Linq;
+using BarStockControl.DTOs;
 
 namespace BarStockControl.Services
 {
@@ -43,6 +44,11 @@ namespace BarStockControl.Services
         public List<OrderItem> GetAllOrderItems()
         {
             return GetAll();
+        }
+
+        public List<OrderItemDto> GetAllOrderItemDtos()
+        {
+            return GetAll().Select(OrderItemMapper.ToDto).ToList();
         }
     }
 } 

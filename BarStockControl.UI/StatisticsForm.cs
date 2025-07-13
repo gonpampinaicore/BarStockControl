@@ -16,12 +16,16 @@ namespace BarStockControl
         private readonly OrderItemService _orderItemService;
         private readonly EventService _eventService;
         private readonly BarService _barService;
+        private readonly StationService _stationService;
         private readonly BarmanOrderService _barmanOrderService;
         private List<EventDto> _eventos;
         private int? _selectedEventId = null;
         private readonly ProductService _productService;
         private readonly RecipeService _recipeService;
         private readonly RecipeItemService _recipeItemService;
+        private readonly StationProductConsumptionService _stationProductConsumptionService;
+        private decimal _totalVentasHistorico = 0;
+        private int _totalTragosHistorico = 0;
 
         public StatisticsForm(OrderService orderService, DrinkService drinkService, OrderItemService orderItemService)
         {
@@ -32,10 +36,12 @@ namespace BarStockControl
             _orderItemService = orderItemService;
             _eventService = new EventService(new Data.XmlDataManager("Xml/data.xml"));
             _barService = new BarService(new Data.XmlDataManager("Xml/data.xml"));
+            _stationService = new StationService(new Data.XmlDataManager("Xml/data.xml"));
             _barmanOrderService = new BarmanOrderService(new Data.XmlDataManager("Xml/data.xml"));
             _productService = new ProductService(new Data.XmlDataManager("Xml/data.xml"));
             _recipeService = new RecipeService(new Data.XmlDataManager("Xml/data.xml"));
             _recipeItemService = new RecipeItemService(new Data.XmlDataManager("Xml/data.xml"));
+            _stationProductConsumptionService = new StationProductConsumptionService(new Data.XmlDataManager("Xml/data.xml"));
             this.Shown += StatisticsForm_Shown;
         }
 
@@ -117,7 +123,7 @@ namespace BarStockControl
                     Color = System.Drawing.Color.MediumSlateBlue,
                     IsValueShownAsLabel = true
                 };
-                var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
+                var orders = _orderService.GetAllOrderDtos().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.PendienteDePago || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
                 var eventos = _eventService.GetAllEventDtos();
                 DateTime desde, hasta;
                 if (cboMeses.SelectedIndex == 0 || cboMeses.SelectedItem == null)
@@ -145,7 +151,10 @@ namespace BarStockControl
                 
                 if (eventosFiltrados.Count == 0)
                 {
-                    MessageBox.Show($"No hay eventos en el período seleccionado (desde {desde:dd/MM/yyyy} hasta {hasta:dd/MM/yyyy}).");
+                    decimal totalVentas2 = orders.Sum(o => o.Total);
+                    chartSales.Series.Clear();
+                    chartSales.Titles.Clear();
+                    chartSales.Titles.Add("No hay eventos en el período seleccionado. Mostrando total histórico.");
                     return;
                 }
                 
@@ -167,7 +176,6 @@ namespace BarStockControl
                 chartSales.Titles.Add("Ventas por evento en el período seleccionado");
                 chartSales.ChartAreas[0].AxisX.Title = "Evento";
                 chartSales.ChartAreas[0].AxisY.Title = "Total Vendido";
-                lblTotalVentas.Text = $"Total de ventas: ${totalVentas:N2}";
             }
             catch (Exception ex)
             {
@@ -179,12 +187,12 @@ namespace BarStockControl
         {
             try
             {
-                var orders = _orderService.GetAll()
+                var orders = _orderService.GetAllOrderDtos()
                     .Where(o => (o.Status == OrderStatus.Pagado || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado)
                         && (!_selectedEventId.HasValue || o.EventId == _selectedEventId.Value))
                     .ToList();
                 var orderIds = orders.Select(o => o.Id).ToList();
-                var items = _orderItemService.GetAll().Where(oi => orderIds.Contains(oi.OrderId)).ToList();
+                var items = _orderItemService.GetAllOrderItemDtos().Where(oi => orderIds.Contains(oi.OrderId)).ToList();
                 var salesByDrink = items
                     .GroupBy(i => i.DrinkId)
                     .Select(g => new
@@ -222,7 +230,19 @@ namespace BarStockControl
                 series.LabelForeColor = System.Drawing.Color.Black;
                 series.IsValueShownAsLabel = true;
                 series.Label = "#PERCENT{P2} (#VAL{N0})";
-                lblTotalTragos.Text = $"Total de tragos vendidos: {totalTragos}";
+                if (salesByDrink.Count > 0)
+                {
+                } else {
+                }
+                if (salesByDrink.Count == 0)
+                {
+                    var allItems = _orderItemService.GetAllOrderItemDtos();
+                    int totalTragosHistorico = allItems.Sum(i => i.Quantity);
+                    chartPie.Series.Clear();
+                    chartPie.Titles.Clear();
+                    chartPie.Titles.Add("No hay ventas en el período seleccionado. Mostrando total histórico.");
+                    return;
+                }
             }
             catch (Exception ex)
             {
@@ -246,7 +266,7 @@ namespace BarStockControl
                     ChartType = SeriesChartType.Pie,
                     Legend = "Leyenda"
                 };
-                var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
+                var orders = _orderService.GetAllOrderDtos().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
                 var salesByEvent = orders
                     .GroupBy(o => o.EventId)
                     .Select(g => new
@@ -286,79 +306,94 @@ namespace BarStockControl
                 chartBarras.ChartAreas.Add(new ChartArea("BarChartArea"));
 
                 var chartArea = chartBarras.ChartAreas[0];
-                chartArea.AxisX.Title = "Total Vendido";
+                chartArea.AxisX.Title = "Tragos Entregados";
                 chartArea.AxisY.Title = "Categoría";
 
-                var series = new Series("Ventas")
+                var series = new Series("Tragos Entregados")
                 {
                     ChartType = SeriesChartType.Bar,
                     Color = System.Drawing.Color.SteelBlue
                 };
 
                 var selectedOption = cboTipoBarra.SelectedItem?.ToString();
-                var barmanOrders = _barmanOrderService.GetAllBarmanOrders();
+                var consumptions = _stationProductConsumptionService.GetAllDtos();
+                
                 if (_selectedEventId.HasValue)
-                    barmanOrders = barmanOrders.Where(bo => bo.EventId == _selectedEventId.Value).ToList();
-                // Solo órdenes en preparación o entregadas
-                var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.EnPreparacion || o.Status == OrderStatus.Entregado).ToList();
+                    consumptions = consumptions.Where(c => c.EventoId == _selectedEventId.Value).ToList();
+
+                var orderItems = _orderItemService.GetAllOrderItemDtos();
+                var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
+                var stations = _stationService.GetAllStationDtos();
+                var bars = _barService.GetAllBarDtos();
 
                 switch (selectedOption)
                 {
                     case "Ventas por estación":
-                        var salesByStation = barmanOrders
-                            .GroupBy(bo => bo.StationId)
+                        var deliveriesByStation = consumptions
+                            .GroupBy(c => c.StationId)
                             .Select(g => new
                             {
                                 StationId = g.Key,
-                                Total = g.Sum(bo => orders.FirstOrDefault(o => o.Id == bo.OrderId)?.Total ?? 0)
+                                TragosEntregados = g.Count()
                             })
-                            .OrderByDescending(x => x.Total)
+                            .OrderByDescending(x => x.TragosEntregados)
                             .ToList();
-                        foreach (var item in salesByStation)
+                        
+                        foreach (var item in deliveriesByStation)
                         {
-                            series.Points.AddXY($"Estación {item.StationId}", item.Total);
+                            var station = stations.FirstOrDefault(s => s.Id == item.StationId);
+                            var stationName = station != null ? station.Name : $"Estación {item.StationId}";
+                            series.Points.AddXY(stationName, item.TragosEntregados);
                         }
-                        chartBarras.Titles.Add("Ventas por Estación");
+                        chartBarras.Titles.Add("Tragos Entregados por Estación");
                         break;
+
                     case "Ventas por barra":
-                        var salesByBar = barmanOrders
-                            .GroupBy(bo => bo.BarId)
+                        var deliveriesByBar = consumptions
+                            .GroupBy(c => c.StationId)
                             .Select(g => new
                             {
-                                BarId = g.Key,
-                                Total = g.Sum(bo => orders.FirstOrDefault(o => o.Id == bo.OrderId)?.Total ?? 0)
+                                StationId = g.Key,
+                                TragosEntregados = g.Count()
                             })
-                            .OrderByDescending(x => x.Total)
+                            .OrderByDescending(x => x.TragosEntregados)
                             .ToList();
-                        var bars = _barService.GetAllBarDtos();
-                        foreach (var item in salesByBar)
+                        
+                        foreach (var item in deliveriesByBar)
                         {
-                            var bar = bars.FirstOrDefault(b => b.Id == item.BarId);
-                            var barName = bar != null ? bar.Name : $"Barra {item.BarId}";
-                            series.Points.AddXY(barName, item.Total);
+                            var station = stations.FirstOrDefault(s => s.Id == item.StationId);
+                            if (station != null)
+                            {
+                                var bar = bars.FirstOrDefault(b => b.Id == station.BarId);
+                                var barName = bar != null ? bar.Name : $"Barra {station.BarId}";
+                                series.Points.AddXY(barName, item.TragosEntregados);
+                            }
                         }
-                        chartBarras.Titles.Add("Ventas por Barra");
+                        chartBarras.Titles.Add("Tragos Entregados por Barra");
                         break;
+
                     case "Ventas por barman":
-                        var salesByBarman = barmanOrders
-                            .GroupBy(bo => bo.BarmanId)
+                        var deliveriesByBarman = consumptions
+                            .Where(c => c.UsuarioId.HasValue)
+                            .GroupBy(c => c.UsuarioId.Value)
                             .Select(g => new
                             {
                                 BarmanId = g.Key,
-                                Total = g.Sum(bo => orders.FirstOrDefault(o => o.Id == bo.OrderId)?.Total ?? 0)
+                                TragosEntregados = g.Count()
                             })
-                            .OrderByDescending(x => x.Total)
+                            .OrderByDescending(x => x.TragosEntregados)
                             .ToList();
-                        var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
-                        foreach (var item in salesByBarman)
+                        
+                        foreach (var item in deliveriesByBarman)
                         {
                             var user = userService.GetById(item.BarmanId);
-                            var barmanName = user != null ? user.FirstName + " " + user.LastName : $"Barman {item.BarmanId}";
-                            series.Points.AddXY(barmanName, item.Total);
+                            var barmanName = user != null ? $"{user.FirstName} {user.LastName}" : $"Barman {item.BarmanId}";
+                            series.Points.AddXY(barmanName, item.TragosEntregados);
                         }
-                        chartBarras.Titles.Add("Ventas por Barman");
+                        chartBarras.Titles.Add("Tragos Entregados por Barman");
                         break;
                 }
+                
                 chartBarras.Series.Add(series);
                 series.IsValueShownAsLabel = true;
                 series.Label = "#VAL{N0}";
@@ -414,9 +449,8 @@ namespace BarStockControl
                     if (recipe == null) continue;
                     var recItem = recipeItems.FirstOrDefault(ri => ri.RecipeId == recipe.Id && ri.ProductId == prod.Id);
                     if (recItem == null) continue;
-                    // El producto está en la receta de este trago
                     totalVendido += oi.Subtotal;
-                    var costoUnitario = prod.Precio; // O el campo de costo real si lo tenés
+                    var costoUnitario = prod.Precio;
                     costoTotal += (decimal)recItem.Quantity * oi.Quantity * costoUnitario;
                 }
                 seriesCosto.Points.AddXY(prod.Name, costoTotal);
@@ -431,6 +465,8 @@ namespace BarStockControl
 
         private void StatisticsForm_Shown(object sender, EventArgs e)
         {
+            _totalVentasHistorico = _orderService.GetAllOrderDtos().Sum(o => o.Total);
+            _totalTragosHistorico = _orderItemService.GetAllOrderItemDtos().Sum(i => i.Quantity);
             SetupEventSelector();
             SetupBarChartSelector();
             SetupMesesSelector();

@@ -4,6 +4,7 @@ using BarStockControl.Forms.Stations;
 using BarStockControl.Forms.CashRegisters;
 using BarStockControl.Services;
 using BarStockControl.Data;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl
 {
@@ -43,16 +44,16 @@ namespace BarStockControl
                 var roleIds = user.RoleIds;
                 var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
 
-                var forms = new (string Label, Func<Form> FormFactory, string RequiredPermission)[]
+                var forms = new (string Label, Func<Form> FormFactory, PermissionType RequiredPermission)[]
                 {
-                    ("Barras", () => new BarForm(), "Bar_full_access"),
-                    ("Estaciones", () => new StationForm(), "Station_full_access"),
-                    ("Cajas Registradoras", () => new CashRegisterForm(), "CashRegister_full_access")
+                    ("Barras", () => new BarForm(), PermissionType.BarFullAccess),
+                    ("Estaciones", () => new StationForm(), PermissionType.StationFullAccess),
+                    ("Cajas Registradoras", () => new CashRegisterForm(), PermissionType.CashRegisterFullAccess)
                 };
 
                 foreach (var (label, formFactory, requiredPermission) in forms)
                 {
-                    if (permissionNames.Contains(requiredPermission))
+                    if (permissionNames.Contains(requiredPermission.ToString()))
                     {
                         AddFormButton(label, formFactory);
                     }

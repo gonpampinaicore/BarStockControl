@@ -6,6 +6,7 @@ using BarStockControl.Models;
 using BarStockControl.Models.Enums;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
+using BarStockControl.DTOs;
 
 namespace BarStockControl.Services
 {
@@ -279,6 +280,11 @@ namespace BarStockControl.Services
             {
                 throw new InvalidOperationException($"Error al exportar productos a CSV: {ex.Message}", ex);
             }
+        }
+
+        public List<ProductDto> GetAllProductDtos()
+        {
+            return GetAll().Select(ProductMapper.ToDto).ToList();
         }
     }
 }

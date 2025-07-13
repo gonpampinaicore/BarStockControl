@@ -15,8 +15,6 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart chartPieEventos;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartBarras;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartCostVsSales;
-        private System.Windows.Forms.Label lblTotalVentas;
-        private System.Windows.Forms.Label lblTotalTragos;
 
         protected override void Dispose(bool disposing)
         {
@@ -35,9 +33,12 @@
             cboMeses = new ComboBox();
             cboTipoBarra = new ComboBox();
             clbProductos = new CheckedListBox();
-            lblTotalVentas = new Label();
-            lblTotalTragos = new Label();
             chartsTableLayout = new TableLayoutPanel();
+            chartSales = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartPie = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartBarras = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartPieEventos = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartCostVsSales = new System.Windows.Forms.DataVisualization.Charting.Chart();
             mainTableLayout.SuspendLayout();
             selectorsPanel.SuspendLayout();
             SuspendLayout();
@@ -45,16 +46,19 @@
             // mainTableLayout
             // 
             mainTableLayout.ColumnCount = 1;
-            mainTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            mainTableLayout.Controls.Clear();
+            mainTableLayout.RowCount = 3;
+            mainTableLayout.RowStyles.Clear();
+            mainTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            mainTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F)); // selectors
+            mainTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // totales
+            mainTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // charts
             mainTableLayout.Controls.Add(selectorsPanel, 0, 0);
-            mainTableLayout.Controls.Add(chartsTableLayout, 0, 1);
+            mainTableLayout.Controls.Add(chartsTableLayout, 0, 2);
             mainTableLayout.Dock = DockStyle.Fill;
             mainTableLayout.Location = new Point(0, 0);
             mainTableLayout.Name = "mainTableLayout";
-            mainTableLayout.RowCount = 2;
-            mainTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 130F));
-            mainTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            mainTableLayout.Size = new Size(1200, 900);
+            mainTableLayout.Size = new Size(1920, 1063);
             mainTableLayout.TabIndex = 0;
             // 
             // selectorsPanel
@@ -63,65 +67,41 @@
             selectorsPanel.Controls.Add(cboMeses);
             selectorsPanel.Controls.Add(cboTipoBarra);
             selectorsPanel.Controls.Add(clbProductos);
-            selectorsPanel.Controls.Add(lblTotalVentas);
-            selectorsPanel.Controls.Add(lblTotalTragos);
             selectorsPanel.Dock = DockStyle.Fill;
             selectorsPanel.Location = new Point(3, 3);
             selectorsPanel.Name = "selectorsPanel";
-            selectorsPanel.Size = new Size(1194, 124);
+            selectorsPanel.Padding = new Padding(10);
+            selectorsPanel.Size = new Size(1914, 54);
             selectorsPanel.TabIndex = 0;
             selectorsPanel.WrapContents = false;
             // 
             // cboEventos
             // 
-            cboEventos.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboEventos.Location = new Point(3, 3);
+            cboEventos.Location = new Point(13, 13);
             cboEventos.Name = "cboEventos";
-            cboEventos.Size = new Size(180, 23);
+            cboEventos.Size = new Size(121, 23);
             cboEventos.TabIndex = 0;
             // 
             // cboMeses
             // 
-            cboMeses.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboMeses.Location = new Point(189, 3);
+            cboMeses.Location = new Point(140, 13);
             cboMeses.Name = "cboMeses";
-            cboMeses.Size = new Size(180, 23);
+            cboMeses.Size = new Size(121, 23);
             cboMeses.TabIndex = 1;
             // 
             // cboTipoBarra
             // 
-            cboTipoBarra.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboTipoBarra.Location = new Point(375, 3);
+            cboTipoBarra.Location = new Point(267, 13);
             cboTipoBarra.Name = "cboTipoBarra";
-            cboTipoBarra.Size = new Size(180, 23);
+            cboTipoBarra.Size = new Size(121, 23);
             cboTipoBarra.TabIndex = 2;
             // 
             // clbProductos
             // 
-            clbProductos.CheckOnClick = true;
-            clbProductos.DisplayMember = "Name";
-            clbProductos.Location = new Point(561, 3);
+            clbProductos.Location = new Point(394, 13);
             clbProductos.Name = "clbProductos";
-            clbProductos.Size = new Size(250, 94);
+            clbProductos.Size = new Size(120, 94);
             clbProductos.TabIndex = 3;
-            // 
-            // lblTotalVentas
-            // 
-            lblTotalVentas.Location = new Point(817, 0);
-            lblTotalVentas.Name = "lblTotalVentas";
-            lblTotalVentas.Size = new Size(180, 23);
-            lblTotalVentas.TabIndex = 4;
-            lblTotalVentas.Text = "Total de ventas: $0";
-            lblTotalVentas.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // lblTotalTragos
-            // 
-            lblTotalTragos.Location = new Point(1003, 0);
-            lblTotalTragos.Name = "lblTotalTragos";
-            lblTotalTragos.Size = new Size(200, 23);
-            lblTotalTragos.TabIndex = 5;
-            lblTotalTragos.Text = "Total de tragos vendidos: 0";
-            lblTotalTragos.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // chartsTableLayout
             // 
@@ -129,21 +109,39 @@
             chartsTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             chartsTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             chartsTableLayout.Dock = DockStyle.Fill;
-            chartsTableLayout.Location = new Point(3, 133);
+            chartsTableLayout.Location = new Point(3, 63);
             chartsTableLayout.Name = "chartsTableLayout";
+            chartsTableLayout.Padding = new Padding(10);
             chartsTableLayout.RowCount = 3;
+            chartsTableLayout.RowStyles.Clear();
             chartsTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
             chartsTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33F));
             chartsTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 34F));
-            chartsTableLayout.Size = new Size(1194, 764);
+            chartsTableLayout.Size = new Size(1914, 997);
             chartsTableLayout.TabIndex = 1;
+            chartsTableLayout.Controls.Add(chartSales, 0, 0);
+            chartsTableLayout.Controls.Add(chartPie, 1, 0);
+            chartsTableLayout.Controls.Add(chartBarras, 0, 1);
+            chartsTableLayout.Controls.Add(chartPieEventos, 1, 1);
+            chartsTableLayout.Controls.Add(chartCostVsSales, 0, 2);
+            chartSales.Dock = DockStyle.Fill;
+            chartPie.Dock = DockStyle.Fill;
+            chartBarras.Dock = DockStyle.Fill;
+            chartPieEventos.Dock = DockStyle.Fill;
+            chartCostVsSales.Dock = DockStyle.Fill;
+            chartSales.Name = "chartSales";
+            chartPie.Name = "chartPie";
+            chartBarras.Name = "chartBarras";
+            chartPieEventos.Name = "chartPieEventos";
+            chartCostVsSales.Name = "chartCostVsSales";
             // 
             // StatisticsForm
             // 
-            ClientSize = new Size(1200, 900);
+            ClientSize = new Size(1920, 1063);
             Controls.Add(mainTableLayout);
             Name = "StatisticsForm";
             Text = "Estadísticas de Ventas";
+            WindowState = FormWindowState.Maximized;
             mainTableLayout.ResumeLayout(false);
             selectorsPanel.ResumeLayout(false);
             ResumeLayout(false);

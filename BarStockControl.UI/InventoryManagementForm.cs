@@ -8,6 +8,7 @@ using BarStockControl.Forms.Deposits;
 using BarStockControl.Forms.Drinks;
 using BarStockControl.Services;
 using BarStockControl.Data;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl
 {
@@ -49,20 +50,19 @@ namespace BarStockControl
                 var roleIds = user.RoleIds;
                 var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
 
-                // Definir los formularios de esta categoría
-                var forms = new (string Label, Func<Form> FormFactory, string RequiredPermission)[]
+                var forms = new (string Label, Func<Form> FormFactory, PermissionType RequiredPermission)[]
                 {
-                    ("Productos", () => new ProductForm(), "Product_full_access"),
-                    ("Stock", () => new StockForm(), "Stock_full_access"),
-                    ("Movimientos de Stock", () => new StockMovementForm(), "StockMovement_full_access"),
-                    ("Depósitos", () => new DepositForm(), "Deposit_full_access"),
-                    ("Tragos", () => new DrinkForm(_xmlDataManager), "Drink_full_access"),
-                    ("Recetas", () => new RecipeForm(), "Recipe_full_access")
+                    ("Productos", () => new ProductForm(), PermissionType.ProductFullAccess),
+                    ("Stock", () => new StockForm(), PermissionType.StockFullAccess),
+                    ("Movimientos de Stock", () => new StockMovementForm(), PermissionType.StockMovementFullAccess),
+                    ("Depósitos", () => new DepositForm(), PermissionType.DepositFullAccess),
+                    ("Tragos", () => new DrinkForm(_xmlDataManager), PermissionType.DrinkFullAccess),
+                    ("Recetas", () => new RecipeForm(), PermissionType.RecipeFullAccess)
                 };
 
                 foreach (var (label, formFactory, requiredPermission) in forms)
                 {
-                    if (permissionNames.Contains(requiredPermission))
+                    if (permissionNames.Contains(requiredPermission.ToString()))
                     {
                         AddFormButton(label, formFactory);
                     }

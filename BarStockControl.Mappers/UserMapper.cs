@@ -1,9 +1,10 @@
-﻿using System.Xml.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
 using BarStockControl.Models;
 using BarStockControl.DTOs;
 using BarStockControl.Security;
-
-
 
 namespace BarStockControl.Mappers
 {
@@ -11,8 +12,7 @@ namespace BarStockControl.Mappers
     {
         public static UserDto ToDto(User user)
         {
-            if (user == null)
-                return null;
+            if (user == null) return null;
 
             return new UserDto
             {
@@ -22,14 +22,14 @@ namespace BarStockControl.Mappers
                 Email = user.Email,
                 Password = PasswordEncryption.DecryptPassword(user.Password),
                 Active = user.Active,
-                RoleIds = new List<int>(user.RoleIds)
+                RoleIds = user.RoleIds.ToList(),
+                PermissionIds = user.PermissionIds.ToList()
             };
         }
 
         public static User ToEntity(UserDto dto)
         {
-            if (dto == null)
-                return null;
+            if (dto == null) return null;
 
             return new User
             {
@@ -37,11 +37,31 @@ namespace BarStockControl.Mappers
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Email = dto.Email,
-                Active = dto.Active,
                 Password = PasswordEncryption.EncryptPassword(dto.Password),
-                RoleIds = new List<int>(dto.RoleIds)
-
+                Active = dto.Active,
+                RoleIds = dto.RoleIds.ToList(),
+                PermissionIds = dto.PermissionIds.ToList()
             };
+        }
+
+        public static XElement ToXml(User user)
+        {
+            var element = new XElement("user",
+                new XAttribute("id", user.Id),
+                new XAttribute("name", user.FirstName),
+                new XAttribute("lastname", user.LastName),
+                new XAttribute("email", user.Email),
+                new XAttribute("password", user.Password),
+                new XAttribute("active", user.Active.ToString().ToLower())
+            );
+
+            foreach (var roleId in user.RoleIds)
+                element.Add(new XElement("roleRef", new XAttribute("ref", roleId)));
+
+            foreach (var permissionId in user.PermissionIds)
+                element.Add(new XElement("permissionRef", new XAttribute("ref", permissionId)));
+
+            return element;
         }
 
         public static User FromXml(XElement element)
@@ -55,28 +75,12 @@ namespace BarStockControl.Mappers
                 Password = (string)element.Attribute("password"),
                 Active = bool.Parse((string)element.Attribute("active") ?? "true"),
                 RoleIds = element.Elements("roleRef")
-                 .Select(e => int.Parse((string)e.Attribute("ref")))
-                 .ToList()
-        };
-        }
-
-        public static XElement ToXml(User user)
-        {
-            var userElement = new XElement("user",
-                new XAttribute("id", user.Id),
-                new XAttribute("name", user.FirstName),
-                new XAttribute("lastname", user.LastName),
-                new XAttribute("email", user.Email),
-                new XAttribute("password", user.Password),
-                new XAttribute("active", user.Active.ToString().ToLower())
-            );
-
-            foreach (var roleId in user.RoleIds)
-            {
-                userElement.Add(new XElement("roleRef", new XAttribute("ref", roleId)));
-            }
-
-            return userElement;
+                    .Select(e => int.Parse((string)e.Attribute("ref")))
+                    .ToList(),
+                PermissionIds = element.Elements("permissionRef")
+                    .Select(e => int.Parse((string)e.Attribute("ref")))
+                    .ToList()
+            };
         }
     }
 }

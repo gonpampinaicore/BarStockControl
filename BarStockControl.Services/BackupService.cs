@@ -149,5 +149,15 @@ namespace BarStockControl.Services
         {
             return BackupMapper.ToXml(backup);
         }
+
+        public void DeleteBackup(string date)
+        {
+            if (DateTime.TryParse(date, out DateTime parsedDate))
+            {
+                var backup = GetAll().FirstOrDefault(b => b.Date.ToString("s") == parsedDate.ToString("s"));
+                if (backup != null)
+                    Delete(backup.Id);
+            }
+        }
     }
 }

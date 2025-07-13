@@ -12,11 +12,14 @@ namespace BarStockControl.Services
     public class UserService : BaseService<User>
     {
         private readonly RoleService _roleService;
+        private readonly PermissionService _permissionService;
+
 
         public UserService(XmlDataManager xmlDataManager)
             : base(xmlDataManager, "users")
         {
             _roleService = new RoleService(xmlDataManager);
+            _permissionService = new PermissionService(xmlDataManager);
         }
 
         protected override User MapFromXml(XElement element)
@@ -216,6 +219,31 @@ namespace BarStockControl.Services
         public User ToEntity(UserDto dto)
         {
             return UserMapper.ToEntity(dto);
+        }
+
+        public void BuildPermissions(User user)
+        {
+            if (user == null) return;
+
+            user.Permissions.Clear();
+
+            foreach (var roleId in user.RoleIds)
+            {
+                var role = _roleService.GetById(roleId);
+                if (role != null)
+                {
+                    user.Permissions.Add(role);
+                }
+            }
+
+            foreach (var permissionId in user.PermissionIds)
+            {
+                var permission = _permissionService.GetById(permissionId);
+                if (permission != null)
+                {
+                    user.Permissions.Add(permission);
+                }
+            }
         }
     }
 }

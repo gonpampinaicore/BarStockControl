@@ -3,6 +3,7 @@ using BarStockControl.Forms.Events;
 using BarStockControl.Forms.Assignments;
 using BarStockControl.Services;
 using BarStockControl.Data;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl
 {
@@ -48,16 +49,16 @@ namespace BarStockControl
                 var eventService = new EventService(new XmlDataManager("Xml/data.xml"));
                 var userService = new UserService(new XmlDataManager("Xml/data.xml"));
 
-                var forms = new (string Label, Func<Form> FormFactory, string RequiredPermission)[]
+                var forms = new (string Label, Func<Form> FormFactory, PermissionType RequiredPermission)[]
                 {
-                    ("Eventos", () => new EventForm(), "Event_full_access"),
-                    ("Asignación de Recursos", () => new ResourceAssignmentForm(), "ResourceAssignment_full_access"),
-                    ("Próximo Evento", () => new LiveEvent(), "LiveEvent_access")
+                    ("Eventos", () => new EventForm(), PermissionType.EventFullAccess),
+                    ("Asignación de Recursos", () => new ResourceAssignmentForm(), PermissionType.ResourceAssignmentFullAccess),
+                    ("Próximo Evento", () => new LiveEvent(), PermissionType.LiveEventAccess)
                 };
 
                 foreach (var (label, formFactory, requiredPermission) in forms)
                 {
-                    if (permissionNames.Contains(requiredPermission))
+                    if (permissionNames.Contains(requiredPermission.ToString()))
                     {
                         AddFormButton(label, formFactory);
                     }

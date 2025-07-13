@@ -12,7 +12,7 @@ namespace BarStockControl.Services
     public class PermissionService : BaseService<Permission>
     {
         public PermissionService(XmlDataManager xmlDataManager)
-            : base(xmlDataManager, "permissionDefs") { }
+            : base(xmlDataManager, "permissions") { }
 
         protected override Permission MapFromXml(XElement element)
         {
@@ -44,174 +44,68 @@ namespace BarStockControl.Services
             if (string.IsNullOrWhiteSpace(permission.Description))
                 errors.Add("La descripción es obligatoria.");
 
-            var existing = GetAll().FirstOrDefault(p => p.Name.Equals(permission.Name, StringComparison.OrdinalIgnoreCase));
+            var existing = GetAll().FirstOrDefault(p =>
+                p.Name.Equals(permission.Name, StringComparison.OrdinalIgnoreCase));
+
             if (existing != null && (!isUpdate || existing.Id != permission.Id))
                 errors.Add("Ya existe un permiso con ese nombre.");
-
-            if (permission.PermissionItemIds == null || !permission.PermissionItemIds.Any())
-                errors.Add("Debe contener al menos un permiso atómico (PermissionItem).");
 
             return errors;
         }
 
-        public List<string> CreatePermission(PermissionDto permissionDto)
+        public List<string> CreatePermission(PermissionDto dto)
         {
-            try
-            {
-                if (permissionDto == null)
-                    throw new ArgumentNullException(nameof(permissionDto), "El permiso no puede ser null.");
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto), "El permiso no puede ser null.");
 
-                var permission = ToEntity(permissionDto);
-                var errors = ValidatePermission(permission);
-                if (errors.Any())
-                    return errors;
+            var permission = ToEntity(dto);
+            var errors = ValidatePermission(permission);
+            if (errors.Any()) return errors;
 
-                permission.Id = GetNextId();
-                permission.IsActive = true;
-                Add(permission);
-                return new List<string>();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al crear permiso: {ex.Message}", ex);
-            }
+            permission.Id = GetNextId();
+            permission.IsActive = true;
+            Add(permission);
+            return new List<string>();
         }
 
-        public List<string> UpdatePermission(PermissionDto permissionDto)
+        public List<string> UpdatePermission(PermissionDto dto)
         {
-            try
-            {
-                if (permissionDto == null)
-                    throw new ArgumentNullException(nameof(permissionDto), "El permiso no puede ser null.");
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto), "El permiso no puede ser null.");
 
-                var permission = ToEntity(permissionDto);
-                var errors = ValidatePermission(permission, isUpdate: true);
-                if (errors.Any())
-                    return errors;
+            var permission = ToEntity(dto);
+            var errors = ValidatePermission(permission, isUpdate: true);
+            if (errors.Any()) return errors;
 
-                Update(permission.Id, permission);
-                return new List<string>();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al actualizar permiso: {ex.Message}", ex);
-            }
+            Update(permission.Id, permission);
+            return new List<string>();
         }
 
         public void DeletePermission(int id)
         {
-            try
-            {
-                if (id <= 0)
-                    throw new ArgumentException("El ID del permiso debe ser mayor a 0.", nameof(id));
+            var permission = GetById(id);
+            if (permission == null)
+                throw new InvalidOperationException($"Permiso con ID {id} no encontrado.");
 
-                var permission = GetById(id);
-                if (permission == null)
-                    throw new InvalidOperationException($"Permiso con ID {id} no encontrado.");
-
-                Delete(id);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al eliminar permiso: {ex.Message}", ex);
-            }
+            Delete(id);
         }
 
         public Permission GetById(int id)
         {
-            try
-            {
-                if (id <= 0)
-                    return null;
-
-                return GetAll().FirstOrDefault(p => p.Id == id);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener permiso por ID: {ex.Message}", ex);
-            }
+            return GetAll().FirstOrDefault(p => p.Id == id);
         }
 
         public List<Permission> GetAllPermissions()
         {
-            try
-            {
-                return GetAll();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener todos los permisos: {ex.Message}", ex);
-            }
+            return GetAll();
         }
 
         public List<Permission> Search(Func<Permission, bool> predicate)
         {
-            try
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate), "El predicado de búsqueda no puede ser null.");
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
 
-                return GetAll().Where(predicate).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al buscar permisos: {ex.Message}", ex);
-            }
-        }
-
-        public List<int> GetPermissionIdsByRoleIds(List<int> roleIds)
-        {
-            try
-            {
-                if (roleIds == null)
-                    throw new ArgumentNullException(nameof(roleIds), "La lista de IDs de roles no puede ser null.");
-
-                var xml = _xmlDataManager.LoadDocument();
-                var permissionIds = new HashSet<int>();
-
-                var roleElements = xml.Root.Element("roles")?.Elements("role")
-                    .Where(r => roleIds.Contains(int.Parse(r.Attribute("id")?.Value ?? "0")));
-
-                if (roleElements != null)
-                {
-                    foreach (var roleElement in roleElements)
-                    {
-                        foreach (var permissionRef in roleElement.Elements("rolePermissionRef"))
-                        {
-                            if (int.TryParse(permissionRef.Attribute("ref")?.Value, out int pid))
-                            {
-                                permissionIds.Add(pid);
-                            }
-                        }
-                    }
-                }
-
-                return permissionIds.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener IDs de permisos por roles: {ex.Message}", ex);
-            }
-        }
-
-        public List<string> GetPermissionNamesByRoleIds(List<int> roleIds)
-        {
-            try
-            {
-                if (roleIds == null)
-                    throw new ArgumentNullException(nameof(roleIds), "La lista de IDs de roles no puede ser null.");
-
-                var permissionIds = GetPermissionIdsByRoleIds(roleIds);
-
-                return GetAll()
-                    .Where(p => permissionIds.Contains(p.Id))
-                    .Select(p => p.Name)
-                    .ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener nombres de permisos por roles: {ex.Message}", ex);
-            }
+            return GetAll().Where(predicate).ToList();
         }
 
         public List<PermissionDto> GetAllPermissionDtos()
@@ -219,5 +113,37 @@ namespace BarStockControl.Services
             return GetAllPermissions().Select(ToDto).ToList();
         }
 
+        // Si bien ahora usamos Composite, este método sirve para reportes rápidos
+        public List<int> GetPermissionIdsByRoleIds(List<int> roleIds)
+        {
+            if (roleIds == null)
+                throw new ArgumentNullException(nameof(roleIds));
+
+            var xml = _xmlDataManager.LoadDocument();
+            var permissionIds = new HashSet<int>();
+
+            var roleElements = xml.Root.Element("roles")?.Elements("role")
+                .Where(r => roleIds.Contains(int.Parse(r.Attribute("id")?.Value ?? "0")));
+
+            if (roleElements != null)
+            {
+                foreach (var roleElement in roleElements)
+                {
+                    foreach (var permissionRef in roleElement.Elements("rolePermissionRef"))
+                    {
+                        if (int.TryParse(permissionRef.Attribute("ref")?.Value, out int pid))
+                            permissionIds.Add(pid);
+                    }
+                }
+            }
+
+            return permissionIds.ToList();
+        }
+
+        public List<string> GetPermissionNamesByRoleIds(List<int> roleIds)
+        {
+            var ids = GetPermissionIdsByRoleIds(roleIds);
+            return GetAll().Where(p => ids.Contains(p.Id)).Select(p => p.Name).ToList();
+        }
     }
 }

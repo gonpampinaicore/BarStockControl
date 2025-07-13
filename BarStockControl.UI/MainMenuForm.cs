@@ -3,6 +3,7 @@ using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Forms;
 using BarStockControl.Models;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl
 {
@@ -104,21 +105,21 @@ namespace BarStockControl
                 var roleIds = user.RoleIds;
                 var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
 
-                var categories = new (string Label, Func<Form> FormFactory, string[] RequiredPermissions)[]
+                var categories = new (string Label, Func<Form> FormFactory, PermissionType[] RequiredPermissions)[]
                 {
                     ("Gestión de Usuarios y Seguridad", () => new UserManagementForm(), 
-                        new[] { "User_full_access", "User_Read_Only", "Role_full_access", "Permission_full_access", "PermissionItem_full_access", "Backup_full_access" }),
+                        new[] { PermissionType.UserFullAccess, PermissionType.RoleFullAccess, PermissionType.PermissionFullAccess, PermissionType.BackupFullAccess }),
                     ("Gestión de Productos e Inventario", () => new InventoryManagementForm(), 
-                        new[] { "Product_full_access", "Stock_full_access", "StockMovement_full_access", "Deposit_full_access", "Drink_full_access" }),
+                        new[] { PermissionType.ProductFullAccess, PermissionType.StockFullAccess, PermissionType.StockMovementFullAccess, PermissionType.DepositFullAccess, PermissionType.DrinkFullAccess }),
                     ("Gestión de Infraestructura", () => new InfrastructureManagementForm(), 
-                        new[] { "Bar_full_access", "Station_full_access", "CashRegister_full_access" }),
+                        new[] { PermissionType.BarFullAccess, PermissionType.StationFullAccess, PermissionType.CashRegisterFullAccess }),
                     ("Gestión de Eventos", () => new EventManagementForm(), 
-                        new[] { "Event_full_access", "ResourceAssignment_full_access", "Bar_full_access", "LiveEvent_access" })
+                        new[] { PermissionType.EventFullAccess, PermissionType.ResourceAssignmentFullAccess, PermissionType.BarFullAccess, PermissionType.LiveEventAccess })
                 };
 
                 foreach (var (label, formFactory, requiredPermissions) in categories)
                 {
-                    if (requiredPermissions.Any(p => permissionNames.Contains(p)))
+                    if (requiredPermissions.Any(p => permissionNames.Contains(p.ToString())))
                     {
                         AddCategoryButton(label, formFactory);
                     }

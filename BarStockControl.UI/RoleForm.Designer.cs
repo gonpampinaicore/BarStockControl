@@ -1,236 +1,144 @@
-﻿namespace BarStockControl.Forms.Roles
+﻿
+namespace BarStockControl
 {
     partial class RoleForm
     {
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.DataGridView dgvRoles;
-        private System.Windows.Forms.TextBox txtSearch;
-        private System.Windows.Forms.CheckBox chkOnlyActive;
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.CheckBox chkActive;
         private System.Windows.Forms.CheckedListBox clbPermissions;
+        private System.Windows.Forms.CheckedListBox clbRoles;
+        private System.Windows.Forms.DataGridView dgvRoles;
         private System.Windows.Forms.Button btnCreate;
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Button btnDelete;
-        private System.Windows.Forms.Label lblName;
-        private System.Windows.Forms.Label lblDescription;
-        private System.Windows.Forms.Label lblSearch;
-        private System.Windows.Forms.Label lblPermissions;
-        private System.Windows.Forms.Label lblPermissionSearch;
-        private System.Windows.Forms.Button btnGoToUsers;
-        private System.Windows.Forms.Button btnGoToPermissions;
-        private System.Windows.Forms.Button btnGoToPermissionItems;
-        private System.Windows.Forms.Button btnGoToMainMenu;
+        private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.CheckBox chkOnlyActive;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null)) components.Dispose();
+            base.Dispose(disposing);
+        }
 
         private void InitializeComponent()
         {
-            dgvRoles = new DataGridView();
-            txtSearch = new TextBox();
-            chkOnlyActive = new CheckBox();
-            txtName = new TextBox();
-            txtDescription = new TextBox();
-            chkActive = new CheckBox();
-            clbPermissions = new CheckedListBox();
-            btnCreate = new Button();
-            btnUpdate = new Button();
-            btnDelete = new Button();
-            lblName = new Label();
-            lblDescription = new Label();
-            lblSearch = new Label();
-            lblPermissions = new Label();
-            lblPermissionSearch = new Label();
-            btnGoToUsers = new Button();
-            btnGoToPermissions = new Button();
-            btnGoToPermissionItems = new Button();
-            btnGoToMainMenu = new Button();
-            ((System.ComponentModel.ISupportInitialize)dgvRoles).BeginInit();
-            SuspendLayout();
-            // 
-            // dgvRoles
-            // 
-            dgvRoles.Location = new Point(20, 299);
-            dgvRoles.Name = "dgvRoles";
-            dgvRoles.ReadOnly = true;
-            dgvRoles.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvRoles.Size = new Size(620, 251);
-            dgvRoles.TabIndex = 0;
-            dgvRoles.CellClick += dgvRoles_CellClick;
-            // 
-            // txtSearch
-            // 
-            txtSearch.Location = new Point(73, 267);
-            txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(200, 23);
-            txtSearch.TabIndex = 1;
-            txtSearch.TextChanged += txtSearch_TextChanged;
-            // 
-            // chkOnlyActive
-            // 
-            chkOnlyActive.Location = new Point(303, 266);
-            chkOnlyActive.Name = "chkOnlyActive";
-            chkOnlyActive.Size = new Size(104, 24);
-            chkOnlyActive.TabIndex = 2;
-            chkOnlyActive.Text = "Solo activos";
-            chkOnlyActive.CheckedChanged += chkOnlyActive_CheckedChanged;
-            // 
+            this.txtName = new System.Windows.Forms.TextBox();
+            this.txtDescription = new System.Windows.Forms.TextBox();
+            this.chkActive = new System.Windows.Forms.CheckBox();
+            this.clbPermissions = new System.Windows.Forms.CheckedListBox();
+            this.clbRoles = new System.Windows.Forms.CheckedListBox();
+            this.dgvRoles = new System.Windows.Forms.DataGridView();
+            this.btnCreate = new System.Windows.Forms.Button();
+            this.btnUpdate = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
+            this.txtSearch = new System.Windows.Forms.TextBox();
+            this.chkOnlyActive = new System.Windows.Forms.CheckBox();
+
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRoles)).BeginInit();
+            this.SuspendLayout();
+
             // txtName
-            // 
-            txtName.Location = new Point(100, 21);
-            txtName.Name = "txtName";
-            txtName.Size = new Size(200, 23);
-            txtName.TabIndex = 3;
-            // 
+            this.txtName.Location = new System.Drawing.Point(20, 20);
+            this.txtName.Name = "txtName";
+            this.txtName.Size = new System.Drawing.Size(200, 23);
+            this.txtName.TabIndex = 0;
+
             // txtDescription
-            // 
-            txtDescription.Location = new Point(100, 60);
-            txtDescription.Name = "txtDescription";
-            txtDescription.Size = new Size(200, 23);
-            txtDescription.TabIndex = 4;
-            // 
+            this.txtDescription.Location = new System.Drawing.Point(20, 60);
+            this.txtDescription.Name = "txtDescription";
+            this.txtDescription.Size = new System.Drawing.Size(200, 23);
+            this.txtDescription.TabIndex = 1;
+
             // chkActive
-            // 
-            chkActive.Location = new Point(100, 99);
-            chkActive.Name = "chkActive";
-            chkActive.Size = new Size(104, 24);
-            chkActive.TabIndex = 5;
-            chkActive.Text = "Activo";
-            // 
+            this.chkActive.Location = new System.Drawing.Point(20, 100);
+            this.chkActive.Name = "chkActive";
+            this.chkActive.Size = new System.Drawing.Size(80, 24);
+            this.chkActive.Text = "Activo";
+            this.chkActive.TabIndex = 2;
+
             // clbPermissions
-            // 
-            clbPermissions.Location = new Point(100, 130);
-            clbPermissions.Name = "clbPermissions";
-            clbPermissions.Size = new Size(271, 112);
-            clbPermissions.TabIndex = 6;
-            // 
+            this.clbPermissions.FormattingEnabled = true;
+            this.clbPermissions.Location = new System.Drawing.Point(240, 20);
+            this.clbPermissions.Name = "clbPermissions";
+            this.clbPermissions.Size = new System.Drawing.Size(200, 130);
+            this.clbPermissions.TabIndex = 3;
+
+            // clbRoles
+            this.clbRoles.FormattingEnabled = true;
+            this.clbRoles.Location = new System.Drawing.Point(460, 20);
+            this.clbRoles.Name = "clbRoles";
+            this.clbRoles.Size = new System.Drawing.Size(200, 130);
+            this.clbRoles.TabIndex = 4;
+
+            // dgvRoles
+            this.dgvRoles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvRoles.Location = new System.Drawing.Point(20, 220);
+            this.dgvRoles.Name = "dgvRoles";
+            this.dgvRoles.RowTemplate.Height = 25;
+            this.dgvRoles.Size = new System.Drawing.Size(640, 150);
+            this.dgvRoles.TabIndex = 5;
+            this.dgvRoles.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvRoles_CellClick);
+
             // btnCreate
-            // 
-            btnCreate.Location = new Point(372, 21);
-            btnCreate.Name = "btnCreate";
-            btnCreate.Size = new Size(75, 23);
-            btnCreate.TabIndex = 7;
-            btnCreate.Text = "Crear";
-            btnCreate.Click += btnCreate_Click;
-            // 
+            this.btnCreate.Location = new System.Drawing.Point(20, 180);
+            this.btnCreate.Name = "btnCreate";
+            this.btnCreate.Size = new System.Drawing.Size(75, 23);
+            this.btnCreate.Text = "Crear";
+            this.btnCreate.TabIndex = 6;
+            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+
             // btnUpdate
-            // 
-            btnUpdate.Location = new Point(372, 60);
-            btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(75, 23);
-            btnUpdate.TabIndex = 8;
-            btnUpdate.Text = "Actualizar";
-            btnUpdate.Click += btnUpdate_Click;
-            // 
+            this.btnUpdate.Location = new System.Drawing.Point(110, 180);
+            this.btnUpdate.Name = "btnUpdate";
+            this.btnUpdate.Size = new System.Drawing.Size(75, 23);
+            this.btnUpdate.Text = "Actualizar";
+            this.btnUpdate.TabIndex = 7;
+            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
+
             // btnDelete
-            // 
-            btnDelete.Location = new Point(372, 100);
-            btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(75, 23);
-            btnDelete.TabIndex = 9;
-            btnDelete.Text = "Eliminar";
-            btnDelete.Click += btnDelete_Click;
-            // 
-            // lblName
-            // 
-            lblName.Location = new Point(12, 20);
-            lblName.Name = "lblName";
-            lblName.Size = new Size(72, 23);
-            lblName.TabIndex = 11;
-            lblName.Text = "Nombre:";
-            // 
-            // lblDescription
-            // 
-            lblDescription.Location = new Point(12, 60);
-            lblDescription.Name = "lblDescription";
-            lblDescription.Size = new Size(72, 23);
-            lblDescription.TabIndex = 12;
-            lblDescription.Text = "Descripción:";
-            // 
-            // lblSearch
-            // 
-            lblSearch.Location = new Point(12, 270);
-            lblSearch.Name = "lblSearch";
-            lblSearch.Size = new Size(100, 23);
-            lblSearch.TabIndex = 10;
-            lblSearch.Text = "Buscar:";
-            // 
-            // lblPermissions
-            // 
-            lblPermissions.Location = new Point(12, 130);
-            lblPermissions.Name = "lblPermissions";
-            lblPermissions.Size = new Size(82, 23);
-            lblPermissions.TabIndex = 13;
-            lblPermissions.Text = "Permisos:";
-            // 
-            // lblPermissionSearch
-            // 
-            lblPermissionSearch.Location = new Point(0, 0);
-            lblPermissionSearch.Name = "lblPermissionSearch";
-            lblPermissionSearch.Size = new Size(100, 23);
-            lblPermissionSearch.TabIndex = 0;
-            // 
-            // btnGoToUsers
-            // 
-            btnGoToUsers.Location = new Point(520, 60);
-            btnGoToUsers.Name = "btnGoToUsers";
-            btnGoToUsers.Size = new Size(120, 30);
-            btnGoToUsers.TabIndex = 14;
-            btnGoToUsers.Text = "Ir a Usuarios";
-            btnGoToUsers.Click += btnGoToUsers_Click;
-            // 
-            // btnGoToPermissions
-            // 
-            btnGoToPermissions.Location = new Point(520, 100);
-            btnGoToPermissions.Name = "btnGoToPermissions";
-            btnGoToPermissions.Size = new Size(120, 30);
-            btnGoToPermissions.TabIndex = 15;
-            btnGoToPermissions.Text = "Ir a Permisos";
-            btnGoToPermissions.Click += btnGoToPermissions_Click;
-            // 
-            // btnGoToPermissionItems
-            // 
-            btnGoToPermissionItems.Location = new Point(520, 140);
-            btnGoToPermissionItems.Name = "btnGoToPermissionItems";
-            btnGoToPermissionItems.Size = new Size(120, 30);
-            btnGoToPermissionItems.TabIndex = 16;
-            btnGoToPermissionItems.Text = "Ir a Elementos";
-            btnGoToPermissionItems.Click += btnGoToPermissionItems_Click;
-            // 
-            // btnGoToMainMenu
-            // 
-            btnGoToMainMenu.Location = new Point(520, 180);
-            btnGoToMainMenu.Name = "btnGoToMainMenu";
-            btnGoToMainMenu.Size = new Size(100, 30);
-            btnGoToMainMenu.TabIndex = 17;
-            btnGoToMainMenu.Text = "Menú Principal";
-            btnGoToMainMenu.Click += btnGoToMainMenu_Click;
-            // 
+            this.btnDelete.Location = new System.Drawing.Point(200, 180);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.Text = "Eliminar";
+            this.btnDelete.TabIndex = 8;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+
+            // txtSearch
+            this.txtSearch.Location = new System.Drawing.Point(20, 390);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(200, 23);
+            this.txtSearch.TabIndex = 9;
+            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+
+            // chkOnlyActive
+            this.chkOnlyActive.Location = new System.Drawing.Point(240, 390);
+            this.chkOnlyActive.Name = "chkOnlyActive";
+            this.chkOnlyActive.Size = new System.Drawing.Size(120, 24);
+            this.chkOnlyActive.Text = "Solo Activos";
+            this.chkOnlyActive.TabIndex = 10;
+            this.chkOnlyActive.CheckedChanged += new System.EventHandler(this.chkOnlyActive_CheckedChanged);
+
             // RoleForm
-            // 
-            ClientSize = new Size(671, 571);
-            Controls.Add(dgvRoles);
-            Controls.Add(txtSearch);
-            Controls.Add(chkOnlyActive);
-            Controls.Add(txtName);
-            Controls.Add(txtDescription);
-            Controls.Add(chkActive);
-            Controls.Add(clbPermissions);
-            Controls.Add(btnCreate);
-            Controls.Add(btnUpdate);
-            Controls.Add(btnDelete);
-            Controls.Add(lblSearch);
-            Controls.Add(lblName);
-            Controls.Add(lblDescription);
-            Controls.Add(lblPermissions);
-            Controls.Add(btnGoToUsers);
-            Controls.Add(btnGoToPermissions);
-            Controls.Add(btnGoToPermissionItems);
-            Controls.Add(btnGoToMainMenu);
-            Name = "RoleForm";
-            Text = "Gestión de Roles";
-            ((System.ComponentModel.ISupportInitialize)dgvRoles).EndInit();
-            ResumeLayout(false);
-            PerformLayout();
+            this.ClientSize = new System.Drawing.Size(684, 441);
+            this.Controls.Add(this.txtName);
+            this.Controls.Add(this.txtDescription);
+            this.Controls.Add(this.chkActive);
+            this.Controls.Add(this.clbPermissions);
+            this.Controls.Add(this.clbRoles);
+            this.Controls.Add(this.dgvRoles);
+            this.Controls.Add(this.btnCreate);
+            this.Controls.Add(this.btnUpdate);
+            this.Controls.Add(this.btnDelete);
+            this.Controls.Add(this.txtSearch);
+            this.Controls.Add(this.chkOnlyActive);
+            this.Name = "RoleForm";
+            this.Text = "Gestión de Roles";
+
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRoles)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
     }
 }

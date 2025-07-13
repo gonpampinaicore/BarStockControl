@@ -3,23 +3,18 @@ using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
 using BarStockControl.DTOs;
-using BarStockControl.Forms.Users;
-using BarStockControl.Forms.Roles;
 
 namespace BarStockControl.Forms.Permissions
 {
     public partial class PermissionForm : Form
     {
         private readonly PermissionService _permissionService;
-        private readonly PermissionItemService _permissionItemService;
         private PermissionDto _selectedPermission;
 
         public PermissionForm()
         {
             InitializeComponent();
             _permissionService = new PermissionService(new XmlDataManager("Xml/data.xml"));
-            _permissionItemService = new PermissionItemService(new XmlDataManager("Xml/data.xml"));
-            LoadPermissionItems();
             LoadPermissions();
         }
 
@@ -135,15 +130,6 @@ namespace BarStockControl.Forms.Permissions
                     txtName.Text = _selectedPermission.Name;
                     txtDescription.Text = _selectedPermission.Description;
                     chkActive.Checked = _selectedPermission.IsActive;
-
-                    for (int i = 0; i < clbPermissionItems.Items.Count; i++)
-                    {
-                        if (clbPermissionItems.Items[i] is PermissionItem item)
-                        {
-                            bool isSelected = _selectedPermission.PermissionItemIds.Contains(item.Id);
-                            clbPermissionItems.SetItemChecked(i, isSelected);
-                        }
-                    }
                 }
             }
             catch (Exception ex)
@@ -152,26 +138,14 @@ namespace BarStockControl.Forms.Permissions
             }
         }
 
-
         private PermissionDto GetPermissionFromForm()
         {
-            var selectedIds = new List<int>();
-
-            foreach (var checkedItem in clbPermissionItems.CheckedItems)
-            {
-                if (checkedItem is PermissionItem item)
-                {
-                    selectedIds.Add(item.Id);
-                }
-            }
-
             return new PermissionDto
             {
                 Id = _selectedPermission?.Id ?? 0,
                 Name = txtName.Text,
                 Description = txtDescription.Text,
-                IsActive = chkActive.Checked,
-                PermissionItemIds = selectedIds
+                IsActive = chkActive.Checked
             };
         }
 
@@ -193,40 +167,16 @@ namespace BarStockControl.Forms.Permissions
             LoadPermissions();
         }
 
-        private void LoadPermissionItems()
-        {
-            try
-            {
-                clbPermissionItems.Items.Clear();
-                var items = _permissionItemService.GetAllItems();
-                foreach (var item in items)
-                {
-                    clbPermissionItems.Items.Add(item, false);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar elementos de permiso: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void txtPermissionItemSearch_TextChanged(object sender, EventArgs e)
-        {
-            LoadPermissionItems();
-        }
-
         private void btnGoToUsers_Click(object sender, EventArgs e)
         {
             try
             {
                 var userForm = new UserForm();
                 userForm.Show();
-                this.Hide();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al abrir Usuarios: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al abrir formulario de usuarios: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -237,26 +187,10 @@ namespace BarStockControl.Forms.Permissions
             {
                 var roleForm = new RoleForm();
                 roleForm.Show();
-                this.Hide();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al abrir Roles: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToPermissionItems_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var permissionItemForm = new PermissionItemForm();
-                permissionItemForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Elementos de Permisos: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al abrir formulario de roles: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -271,7 +205,7 @@ namespace BarStockControl.Forms.Permissions
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al abrir Menú Principal: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al abrir menú principal: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -279,11 +213,15 @@ namespace BarStockControl.Forms.Permissions
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            
-            if (Application.OpenForms.Count == 1 && Application.OpenForms[0] == this)
+            try
             {
                 var mainMenuForm = new MainMenuForm();
                 mainMenuForm.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al abrir menú principal: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

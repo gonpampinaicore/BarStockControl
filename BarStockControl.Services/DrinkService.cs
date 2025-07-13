@@ -54,77 +54,63 @@ namespace BarStockControl.Services
                     return false;
                 }
 
+                if (recipeItems == null || !recipeItems.Any())
+                {
+                    errorMessage = "Todo trago debe tener al menos un ingrediente.";
+                    return false;
+                }
+
                 var drink = drinkDto.ToModel();
                 drink.Id = GetNextId();
                 drink.CreatedAt = DateTime.Now;
 
-                if (drink.IsComposed)
+                var productIds = new HashSet<int>();
+                foreach (var item in recipeItems)
                 {
-                    if (recipeItems == null || !recipeItems.Any())
+                    if (item.Quantity <= 0)
                     {
-                        errorMessage = "Un trago compuesto debe tener al menos un ingrediente.";
+                        errorMessage = "La cantidad de cada ingrediente debe ser mayor a 0.";
                         return false;
                     }
-
-                    var productIds = new HashSet<int>();
-                    foreach (var item in recipeItems)
+                    var product = _productService.GetById(item.ProductId);
+                    if (product == null || !product.IsActive)
                     {
-                        if (item.Quantity <= 0)
-                        {
-                            errorMessage = "La cantidad de cada ingrediente debe ser mayor a 0.";
-                            return false;
-                        }
-                        var product = _productService.GetById(item.ProductId);
-                        if (product == null || !product.IsActive)
-                        {
-                            errorMessage = $"El producto con ID {item.ProductId} no existe o está inactivo.";
-                            return false;
-                        }
-                        if (!productIds.Add(item.ProductId))
-                        {
-                            errorMessage = "No se puede repetir el mismo producto en la receta.";
-                            return false;
-                        }
-                    }
-
-                    // Primero agregamos el trago
-                    Add(drink);
-
-                    // Luego creamos la receta asociada
-                    var recipe = new Recipe
-                    {
-                        Id = GetNextRecipeId(),
-                        DrinkId = drink.Id,
-                        Name = drink.Name + " - Receta"
-                    };
-
-                    if (!_recipeService.CreateRecipe(recipe.ToDto()))
-                    {
-                        // Si falla la creación de la receta, eliminamos el trago
-                        Delete(drink.Id);
-                        errorMessage = "Error al crear la receta asociada al trago.";
+                        errorMessage = $"El producto con ID {item.ProductId} no existe o está inactivo.";
                         return false;
                     }
-
-                    // Finalmente guardamos los ingredientes de la receta
-                    if (!SaveRecipeItems(drink.Id, recipeItems))
+                    if (!productIds.Add(item.ProductId))
                     {
-                        // Si falla, eliminamos tanto la receta como el trago
-                        _recipeService.DeleteRecipe(recipe.Id);
-                        Delete(drink.Id);
-                        errorMessage = "Error al guardar los ingredientes de la receta.";
+                        errorMessage = "No se puede repetir el mismo producto en la receta.";
                         return false;
                     }
-
-                    // Calculamos y actualizamos el costo estimado
-                    drink.EstimatedCost = CalculateEstimatedCost(drink.Id);
-                    Update(drink.Id, drink);
                 }
-                else
+
+                Add(drink);
+
+                var recipe = new Recipe
                 {
-                    // Si no es compuesto, simplemente agregamos el trago
-                    Add(drink);
+                    Id = GetNextRecipeId(),
+                    DrinkId = drink.Id,
+                    Name = drink.Name + " - Receta"
+                };
+
+                if (!_recipeService.CreateRecipe(recipe.ToDto()))
+                {
+                    Delete(drink.Id);
+                    errorMessage = "Error al crear la receta asociada al trago.";
+                    return false;
                 }
+
+                if (!SaveRecipeItems(drink.Id, recipeItems))
+                {
+                    _recipeService.DeleteRecipe(recipe.Id);
+                    Delete(drink.Id);
+                    errorMessage = "Error al guardar los ingredientes de la receta.";
+                    return false;
+                }
+
+                drink.EstimatedCost = CalculateEstimatedCost(drink.Id);
+                Update(drink.Id, drink);
 
                 return true;
             }
@@ -153,7 +139,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                // Buscar y eliminar la receta asociada al trago
                 var recipes = _recipeService.GetAllRecipes();
                 var associatedRecipe = recipes.FirstOrDefault(r => r.DrinkId == id);
                 if (associatedRecipe != null)
@@ -177,7 +162,6 @@ namespace BarStockControl.Services
                 if (drink == null || !drink.IsComposed)
                     return 0;
 
-                // Buscar la receta por DrinkId
                 var recipes = _recipeService.GetAllRecipes();
                 var recipeDto = recipes.FirstOrDefault(r => r.DrinkId == drinkId);
                 if (recipeDto == null)
@@ -210,7 +194,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                // Buscar la receta por DrinkId
                 var recipes = _recipeService.GetAllRecipes();
                 var recipeDto = recipes.FirstOrDefault(r => r.DrinkId == drinkId);
                 if (recipeDto == null)
@@ -228,13 +211,11 @@ namespace BarStockControl.Services
         {
             try
             {
-                // Buscar la receta por DrinkId
                 var recipes = _recipeService.GetAllRecipes();
                 var recipeDto = recipes.FirstOrDefault(r => r.DrinkId == drinkId);
                 if (recipeDto == null)
                     return false;
 
-                // Eliminar los items existentes de la receta
                 var existingItems = _recipeItemService.GetAllRecipeItems()
                     .Where(item => item.RecipeId == recipeDto.Id)
                     .ToList();
@@ -244,7 +225,6 @@ namespace BarStockControl.Services
                     _recipeItemService.DeleteRecipeItem(existingItem.Id);
                 }
 
-                // Crear los nuevos items
                 recipeDto.Items.Clear();
                 foreach (var itemDto in items)
                 {
@@ -257,7 +237,6 @@ namespace BarStockControl.Services
                         IsActive = true
                     };
 
-                    // Crear el item en el servicio
                     if (_recipeItemService.CreateRecipeItem(newItem))
                     {
                         recipeDto.Items.Add(newItem);
@@ -268,7 +247,6 @@ namespace BarStockControl.Services
                     }
                 }
 
-                // Actualizar la receta con los nuevos items
                 return _recipeService.UpdateRecipe(recipeDto);
             }
             catch (Exception)

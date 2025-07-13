@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT data (
-    users?,
-    permissionItems?,
-    permissionDefs?,
+    permissions?,
     roles?,
+    users?,
     products?,
     bars?,
     stations?,
@@ -13,34 +12,19 @@
     drinks?,
     recipes?,
     recipeItems?,
-    resourceAssignments?
+    resourceAssignments?,
+    resourceRolePermissions?,
+    cashRegisters?,
+    orders?,
+    orderItems?,
+    barmanOrders?,
+    stockMovements?,
+    stationProductConsumptions?
 )>
 
-<!-- ========== USERS ========== -->
-<!ELEMENT users (user*)>
-<!ELEMENT user (roleRef)>
-<!ATTLIST user
-    id ID #REQUIRED
-    name CDATA #REQUIRED
-    lastname CDATA #REQUIRED
-    email CDATA #REQUIRED
-    password CDATA #REQUIRED
-    active (true|false) "true"
->
-
-<!-- ========== PERMISSION ITEMS ========== -->
-<!ELEMENT permissionItems (permissionItem*)>
-<!ELEMENT permissionItem EMPTY>
-<!ATTLIST permissionItem
-    id ID #REQUIRED
-    name CDATA #REQUIRED
-    description CDATA #REQUIRED
-    isActive (true|false) "true"
->
-
 <!-- ========== PERMISSIONS ========== -->
-<!ELEMENT permissionDefs (permission*)>
-<!ELEMENT permission (permissionItemRef*)>
+<!ELEMENT permissions (permission*)>
+<!ELEMENT permission EMPTY>
 <!ATTLIST permission
     id ID #REQUIRED
     name CDATA #REQUIRED
@@ -51,11 +35,39 @@
 <!-- ========== ROLES ========== -->
 <!ELEMENT roles (role*)>
 <!ELEMENT role (rolePermissionRef*)>
+<!ELEMENT rolePermissionRef EMPTY>
+<!ATTLIST rolePermissionRef
+    ref IDREF #REQUIRED
+>
 <!ATTLIST role
     id ID #REQUIRED
     name CDATA #REQUIRED
     description CDATA #REQUIRED
     isActive (true|false) "true"
+>
+
+<!-- ========== USERS ========== -->
+<!ELEMENT users (user*)>
+<!ELEMENT user (roleRef)>
+<!ELEMENT roleRef EMPTY>
+<!ATTLIST roleRef
+    ref IDREF #REQUIRED
+>
+<!ATTLIST user
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    lastname CDATA #REQUIRED
+    email CDATA #REQUIRED
+    password CDATA #REQUIRED
+    active (true|false) "true"
+>
+
+<!-- ========== RESOURCE ROLE PERMISSIONS ========== -->
+<!ELEMENT resourceRolePermissions (resourceRolePermission*)>
+<!ELEMENT resourceRolePermission EMPTY>
+<!ATTLIST resourceRolePermission
+    roleId IDREF #REQUIRED
+    resourceType CDATA #REQUIRED
 >
 
 <!-- ========== PRODUCTS ========== -->
@@ -65,9 +77,14 @@
     id ID #REQUIRED
     name CDATA #REQUIRED
     unit CDATA #REQUIRED
-    category (Gaseosa|BebidaAlcoholica|Energizante|Hielo|Descartable) #REQUIRED
+    category CDATA #REQUIRED
     capacity CDATA #REQUIRED
+    precio CDATA #REQUIRED
+    estimatedServings CDATA #REQUIRED
     isActive (true|false) "true"
+    type CDATA #REQUIRED
+    qualityCategory CDATA #REQUIRED
+    isImported (true|false) "true"
 >
 
 <!-- ========== BARS ========== -->
@@ -76,8 +93,9 @@
 <!ATTLIST bar
     id ID #REQUIRED
     name CDATA #REQUIRED
-    description CDATA #REQUIRED
+    description CDATA #IMPLIED
     isActive (true|false) "true"
+    active (true|false) "true"
 >
 
 <!-- ========== STATIONS ========== -->
@@ -86,9 +104,10 @@
 <!ATTLIST station
     id ID #REQUIRED
     name CDATA #REQUIRED
-    description CDATA #REQUIRED
-    barRef IDREF #REQUIRED
-    isActive (true|false) "true"
+    status CDATA #REQUIRED
+    active (true|false) "true"
+    comment CDATA #IMPLIED
+    barId IDREF #REQUIRED
 >
 
 <!-- ========== DEPOSITS ========== -->
@@ -106,10 +125,28 @@
 <!ELEMENT stock EMPTY>
 <!ATTLIST stock
     id ID #REQUIRED
-    productRef IDREF #REQUIRED
-    depositRef IDREF #REQUIRED
+    productId IDREF #REQUIRED
     quantity CDATA #REQUIRED
-    isActive (true|false) "true"
+    depositId IDREF #IMPLIED
+    stationId IDREF #IMPLIED
+>
+
+<!-- ========== STOCK MOVEMENTS ========== -->
+<!ELEMENT stockMovements (stockMovement*)>
+<!ELEMENT stockMovement EMPTY>
+<!ATTLIST stockMovement
+    id ID #REQUIRED
+    productId IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+    eventId IDREF #REQUIRED
+    requestedByUserId IDREF #REQUIRED
+    timestamp CDATA #REQUIRED
+    status CDATA #REQUIRED
+    fromDepositId IDREF #IMPLIED
+    toDepositId IDREF #IMPLIED
+    fromStationId IDREF #IMPLIED
+    toStationId IDREF #IMPLIED
+    comment CDATA #IMPLIED
 >
 
 <!-- ========== EVENTS ========== -->
@@ -121,8 +158,8 @@
     description CDATA #REQUIRED
     startDate CDATA #REQUIRED
     endDate CDATA #REQUIRED
-    status (Planificado|EnCurso|Finalizado|Cancelado) #REQUIRED
-    isActive (true|false) "true"
+    status CDATA #REQUIRED
+    active (true|false) "true"
 >
 
 <!-- ========== DRINKS ========== -->
@@ -132,8 +169,11 @@
     id ID #REQUIRED
     name CDATA #REQUIRED
     price CDATA #REQUIRED
-    isComposed (true|false) "false"
+    isComposed (true|false) "true"
     isActive (true|false) "true"
+    estimatedCost CDATA #REQUIRED
+    createdAt CDATA #REQUIRED
+    updatedAt CDATA #IMPLIED
 >
 
 <!-- ========== RECIPES ========== -->
@@ -142,6 +182,7 @@
 <!ATTLIST recipe
     id ID #REQUIRED
     drinkRef IDREF #REQUIRED
+    name CDATA #REQUIRED
     isActive (true|false) "true"
 >
 
@@ -161,20 +202,69 @@
 <!ELEMENT resourceAssignment EMPTY>
 <!ATTLIST resourceAssignment
     id ID #REQUIRED
-    eventRef IDREF #REQUIRED
-    userRef IDREF #REQUIRED
-    stationRef IDREF #REQUIRED
-    startDate CDATA #REQUIRED
-    endDate CDATA #REQUIRED
-    isActive (true|false) "true"
+    eventId IDREF #REQUIRED
+    resourceId IDREF #REQUIRED
+    resourceType CDATA #REQUIRED
+    userId IDREF #REQUIRED
 >
 
-<!-- ========== REFERENCES ========== -->
-<!ELEMENT roleRef EMPTY>
-<!ATTLIST roleRef ref IDREF #REQUIRED>
+<!-- ========== CASH REGISTERS ========== -->
+<!ELEMENT cashRegisters (cashRegister*)>
+<!ELEMENT cashRegister EMPTY>
+<!ATTLIST cashRegister
+    id ID #REQUIRED
+    name CDATA #REQUIRED
+    active (true|false) "true"
+    barId IDREF #REQUIRED
+>
 
-<!ELEMENT permissionItemRef EMPTY>
-<!ATTLIST permissionItemRef ref IDREF #REQUIRED>
+<!-- ========== ORDERS ========== -->
+<!ELEMENT orders (order*)>
+<!ELEMENT order EMPTY>
+<!ATTLIST order
+    id ID #REQUIRED
+    eventId IDREF #REQUIRED
+    userId IDREF #REQUIRED
+    createdAt CDATA #REQUIRED
+    status CDATA #REQUIRED
+    paymentMethod CDATA #REQUIRED
+    total CDATA #REQUIRED
+>
 
-<!ELEMENT rolePermissionRef EMPTY>
-<!ATTLIST rolePermissionRef ref IDREF #REQUIRED>
+<!-- ========== ORDER ITEMS ========== -->
+<!ELEMENT orderItems (orderItem*)>
+<!ELEMENT orderItem EMPTY>
+<!ATTLIST orderItem
+    id ID #REQUIRED
+    orderId IDREF #REQUIRED
+    drinkId IDREF #REQUIRED
+    quantity CDATA #REQUIRED
+    unitPrice CDATA #REQUIRED
+    discount CDATA #REQUIRED
+    subtotal CDATA #REQUIRED
+>
+
+<!-- ========== BARMAN ORDERS ========== -->
+<!ELEMENT barmanOrders (barmanOrder*)>
+<!ELEMENT barmanOrder EMPTY>
+<!ATTLIST barmanOrder
+    id ID #REQUIRED
+    orderId IDREF #REQUIRED
+    barmanId IDREF #REQUIRED
+    stationId IDREF #REQUIRED
+    barId IDREF #REQUIRED
+    eventId IDREF #REQUIRED
+>
+
+<!-- ========== STATION PRODUCT CONSUMPTIONS ========== -->
+<!ELEMENT stationProductConsumptions (stationProductConsumption*)>
+<!ELEMENT stationProductConsumption EMPTY>
+<!ATTLIST stationProductConsumption
+    id ID #REQUIRED
+    stationId IDREF #REQUIRED
+    productId IDREF #REQUIRED
+    orderItemId IDREF #REQUIRED
+    fechaHora CDATA #REQUIRED
+    eventoId IDREF #REQUIRED
+    usuarioId IDREF #REQUIRED
+>

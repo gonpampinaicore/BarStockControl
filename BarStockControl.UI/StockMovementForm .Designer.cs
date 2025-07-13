@@ -29,6 +29,7 @@ namespace BarStockControl.Forms.StockMovements
         private System.Windows.Forms.Label lblComment;
         private System.Windows.Forms.Label lblMovements;
         private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.Button btnRollback;
 
         private void InitializeComponent()
         {
@@ -56,34 +57,45 @@ namespace BarStockControl.Forms.StockMovements
             lblComment = new Label();
             lblMovements = new Label();
             lblStatus = new Label();
+            btnRollback = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvFromStock).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvToStock).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvMovements).BeginInit();
             SuspendLayout();
-
+            // 
+            // cmbEvent
+            // 
             cmbEvent.Location = new Point(20, 30);
             cmbEvent.Name = "cmbEvent";
             cmbEvent.Size = new Size(350, 23);
             cmbEvent.TabIndex = 1;
             cmbEvent.SelectedIndexChanged += cmbEvent_SelectedIndexChanged;
-
+            // 
+            // rdoFromDeposit
+            // 
             rdoFromDeposit.Location = new Point(20, 90);
             rdoFromDeposit.Name = "rdoFromDeposit";
             rdoFromDeposit.Size = new Size(100, 20);
             rdoFromDeposit.TabIndex = 3;
             rdoFromDeposit.Text = "Depósito";
-
+            // 
+            // rdoFromStation
+            // 
             rdoFromStation.Location = new Point(130, 90);
             rdoFromStation.Name = "rdoFromStation";
             rdoFromStation.Size = new Size(100, 20);
             rdoFromStation.TabIndex = 4;
             rdoFromStation.Text = "Estación";
-
+            // 
+            // cmbFromLocation
+            // 
             cmbFromLocation.Location = new Point(20, 115);
             cmbFromLocation.Name = "cmbFromLocation";
             cmbFromLocation.Size = new Size(350, 23);
             cmbFromLocation.TabIndex = 5;
-
+            // 
+            // dgvFromStock
+            // 
             dgvFromStock.AllowUserToAddRows = false;
             dgvFromStock.AllowUserToDeleteRows = false;
             dgvFromStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
@@ -92,24 +104,32 @@ namespace BarStockControl.Forms.StockMovements
             dgvFromStock.ReadOnly = true;
             dgvFromStock.Size = new Size(540, 180);
             dgvFromStock.TabIndex = 7;
-
+            // 
+            // rdoToDeposit
+            // 
             rdoToDeposit.Location = new Point(580, 90);
             rdoToDeposit.Name = "rdoToDeposit";
             rdoToDeposit.Size = new Size(100, 20);
             rdoToDeposit.TabIndex = 9;
             rdoToDeposit.Text = "Depósito";
-
+            // 
+            // rdoToStation
+            // 
             rdoToStation.Location = new Point(690, 90);
             rdoToStation.Name = "rdoToStation";
             rdoToStation.Size = new Size(100, 20);
             rdoToStation.TabIndex = 10;
             rdoToStation.Text = "Estación";
-
+            // 
+            // cmbToLocation
+            // 
             cmbToLocation.Location = new Point(580, 115);
             cmbToLocation.Name = "cmbToLocation";
             cmbToLocation.Size = new Size(350, 23);
             cmbToLocation.TabIndex = 11;
-
+            // 
+            // dgvToStock
+            // 
             dgvToStock.AllowUserToAddRows = false;
             dgvToStock.AllowUserToDeleteRows = false;
             dgvToStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
@@ -118,24 +138,32 @@ namespace BarStockControl.Forms.StockMovements
             dgvToStock.ReadOnly = true;
             dgvToStock.Size = new Size(540, 180);
             dgvToStock.TabIndex = 13;
-
+            // 
+            // txtQuantity
+            // 
             txtQuantity.Location = new Point(20, 380);
             txtQuantity.Name = "txtQuantity";
             txtQuantity.Size = new Size(100, 23);
             txtQuantity.TabIndex = 15;
-
+            // 
+            // txtComment
+            // 
             txtComment.Location = new Point(140, 380);
             txtComment.Name = "txtComment";
             txtComment.Size = new Size(300, 23);
             txtComment.TabIndex = 17;
-
+            // 
+            // btnCreate
+            // 
             btnCreate.Location = new Point(460, 380);
             btnCreate.Name = "btnCreate";
             btnCreate.Size = new Size(100, 23);
             btnCreate.TabIndex = 18;
             btnCreate.Text = "Crear";
             btnCreate.Click += btnCreate_Click;
-
+            // 
+            // dgvMovements
+            // 
             dgvMovements.AllowUserToAddRows = false;
             dgvMovements.AllowUserToDeleteRows = false;
             dgvMovements.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
@@ -144,73 +172,108 @@ namespace BarStockControl.Forms.StockMovements
             dgvMovements.ReadOnly = true;
             dgvMovements.Size = new Size(1100, 180);
             dgvMovements.TabIndex = 20;
-
+            // 
+            // cmbStatus
+            // 
             cmbStatus.Location = new Point(20, 660);
             cmbStatus.Name = "cmbStatus";
             cmbStatus.Size = new Size(150, 23);
             cmbStatus.TabIndex = 22;
-
+            // 
+            // btnChangeStatus
+            // 
             btnChangeStatus.Location = new Point(190, 660);
             btnChangeStatus.Name = "btnChangeStatus";
             btnChangeStatus.Size = new Size(100, 23);
             btnChangeStatus.TabIndex = 23;
             btnChangeStatus.Text = "Cambiar";
-
+            // 
+            // lblEvent
+            // 
             lblEvent.Location = new Point(20, 10);
             lblEvent.Name = "lblEvent";
             lblEvent.Size = new Size(300, 15);
             lblEvent.TabIndex = 0;
             lblEvent.Text = "Evento activo";
-
+            // 
+            // lblFromLocation
+            // 
             lblFromLocation.Location = new Point(20, 70);
             lblFromLocation.Name = "lblFromLocation";
             lblFromLocation.Size = new Size(300, 15);
             lblFromLocation.TabIndex = 2;
             lblFromLocation.Text = "Origen del producto";
-
+            // 
+            // lblFromStock
+            // 
             lblFromStock.Location = new Point(20, 145);
             lblFromStock.Name = "lblFromStock";
             lblFromStock.Size = new Size(300, 15);
             lblFromStock.TabIndex = 6;
             lblFromStock.Text = "Stock disponible en origen";
-
+            // 
+            // lblToLocation
+            // 
             lblToLocation.Location = new Point(580, 70);
             lblToLocation.Name = "lblToLocation";
             lblToLocation.Size = new Size(300, 15);
             lblToLocation.TabIndex = 8;
             lblToLocation.Text = "Destino del producto";
-
+            // 
+            // lblToStock
+            // 
             lblToStock.Location = new Point(580, 145);
             lblToStock.Name = "lblToStock";
             lblToStock.Size = new Size(300, 15);
             lblToStock.TabIndex = 12;
             lblToStock.Text = "Stock actual en destino";
-
+            // 
+            // lblQuantity
+            // 
             lblQuantity.Location = new Point(20, 360);
             lblQuantity.Name = "lblQuantity";
             lblQuantity.Size = new Size(150, 17);
             lblQuantity.TabIndex = 14;
             lblQuantity.Text = "Cantidad a trasladar";
-
+            // 
+            // lblComment
+            // 
             lblComment.Location = new Point(140, 360);
             lblComment.Name = "lblComment";
             lblComment.Size = new Size(150, 17);
             lblComment.TabIndex = 16;
             lblComment.Text = "Comentario (opcional)";
-
+            // 
+            // lblMovements
+            // 
             lblMovements.Location = new Point(20, 420);
             lblMovements.Name = "lblMovements";
             lblMovements.Size = new Size(400, 15);
             lblMovements.TabIndex = 19;
             lblMovements.Text = "Movimientos realizados en este evento";
-
+            // 
+            // lblStatus
+            // 
             lblStatus.Location = new Point(20, 640);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(150, 15);
             lblStatus.TabIndex = 21;
             lblStatus.Text = "Estado del movimiento";
-
+            // 
+            // btnRollback
+            // 
+            btnRollback.Location = new Point(580, 380);
+            btnRollback.Name = "btnRollback";
+            btnRollback.Size = new Size(134, 23);
+            btnRollback.TabIndex = 99;
+            btnRollback.Text = "Deshacer Movimiento";
+            btnRollback.UseVisualStyleBackColor = true;
+            btnRollback.Click += btnRollback_Click;
+            // 
+            // StockMovementForm
+            // 
             ClientSize = new Size(1150, 750);
+            Controls.Add(btnRollback);
             Controls.Add(lblEvent);
             Controls.Add(cmbEvent);
             Controls.Add(lblFromLocation);

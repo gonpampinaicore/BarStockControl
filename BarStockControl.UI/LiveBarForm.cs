@@ -33,6 +33,8 @@ namespace BarStockControl.UI
             _eventService = new EventService(new Data.XmlDataManager("Xml/data.xml"));
             _assignmentService = new ResourceAssignmentService(new Data.XmlDataManager("Xml/data.xml"));
             _currentEvent = currentEvent;
+            if (_currentEvent != null)
+                this.Text = "Evento en vivo: " + _currentEvent.Name;
             SetupUI();
             LoadEventData();
         }

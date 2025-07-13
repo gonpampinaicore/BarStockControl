@@ -69,6 +69,11 @@ namespace BarStockControl.Forms.Invoices
                     if (sfd.ShowDialog() == DialogResult.OK)
                     {
                         GeneratePdfQuestPdf(sfd.FileName);
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = sfd.FileName,
+                            UseShellExecute = true
+                        });
                         MessageBox.Show("Factura guardada como PDF correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }

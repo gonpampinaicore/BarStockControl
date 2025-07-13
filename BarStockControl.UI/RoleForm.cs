@@ -1,11 +1,13 @@
-﻿using BarStockControl.Services;
+﻿
 using BarStockControl.Data;
-using BarStockControl.Mappers;
 using BarStockControl.DTOs;
-using BarStockControl.Forms.Users;
-using BarStockControl.Forms.Permissions;
+using BarStockControl.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 
-namespace BarStockControl.Forms.Roles
+namespace BarStockControl
 {
     public partial class RoleForm : Form
     {
@@ -40,6 +42,13 @@ namespace BarStockControl.Forms.Roles
                 }
 
                 dgvRoles.DataSource = roles;
+
+                clbRoles.Items.Clear();
+                foreach (var role in roles)
+                {
+                    clbRoles.Items.Add(role, false);
+                }
+                clbRoles.DisplayMember = "Name";
             }
             catch (Exception ex)
             {
@@ -82,7 +91,7 @@ namespace BarStockControl.Forms.Roles
                 ClearForm();
                 LoadRoles();
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -111,7 +120,7 @@ namespace BarStockControl.Forms.Roles
                 ClearForm();
                 LoadRoles();
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -156,14 +165,17 @@ namespace BarStockControl.Forms.Roles
                     for (int i = 0; i < clbPermissions.Items.Count; i++)
                     {
                         if (clbPermissions.Items[i] is PermissionDto p)
-                        {
-                            bool isSelected = _selectedRole.PermissionIds.Contains(p.Id);
-                            clbPermissions.SetItemChecked(i, isSelected);
-                        }
+                            clbPermissions.SetItemChecked(i, _selectedRole.PermissionIds.Contains(p.Id));
+                    }
+
+                    for (int i = 0; i < clbRoles.Items.Count; i++)
+                    {
+                        if (clbRoles.Items[i] is RoleDto r)
+                            clbRoles.SetItemChecked(i, _selectedRole.RoleIds.Contains(r.Id));
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -171,13 +183,8 @@ namespace BarStockControl.Forms.Roles
 
         private RoleDto GetRoleFromForm()
         {
-            var selectedPermissionIds = new List<int>();
-
-            foreach (var checkedItem in clbPermissions.CheckedItems)
-            {
-                if (checkedItem is PermissionDto p)
-                    selectedPermissionIds.Add(p.Id);
-            }
+            var selectedPermissionIds = clbPermissions.CheckedItems.Cast<PermissionDto>().Select(p => p.Id).ToList();
+            var selectedRoleIds = clbRoles.CheckedItems.Cast<RoleDto>().Select(r => r.Id).ToList();
 
             return new RoleDto
             {
@@ -185,7 +192,8 @@ namespace BarStockControl.Forms.Roles
                 Name = txtName.Text,
                 Description = txtDescription.Text,
                 IsActive = chkActive.Checked,
-                PermissionIds = selectedPermissionIds
+                PermissionIds = selectedPermissionIds,
+                RoleIds = selectedRoleIds
             };
         }
 
@@ -198,92 +206,12 @@ namespace BarStockControl.Forms.Roles
 
             for (int i = 0; i < clbPermissions.Items.Count; i++)
                 clbPermissions.SetItemChecked(i, false);
+
+            for (int i = 0; i < clbRoles.Items.Count; i++)
+                clbRoles.SetItemChecked(i, false);
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            LoadRoles();
-        }
-
-        private void chkOnlyActive_CheckedChanged(object sender, EventArgs e)
-        {
-            LoadRoles();
-        }
-
-        private void txtPermissionSearch_TextChanged(object sender, EventArgs e)
-        {
-            LoadPermissions();
-        }
-
-        private void btnGoToUsers_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var userForm = new UserForm();
-                userForm.Show();
-                this.Hide();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Usuarios: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToPermissions_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var permissionForm = new PermissionForm();
-                permissionForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Permisos: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToPermissionItems_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var permissionItemForm = new PermissionItemForm();
-                permissionItemForm.Show();
-                this.Hide();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Elementos de Permisos: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnGoToMainMenu_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var mainMenuForm = new MainMenuForm();
-                mainMenuForm.Show();
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir Menú Principal: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-            
-            if (Application.OpenForms.Count == 1 && Application.OpenForms[0] == this)
-            {
-                var mainMenuForm = new MainMenuForm();
-                mainMenuForm.Show();
-            }
-        }
+        private void txtSearch_TextChanged(object sender, EventArgs e) => LoadRoles();
+        private void chkOnlyActive_CheckedChanged(object sender, EventArgs e) => LoadRoles();
     }
 }

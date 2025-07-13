@@ -235,10 +235,13 @@ namespace BarStockControl.Forms.Drinks
             this.btnDelete.Text = "Eliminar";
             this.btnDelete.UseVisualStyleBackColor = true;
 
+            this.btnClear = new System.Windows.Forms.Button();
+
             // Form
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(524, 685);
+            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.btnUpdate);
             this.Controls.Add(this.btnCreate);
@@ -290,5 +293,6 @@ namespace BarStockControl.Forms.Drinks
         private System.Windows.Forms.Label lblProduct;
         private System.Windows.Forms.Label lblQuantity;
         private System.Windows.Forms.Button btnCalculateEstimatedCost;
+        private System.Windows.Forms.Button btnClear;
     }
 } 

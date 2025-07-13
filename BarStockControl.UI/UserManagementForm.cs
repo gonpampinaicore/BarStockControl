@@ -1,10 +1,9 @@
 using BarStockControl.Core;
-using BarStockControl.Forms.Users;
-using BarStockControl.Forms.Roles;
-using BarStockControl.Forms.Permissions;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Forms;
+using BarStockControl.Models.Enums;
+
 
 namespace BarStockControl
 {
@@ -44,19 +43,16 @@ namespace BarStockControl
                 var roleIds = user.RoleIds;
                 var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
 
-                var forms = new (string Label, Func<Form> FormFactory, string RequiredPermissions)[]
+                var menuItems = new List<(string Text, Func<Form> FormFactory, PermissionType RequiredPermission)>
                 {
-                    ("Usuarios", () => new UserForm(), "User_full_access,User_Read_Only"),
-                    ("Roles", () => new RoleForm(), "Role_full_access"),
-                    ("Permisos", () => new PermissionForm(), "Permission_full_access"),
-                    ("Elementos de Permisos", () => new PermissionItemForm(), "PermissionItem_full_access"),
-                    ("Respaldo", () => new BackupForm(), "Backup_full_access")
+                    ("Usuarios", () => new UserForm(), PermissionType.UserFullAccess),
+                    ("Roles", () => new RoleForm(), PermissionType.RoleFullAccess),
+                    ("Backup", () => new BackupForm(), PermissionType.BackupFullAccess)
                 };
 
-                foreach (var (label, formFactory, requiredPermissions) in forms)
+                foreach (var (label, formFactory, requiredPermission) in menuItems)
                 {
-                    var permissions = requiredPermissions.Split(',');
-                    if (permissions.Any(p => permissionNames.Contains(p.Trim())))
+                    if (permissionNames.Contains(requiredPermission.ToString()))
                     {
                         AddFormButton(label, formFactory);
                     }

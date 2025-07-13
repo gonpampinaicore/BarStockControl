@@ -15,12 +15,21 @@ namespace BarStockControl.Models
         public string Password { get; set; }
         public bool Active { get; set; }
 
-        public List<int> RoleIds { get; set; } = new List<int>();
+        public List<int> RoleIds { get; set; } = new();
+        public List<int> PermissionIds { get; set; } = new();
 
-    public override string ToString()
-    {
-        return $"{FirstName} {LastName}";
+        private List<Component> _permissions;
 
-    }
+        public User()
+        {
+            _permissions = new List<Component>();
+        }
+
+        public List<Component> Permissions => _permissions;
+
+        public override string ToString()
+        {
+            return $"{FirstName} {LastName}";
+        }
     }
 }

@@ -15,6 +15,7 @@
         private System.Windows.Forms.Button btnCreate;
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.Button btnClear;
 
         private System.Windows.Forms.Label lblSearch;
         private System.Windows.Forms.Label lblName;
@@ -25,150 +26,185 @@
 
         private void InitializeComponent()
         {
-            dgvEvents = new System.Windows.Forms.DataGridView();
-            txtSearch = new System.Windows.Forms.TextBox();
-            chkOnlyActive = new System.Windows.Forms.CheckBox();
-            txtName = new System.Windows.Forms.TextBox();
-            txtDescription = new System.Windows.Forms.TextBox();
-            dtpStart = new System.Windows.Forms.DateTimePicker();
-            dtpEnd = new System.Windows.Forms.DateTimePicker();
-            cmbStatus = new System.Windows.Forms.ComboBox();
-            chkActive = new System.Windows.Forms.CheckBox();
-            btnCreate = new System.Windows.Forms.Button();
-            btnUpdate = new System.Windows.Forms.Button();
-            btnDelete = new System.Windows.Forms.Button();
-            lblSearch = new System.Windows.Forms.Label();
-            lblName = new System.Windows.Forms.Label();
-            lblDescription = new System.Windows.Forms.Label();
-            lblStart = new System.Windows.Forms.Label();
-            lblEnd = new System.Windows.Forms.Label();
-            lblStatus = new System.Windows.Forms.Label();
-
-            ((System.ComponentModel.ISupportInitialize)(dgvEvents)).BeginInit();
+            dgvEvents = new DataGridView();
+            txtSearch = new TextBox();
+            chkOnlyActive = new CheckBox();
+            txtName = new TextBox();
+            txtDescription = new TextBox();
+            dtpStart = new DateTimePicker();
+            dtpEnd = new DateTimePicker();
+            cmbStatus = new ComboBox();
+            chkActive = new CheckBox();
+            btnCreate = new Button();
+            btnUpdate = new Button();
+            btnDelete = new Button();
+            btnClear = new Button();
+            lblSearch = new Label();
+            lblName = new Label();
+            lblDescription = new Label();
+            lblStart = new Label();
+            lblEnd = new Label();
+            lblStatus = new Label();
+            ((System.ComponentModel.ISupportInitialize)dgvEvents).BeginInit();
             SuspendLayout();
-
+            // 
             // dgvEvents
-            dgvEvents.Location = new System.Drawing.Point(20, 50);
+            // 
+            dgvEvents.Location = new Point(20, 50);
             dgvEvents.Name = "dgvEvents";
-            dgvEvents.Size = new System.Drawing.Size(600, 200);
+            dgvEvents.Size = new Size(685, 200);
             dgvEvents.TabIndex = 0;
             dgvEvents.CellClick += dgvEvents_CellClick;
-
+            // 
             // txtSearch
-            txtSearch.Location = new System.Drawing.Point(100, 20);
+            // 
+            txtSearch.Location = new Point(100, 20);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new System.Drawing.Size(200, 23);
+            txtSearch.Size = new Size(200, 23);
             txtSearch.TabIndex = 1;
             txtSearch.TextChanged += txtSearch_TextChanged;
-
+            // 
             // chkOnlyActive
-            chkOnlyActive.Location = new System.Drawing.Point(320, 20);
+            // 
+            chkOnlyActive.Location = new Point(320, 20);
             chkOnlyActive.Name = "chkOnlyActive";
-            chkOnlyActive.Size = new System.Drawing.Size(104, 24);
+            chkOnlyActive.Size = new Size(104, 24);
             chkOnlyActive.TabIndex = 2;
-            chkOnlyActive.Text = "Only active";
+            chkOnlyActive.Text = "Solo activos";
             chkOnlyActive.CheckedChanged += chkOnlyActive_CheckedChanged;
-
-            // lblSearch
-            lblSearch.Location = new System.Drawing.Point(20, 23);
-            lblSearch.Name = "lblSearch";
-            lblSearch.Size = new System.Drawing.Size(80, 23);
-            lblSearch.Text = "Search:";
-
+            // 
             // txtName
-            txtName.Location = new System.Drawing.Point(100, 270);
+            // 
+            txtName.Location = new Point(100, 270);
             txtName.Name = "txtName";
-            txtName.Size = new System.Drawing.Size(200, 23);
+            txtName.Size = new Size(200, 23);
             txtName.TabIndex = 3;
-
-            // lblName
-            lblName.Location = new System.Drawing.Point(20, 273);
-            lblName.Name = "lblName";
-            lblName.Size = new System.Drawing.Size(80, 23);
-            lblName.Text = "Name:";
-
+            // 
             // txtDescription
-            txtDescription.Location = new System.Drawing.Point(100, 300);
+            // 
+            txtDescription.Location = new Point(100, 300);
             txtDescription.Name = "txtDescription";
-            txtDescription.Size = new System.Drawing.Size(200, 23);
+            txtDescription.Size = new Size(200, 23);
             txtDescription.TabIndex = 4;
-
-            // lblDescription
-            lblDescription.Location = new System.Drawing.Point(20, 303);
-            lblDescription.Name = "lblDescription";
-            lblDescription.Size = new System.Drawing.Size(80, 23);
-            lblDescription.Text = "Description:";
-
+            // 
             // dtpStart
-            dtpStart.Location = new System.Drawing.Point(100, 330);
+            // 
+            dtpStart.Location = new Point(100, 330);
             dtpStart.Name = "dtpStart";
-            dtpStart.Size = new System.Drawing.Size(200, 23);
+            dtpStart.Size = new Size(229, 23);
             dtpStart.TabIndex = 5;
-
-            // lblStart
-            lblStart.Location = new System.Drawing.Point(20, 333);
-            lblStart.Name = "lblStart";
-            lblStart.Size = new System.Drawing.Size(80, 23);
-            lblStart.Text = "Start date:";
-
+            // 
             // dtpEnd
-            dtpEnd.Location = new System.Drawing.Point(100, 360);
+            // 
+            dtpEnd.Location = new Point(100, 360);
             dtpEnd.Name = "dtpEnd";
-            dtpEnd.Size = new System.Drawing.Size(200, 23);
+            dtpEnd.Size = new Size(229, 23);
             dtpEnd.TabIndex = 6;
-
-            // lblEnd
-            lblEnd.Location = new System.Drawing.Point(20, 363);
-            lblEnd.Name = "lblEnd";
-            lblEnd.Size = new System.Drawing.Size(80, 23);
-            lblEnd.Text = "End date:";
-
+            // 
             // cmbStatus
-            cmbStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cmbStatus.Location = new System.Drawing.Point(100, 390);
+            // 
+            cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbStatus.Location = new Point(100, 390);
             cmbStatus.Name = "cmbStatus";
-            cmbStatus.Size = new System.Drawing.Size(200, 23);
+            cmbStatus.Size = new Size(200, 23);
             cmbStatus.TabIndex = 7;
-
-            // lblStatus
-            lblStatus.Location = new System.Drawing.Point(20, 393);
-            lblStatus.Name = "lblStatus";
-            lblStatus.Size = new System.Drawing.Size(80, 23);
-            lblStatus.Text = "Status:";
-
+            // 
             // chkActive
-            chkActive.Location = new System.Drawing.Point(100, 420);
+            // 
+            chkActive.Location = new Point(100, 420);
             chkActive.Name = "chkActive";
-            chkActive.Size = new System.Drawing.Size(104, 24);
+            chkActive.Size = new Size(104, 24);
             chkActive.TabIndex = 8;
-            chkActive.Text = "Active";
-
+            chkActive.Text = "Activo";
+            // 
             // btnCreate
-            btnCreate.Location = new System.Drawing.Point(320, 270);
+            // 
+            btnCreate.Location = new Point(377, 270);
             btnCreate.Name = "btnCreate";
-            btnCreate.Size = new System.Drawing.Size(75, 23);
+            btnCreate.Size = new Size(75, 23);
             btnCreate.TabIndex = 9;
-            btnCreate.Text = "Create";
+            btnCreate.Text = "Crear";
             btnCreate.Click += btnCreate_Click;
-
+            // 
             // btnUpdate
-            btnUpdate.Location = new System.Drawing.Point(320, 300);
+            // 
+            btnUpdate.Location = new Point(377, 299);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new System.Drawing.Size(75, 23);
+            btnUpdate.Size = new Size(75, 23);
             btnUpdate.TabIndex = 10;
-            btnUpdate.Text = "Update";
+            btnUpdate.Text = "Actualizar";
             btnUpdate.Click += btnUpdate_Click;
-
+            // 
             // btnDelete
-            btnDelete.Location = new System.Drawing.Point(320, 330);
+            // 
+            btnDelete.Location = new Point(377, 328);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new System.Drawing.Size(75, 23);
+            btnDelete.Size = new Size(75, 23);
             btnDelete.TabIndex = 11;
-            btnDelete.Text = "Delete";
+            btnDelete.Text = "Eliminar";
             btnDelete.Click += btnDelete_Click;
-
+            // 
+            // btnClear
+            // 
+            btnClear.Location = new Point(377, 357);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(75, 23);
+            btnClear.TabIndex = 99;
+            btnClear.Text = "Limpiar";
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click;
+            // 
+            // lblSearch
+            // 
+            lblSearch.Location = new Point(20, 23);
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new Size(80, 23);
+            lblSearch.TabIndex = 12;
+            lblSearch.Text = "Buscar:";
+            // 
+            // lblName
+            // 
+            lblName.Location = new Point(20, 273);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(80, 23);
+            lblName.TabIndex = 13;
+            lblName.Text = "Nombre:";
+            // 
+            // lblDescription
+            // 
+            lblDescription.Location = new Point(20, 303);
+            lblDescription.Name = "lblDescription";
+            lblDescription.Size = new Size(80, 23);
+            lblDescription.TabIndex = 14;
+            lblDescription.Text = "Descripción:";
+            // 
+            // lblStart
+            // 
+            lblStart.Location = new Point(20, 333);
+            lblStart.Name = "lblStart";
+            lblStart.Size = new Size(80, 23);
+            lblStart.TabIndex = 15;
+            lblStart.Text = "Fecha de inicio:";
+            // 
+            // lblEnd
+            // 
+            lblEnd.Location = new Point(20, 363);
+            lblEnd.Name = "lblEnd";
+            lblEnd.Size = new Size(80, 23);
+            lblEnd.TabIndex = 16;
+            lblEnd.Text = "Fecha de fin:";
+            // 
+            // lblStatus
+            // 
+            lblStatus.Location = new Point(20, 393);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(80, 23);
+            lblStatus.TabIndex = 17;
+            lblStatus.Text = "Estado:";
+            // 
             // EventForm
-            ClientSize = new System.Drawing.Size(640, 480);
+            // 
+            ClientSize = new Size(746, 484);
             Controls.Add(dgvEvents);
             Controls.Add(txtSearch);
             Controls.Add(chkOnlyActive);
@@ -181,6 +217,7 @@
             Controls.Add(btnCreate);
             Controls.Add(btnUpdate);
             Controls.Add(btnDelete);
+            Controls.Add(btnClear);
             Controls.Add(lblSearch);
             Controls.Add(lblName);
             Controls.Add(lblDescription);
@@ -188,9 +225,8 @@
             Controls.Add(lblEnd);
             Controls.Add(lblStatus);
             Name = "EventForm";
-            Text = "Event Management";
-
-            ((System.ComponentModel.ISupportInitialize)(dgvEvents)).EndInit();
+            Text = "Gestión de eventos";
+            ((System.ComponentModel.ISupportInitialize)dgvEvents).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }

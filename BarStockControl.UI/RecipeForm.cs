@@ -386,7 +386,12 @@ namespace BarStockControl
         private void RefreshRecipeGrid()
         {
             dgvRecipeItems.DataSource = null;
-            dgvRecipeItems.DataSource = _currentRecipeItems;
+            var products = _productService.GetAllProducts().ToDictionary(p => p.Id, p => p.Name);
+            var displayList = _currentRecipeItems.Select(item => new {
+                Producto = products.ContainsKey(item.ProductId) ? products[item.ProductId] : $"ID {item.ProductId}",
+                Cantidad = item.Quantity
+            }).ToList();
+            dgvRecipeItems.DataSource = displayList;
         }
 
         private void ConfigureDataGridView()
@@ -406,13 +411,13 @@ namespace BarStockControl
             dgvRecipeItems.Columns.Clear();
             dgvRecipeItems.Columns.Add(new DataGridViewTextBoxColumn
             {
-                DataPropertyName = "ProductId",
+                DataPropertyName = "Producto",
                 HeaderText = "Producto",
                 Width = 200
             });
             dgvRecipeItems.Columns.Add(new DataGridViewTextBoxColumn
             {
-                DataPropertyName = "Quantity",
+                DataPropertyName = "Cantidad",
                 HeaderText = "Cantidad",
                 Width = 100,
                 DefaultCellStyle = new DataGridViewCellStyle { Format = "N2" }

@@ -8,8 +8,13 @@ namespace BarStockControl.Services
 {
     public class RoleService : BaseService<Role>
     {
+        private readonly PermissionService _permissionService;
+
         public RoleService(XmlDataManager xmlDataManager)
-            : base(xmlDataManager, "roles") { }
+            : base(xmlDataManager, "roles")
+        {
+            _permissionService = new PermissionService(xmlDataManager);
+        }
 
         protected override Role MapFromXml(XElement element)
         {
@@ -28,7 +33,9 @@ namespace BarStockControl.Services
 
         public Role ToEntity(RoleDto dto)
         {
-            return RoleMapper.ToEntity(dto);
+            var allRoles = GetAll();
+            var allPermissions = _permissionService.GetAll();
+            return RoleMapper.ToEntity(dto, allRoles, allPermissions);
         }
 
         public List<string> ValidateRole(Role role, bool isUpdate = false)
@@ -100,7 +107,7 @@ namespace BarStockControl.Services
         {
             try
             {
-                return GetAll().Select(RoleMapper.ToDto).ToList();
+                return GetAll().Select(ToDto).ToList();
             }
             catch (Exception ex)
             {

@@ -49,5 +49,10 @@ namespace BarStockControl.Services
         {
             return GetAll();
         }
+
+        public List<OrderDto> GetAllOrderDtos()
+        {
+            return GetAll().Select(OrderMapper.ToDto).ToList();
+        }
     }
 }

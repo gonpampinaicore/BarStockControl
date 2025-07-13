@@ -34,7 +34,7 @@ namespace BarStockControl.Forms
                 {
                     b.Id,
                     b.Date,
-                    Detail = b.Detail,
+                    b.Detail,
                     User = $"{b.User.FirstName} {b.User.LastName}",
                     b.FileName
                 }).ToList();
@@ -105,6 +105,7 @@ namespace BarStockControl.Forms
             }
 
             var fileName = dgvBackups.SelectedRows[0].Cells["FileName"].Value.ToString();
+            var date = dgvBackups.SelectedRows[0].Cells["Date"].Value.ToString();
 
             var confirm = MessageBox.Show($"¿Seguro que querés eliminar {fileName}?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (confirm == DialogResult.Yes)
@@ -112,7 +113,8 @@ namespace BarStockControl.Forms
                 try
                 {
                     _backupService.DeleteBackupFile(fileName);
-                    MessageBox.Show("Archivo eliminado.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _backupService.DeleteBackup(date);
+                    MessageBox.Show("Backup eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadBackups();
                 }
                 catch (Exception ex)
