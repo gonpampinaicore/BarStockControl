@@ -7,14 +7,23 @@ namespace BarStockControl
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.CheckBox chkActive;
-        private System.Windows.Forms.CheckedListBox clbPermissions;
-        private System.Windows.Forms.CheckedListBox clbRoles;
+        private System.Windows.Forms.TreeView tvRoleHierarchy;
         private System.Windows.Forms.DataGridView dgvRoles;
         private System.Windows.Forms.Button btnCreate;
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.CheckBox chkOnlyActive;
+        private System.Windows.Forms.Label lblName;
+        private System.Windows.Forms.Label lblDescription;
+        private System.Windows.Forms.Label lblHierarchy;
+        private System.Windows.Forms.Button btnAddRole;
+        private System.Windows.Forms.Button btnAddPermission;
+        private System.Windows.Forms.Button btnRemoveItem;
+        private System.Windows.Forms.Panel pnlForm;
+        private System.Windows.Forms.Panel pnlHierarchy;
+        private System.Windows.Forms.ToolTip toolTip1;
 
         protected override void Dispose(bool disposing)
         {
@@ -24,121 +33,233 @@ namespace BarStockControl
 
         private void InitializeComponent()
         {
-            this.txtName = new System.Windows.Forms.TextBox();
-            this.txtDescription = new System.Windows.Forms.TextBox();
-            this.chkActive = new System.Windows.Forms.CheckBox();
-            this.clbPermissions = new System.Windows.Forms.CheckedListBox();
-            this.clbRoles = new System.Windows.Forms.CheckedListBox();
-            this.dgvRoles = new System.Windows.Forms.DataGridView();
-            this.btnCreate = new System.Windows.Forms.Button();
-            this.btnUpdate = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.chkOnlyActive = new System.Windows.Forms.CheckBox();
-
-            ((System.ComponentModel.ISupportInitialize)(this.dgvRoles)).BeginInit();
-            this.SuspendLayout();
-
+            components = new System.ComponentModel.Container();
+            txtName = new TextBox();
+            txtDescription = new TextBox();
+            chkActive = new CheckBox();
+            tvRoleHierarchy = new TreeView();
+            dgvRoles = new DataGridView();
+            btnCreate = new Button();
+            btnUpdate = new Button();
+            btnDelete = new Button();
+            btnClear = new Button();
+            txtSearch = new TextBox();
+            chkOnlyActive = new CheckBox();
+            lblName = new Label();
+            lblDescription = new Label();
+            lblHierarchy = new Label();
+            btnAddRole = new Button();
+            btnAddPermission = new Button();
+            btnRemoveItem = new Button();
+            pnlForm = new Panel();
+            pnlHierarchy = new Panel();
+            toolTip1 = new ToolTip(components);
+            ((System.ComponentModel.ISupportInitialize)dgvRoles).BeginInit();
+            pnlForm.SuspendLayout();
+            pnlHierarchy.SuspendLayout();
+            SuspendLayout();
+            // 
             // txtName
-            this.txtName.Location = new System.Drawing.Point(20, 20);
-            this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(200, 23);
-            this.txtName.TabIndex = 0;
-
+            // 
+            txtName.Location = new Point(10, 30);
+            txtName.Name = "txtName";
+            txtName.Size = new Size(280, 23);
+            txtName.TabIndex = 1;
+            // 
             // txtDescription
-            this.txtDescription.Location = new System.Drawing.Point(20, 60);
-            this.txtDescription.Name = "txtDescription";
-            this.txtDescription.Size = new System.Drawing.Size(200, 23);
-            this.txtDescription.TabIndex = 1;
-
+            // 
+            txtDescription.Location = new Point(10, 80);
+            txtDescription.Name = "txtDescription";
+            txtDescription.Size = new Size(280, 23);
+            txtDescription.TabIndex = 3;
+            // 
             // chkActive
-            this.chkActive.Location = new System.Drawing.Point(20, 100);
-            this.chkActive.Name = "chkActive";
-            this.chkActive.Size = new System.Drawing.Size(80, 24);
-            this.chkActive.Text = "Activo";
-            this.chkActive.TabIndex = 2;
-
-            // clbPermissions
-            this.clbPermissions.FormattingEnabled = true;
-            this.clbPermissions.Location = new System.Drawing.Point(240, 20);
-            this.clbPermissions.Name = "clbPermissions";
-            this.clbPermissions.Size = new System.Drawing.Size(200, 130);
-            this.clbPermissions.TabIndex = 3;
-
-            // clbRoles
-            this.clbRoles.FormattingEnabled = true;
-            this.clbRoles.Location = new System.Drawing.Point(460, 20);
-            this.clbRoles.Name = "clbRoles";
-            this.clbRoles.Size = new System.Drawing.Size(200, 130);
-            this.clbRoles.TabIndex = 4;
-
+            // 
+            chkActive.AutoSize = true;
+            chkActive.Location = new Point(10, 115);
+            chkActive.Name = "chkActive";
+            chkActive.Size = new Size(60, 19);
+            chkActive.TabIndex = 4;
+            chkActive.Text = "Activo";
+            chkActive.UseVisualStyleBackColor = true;
+            // 
+            // tvRoleHierarchy
+            // 
+            tvRoleHierarchy.Location = new Point(10, 30);
+            tvRoleHierarchy.Name = "tvRoleHierarchy";
+            tvRoleHierarchy.Size = new Size(430, 200);
+            tvRoleHierarchy.TabIndex = 1;
+            // 
             // dgvRoles
-            this.dgvRoles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvRoles.Location = new System.Drawing.Point(20, 220);
-            this.dgvRoles.Name = "dgvRoles";
-            this.dgvRoles.RowTemplate.Height = 25;
-            this.dgvRoles.Size = new System.Drawing.Size(640, 150);
-            this.dgvRoles.TabIndex = 5;
-            this.dgvRoles.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvRoles_CellClick);
-
+            // 
+            dgvRoles.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvRoles.Location = new Point(12, 330);
+            dgvRoles.Name = "dgvRoles";
+            dgvRoles.Size = new Size(768, 200);
+            dgvRoles.TabIndex = 2;
+            dgvRoles.CellClick += dgvRoles_CellClick;
+            // 
             // btnCreate
-            this.btnCreate.Location = new System.Drawing.Point(20, 180);
-            this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(75, 23);
-            this.btnCreate.Text = "Crear";
-            this.btnCreate.TabIndex = 6;
-            this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
-
+            // 
+            btnCreate.Location = new Point(12, 540);
+            btnCreate.Name = "btnCreate";
+            btnCreate.Size = new Size(75, 23);
+            btnCreate.TabIndex = 3;
+            btnCreate.Text = "Crear";
+            btnCreate.UseVisualStyleBackColor = true;
+            btnCreate.Click += btnCreate_Click;
+            // 
             // btnUpdate
-            this.btnUpdate.Location = new System.Drawing.Point(110, 180);
-            this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Size = new System.Drawing.Size(75, 23);
-            this.btnUpdate.Text = "Actualizar";
-            this.btnUpdate.TabIndex = 7;
-            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
-
+            // 
+            btnUpdate.Location = new Point(100, 540);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(75, 23);
+            btnUpdate.TabIndex = 4;
+            btnUpdate.Text = "Actualizar";
+            btnUpdate.UseVisualStyleBackColor = true;
+            btnUpdate.Click += btnUpdate_Click;
+            // 
             // btnDelete
-            this.btnDelete.Location = new System.Drawing.Point(200, 180);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 23);
-            this.btnDelete.Text = "Eliminar";
-            this.btnDelete.TabIndex = 8;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-
+            // 
+            btnDelete.Location = new Point(188, 540);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(75, 23);
+            btnDelete.TabIndex = 5;
+            btnDelete.Text = "Eliminar";
+            btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
+            // 
+            // btnClear
+            // 
+            btnClear.Location = new Point(276, 540);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(75, 23);
+            btnClear.TabIndex = 6;
+            btnClear.Text = "Limpiar";
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click;
+            // 
             // txtSearch
-            this.txtSearch.Location = new System.Drawing.Point(20, 390);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(200, 23);
-            this.txtSearch.TabIndex = 9;
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
-
+            // 
+            txtSearch.Location = new Point(12, 301);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(200, 23);
+            txtSearch.TabIndex = 7;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
             // chkOnlyActive
-            this.chkOnlyActive.Location = new System.Drawing.Point(240, 390);
-            this.chkOnlyActive.Name = "chkOnlyActive";
-            this.chkOnlyActive.Size = new System.Drawing.Size(120, 24);
-            this.chkOnlyActive.Text = "Solo Activos";
-            this.chkOnlyActive.TabIndex = 10;
-            this.chkOnlyActive.CheckedChanged += new System.EventHandler(this.chkOnlyActive_CheckedChanged);
-
+            // 
+            chkOnlyActive.AutoSize = true;
+            chkOnlyActive.Location = new Point(221, 303);
+            chkOnlyActive.Name = "chkOnlyActive";
+            chkOnlyActive.Size = new Size(91, 19);
+            chkOnlyActive.TabIndex = 8;
+            chkOnlyActive.Text = "Solo Activos";
+            chkOnlyActive.UseVisualStyleBackColor = true;
+            chkOnlyActive.CheckedChanged += chkOnlyActive_CheckedChanged;
+            // 
+            // lblName
+            // 
+            lblName.AutoSize = true;
+            lblName.Location = new Point(10, 10);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(54, 15);
+            lblName.TabIndex = 0;
+            lblName.Text = "Nombre:";
+            // 
+            // lblDescription
+            // 
+            lblDescription.AutoSize = true;
+            lblDescription.Location = new Point(10, 60);
+            lblDescription.Name = "lblDescription";
+            lblDescription.Size = new Size(72, 15);
+            lblDescription.TabIndex = 2;
+            lblDescription.Text = "Descripción:";
+            // 
+            // lblHierarchy
+            // 
+            lblHierarchy.AutoSize = true;
+            lblHierarchy.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold);
+            lblHierarchy.Location = new Point(10, 10);
+            lblHierarchy.Name = "lblHierarchy";
+            lblHierarchy.Size = new Size(109, 13);
+            lblHierarchy.TabIndex = 0;
+            lblHierarchy.Text = "Jerarquía del Rol:";
+            // 
+            // btnAddRole
+            // 
+            btnAddRole.Location = new Point(10, 240);
+            btnAddRole.Name = "btnAddRole";
+            btnAddRole.Size = new Size(100, 23);
+            btnAddRole.TabIndex = 2;
+            btnAddRole.Text = "Agregar Rol";
+            btnAddRole.UseVisualStyleBackColor = true;
+            // 
+            // btnAddPermission
+            // 
+            btnAddPermission.Location = new Point(120, 240);
+            btnAddPermission.Name = "btnAddPermission";
+            btnAddPermission.Size = new Size(120, 23);
+            btnAddPermission.TabIndex = 3;
+            btnAddPermission.Text = "Agregar Permiso";
+            btnAddPermission.UseVisualStyleBackColor = true;
+            // 
+            // btnRemoveItem
+            // 
+            btnRemoveItem.Location = new Point(250, 240);
+            btnRemoveItem.Name = "btnRemoveItem";
+            btnRemoveItem.Size = new Size(100, 23);
+            btnRemoveItem.TabIndex = 4;
+            btnRemoveItem.Text = "Quitar Item";
+            btnRemoveItem.UseVisualStyleBackColor = true;
+            // 
+            // pnlForm
+            // 
+            pnlForm.BorderStyle = BorderStyle.FixedSingle;
+            pnlForm.Controls.Add(lblDescription);
+            pnlForm.Controls.Add(lblName);
+            pnlForm.Controls.Add(chkActive);
+            pnlForm.Controls.Add(txtDescription);
+            pnlForm.Controls.Add(txtName);
+            pnlForm.Location = new Point(12, 12);
+            pnlForm.Name = "pnlForm";
+            pnlForm.Size = new Size(300, 150);
+            pnlForm.TabIndex = 0;
+            // 
+            // pnlHierarchy
+            // 
+            pnlHierarchy.BorderStyle = BorderStyle.FixedSingle;
+            pnlHierarchy.Controls.Add(btnRemoveItem);
+            pnlHierarchy.Controls.Add(btnAddPermission);
+            pnlHierarchy.Controls.Add(btnAddRole);
+            pnlHierarchy.Controls.Add(lblHierarchy);
+            pnlHierarchy.Controls.Add(tvRoleHierarchy);
+            pnlHierarchy.Location = new Point(330, 12);
+            pnlHierarchy.Name = "pnlHierarchy";
+            pnlHierarchy.Size = new Size(450, 300);
+            pnlHierarchy.TabIndex = 1;
+            // 
             // RoleForm
-            this.ClientSize = new System.Drawing.Size(684, 441);
-            this.Controls.Add(this.txtName);
-            this.Controls.Add(this.txtDescription);
-            this.Controls.Add(this.chkActive);
-            this.Controls.Add(this.clbPermissions);
-            this.Controls.Add(this.clbRoles);
-            this.Controls.Add(this.dgvRoles);
-            this.Controls.Add(this.btnCreate);
-            this.Controls.Add(this.btnUpdate);
-            this.Controls.Add(this.btnDelete);
-            this.Controls.Add(this.txtSearch);
-            this.Controls.Add(this.chkOnlyActive);
-            this.Name = "RoleForm";
-            this.Text = "Gestión de Roles";
-
-            ((System.ComponentModel.ISupportInitialize)(this.dgvRoles)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            // 
+            ClientSize = new Size(792, 580);
+            Controls.Add(pnlForm);
+            Controls.Add(pnlHierarchy);
+            Controls.Add(dgvRoles);
+            Controls.Add(btnCreate);
+            Controls.Add(btnUpdate);
+            Controls.Add(btnDelete);
+            Controls.Add(btnClear);
+            Controls.Add(txtSearch);
+            Controls.Add(chkOnlyActive);
+            Name = "RoleForm";
+            Text = "Gestión de Roles";
+            ((System.ComponentModel.ISupportInitialize)dgvRoles).EndInit();
+            pnlForm.ResumeLayout(false);
+            pnlForm.PerformLayout();
+            pnlHierarchy.ResumeLayout(false);
+            pnlHierarchy.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
     }
 }

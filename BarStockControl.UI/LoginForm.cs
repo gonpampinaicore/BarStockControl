@@ -38,6 +38,7 @@ namespace BarStockControl.Forms
                     return;
                 }
 
+                _userService.BuildPermissions(user);
                 SessionContext.Instance.SetUser(user);
 
                 var mainMenu = new MainMenuForm();

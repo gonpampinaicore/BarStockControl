@@ -26,6 +26,11 @@ namespace BarStockControl.Models
         {
         }
 
+        //doesn't remove because permissions are static
+        public override void RemoveChild(Component c)
+        {
+        }
+
         //doesn't delete because permissions are static
         public override void ClearChildren()
         {

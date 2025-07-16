@@ -26,6 +26,11 @@ namespace BarStockControl.Models
             _children.Add(c);
         }
 
+        public override void RemoveChild(Component c)
+        {
+            _children.Remove(c);
+        }
+
         public override void ClearChildren()
         {
             _children = new List<Component>();

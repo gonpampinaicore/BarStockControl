@@ -10,6 +10,7 @@ namespace BarStockControl
     public partial class MainMenuForm : Form
     {
         private readonly PermissionService _permissionService;
+        private readonly ComponentService _componentService;
         private ToolTip toolTip;
         private bool _isClosingProgrammatically = false;
         private readonly OrderService _orderService;
@@ -22,13 +23,17 @@ namespace BarStockControl
             try
             {
                 InitializeComponent();
+                
                 var xmlDataManager = new XmlDataManager("Xml/data.xml");
                 _permissionService = new PermissionService(xmlDataManager);
+                _componentService = new ComponentService(xmlDataManager);
                 _orderService = new OrderService(xmlDataManager);
                 _drinkService = new DrinkService(xmlDataManager);
                 _orderItemService = new OrderItemService(xmlDataManager);
+                
                 ProfileToolTip();
                 _loggedUser = SessionContext.Instance.LoggedUser;
+                
                 LoadUserInfo();
                 LoadUserRoles();            
                 LoadAvailableCategories();
@@ -46,11 +51,8 @@ namespace BarStockControl
             try
             {
                 var user = _loggedUser;
-                var roleService = new RoleService(new XmlDataManager("Xml/data.xml"));
-
-                var roleNames = user.RoleIds
-                    .Select(id => roleService.GetById(id)?.Name)
-                    .Where(name => !string.IsNullOrWhiteSpace(name));
+                var allUserRoles = _componentService.GetAllUserRolesRecursive(user);
+                var roleNames = allUserRoles.Select(r => r.Name).Where(name => !string.IsNullOrWhiteSpace(name));
 
                 lblRole.Text = roleNames.Any()
                     ? $"Rol: {string.Join(", ", roleNames)}"
@@ -102,8 +104,9 @@ namespace BarStockControl
                 if (user == null)
                     return;
 
-                var roleIds = user.RoleIds;
-                var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
+                // Usar ComponentService para obtener permisos del usuario
+                var allUserPermissions = _componentService.GetAllUserPermissionsRecursive(user);
+                var permissionNames = allUserPermissions.Select(p => p.Name).ToList();
 
                 var categories = new (string Label, Func<Form> FormFactory, PermissionType[] RequiredPermissions)[]
                 {
@@ -125,9 +128,8 @@ namespace BarStockControl
                     }
                 }
 
-                AddCategoryButton("Estadísticas", () => new StatisticsForm(_orderService, _drinkService, _orderItemService));
-
-                if (flowLayoutPanel1.Controls.Count == 0)
+                var buttonsAdded = flowLayoutPanel1.Controls.Count;
+                if (buttonsAdded == 0)
                 {
                     var label = new Label();
                     label.Text = "No tienes acceso a ningún módulo del sistema.";
@@ -136,6 +138,8 @@ namespace BarStockControl
                     label.Padding = new Padding(10);
                     flowLayoutPanel1.Controls.Add(label);
                 }
+
+                AddCategoryButton("Estadísticas", () => new StatisticsForm(_orderService, _drinkService, _orderItemService));
             }
             catch (Exception ex)
             {

@@ -19,6 +19,8 @@ namespace BarStockControl.Models
         //method to clear children
         public abstract void ClearChildren();
 
+        public abstract void RemoveChild(Component c);
+
         //Permission property, simple permissions are static
         public PermissionType Permission { get; set; }
 

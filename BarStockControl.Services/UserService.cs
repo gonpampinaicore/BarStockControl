@@ -225,25 +225,8 @@ namespace BarStockControl.Services
         {
             if (user == null) return;
 
-            user.Permissions.Clear();
-
-            foreach (var roleId in user.RoleIds)
-            {
-                var role = _roleService.GetById(roleId);
-                if (role != null)
-                {
-                    user.Permissions.Add(role);
-                }
-            }
-
-            foreach (var permissionId in user.PermissionIds)
-            {
-                var permission = _permissionService.GetById(permissionId);
-                if (permission != null)
-                {
-                    user.Permissions.Add(permission);
-                }
-            }
+            var componentService = new ComponentService(_xmlDataManager);
+            componentService.BuildUserPermissions(user, user.RoleIds, user.PermissionIds);
         }
     }
 }

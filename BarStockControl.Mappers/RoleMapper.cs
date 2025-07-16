@@ -1,5 +1,6 @@
 ﻿using BarStockControl.DTOs;
 using BarStockControl.Models;
+using BarStockControl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -95,7 +96,7 @@ namespace BarStockControl.Mappers
             foreach (var child in role.Children)
             {
                 if (child is Permission perm)
-                {
+            {
                     element.Add(new XElement("rolePermissionRef", new XAttribute("ref", perm.Id)));
                 }
                 else if (child is Role subRole)

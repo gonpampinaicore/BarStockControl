@@ -15,14 +15,15 @@
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnClear;
-        private System.Windows.Forms.CheckedListBox clbRoles;
-        private System.Windows.Forms.CheckedListBox clbPermissions;
+        private System.Windows.Forms.TreeView tvUserRoles;
         private System.Windows.Forms.Label lblFirstName;
         private System.Windows.Forms.Label lblLastName;
         private System.Windows.Forms.Label lblEmail;
         private System.Windows.Forms.Label lblPassword;
-        private System.Windows.Forms.Label lblRoles;
-        private System.Windows.Forms.Label lblPermissions;
+        private System.Windows.Forms.Label lblUserRoles;
+        private System.Windows.Forms.Button btnAddPermission;
+        private System.Windows.Forms.Button btnRemovePermission;
+        private System.Windows.Forms.Button btnAddRole;
 
         protected override void Dispose(bool disposing)
         {
@@ -44,14 +45,15 @@
             btnUpdate = new Button();
             btnDelete = new Button();
             btnClear = new Button();
-            clbRoles = new CheckedListBox();
-            clbPermissions = new CheckedListBox();
+            tvUserRoles = new TreeView();
             lblFirstName = new Label();
             lblLastName = new Label();
             lblEmail = new Label();
             lblPassword = new Label();
-            lblRoles = new Label();
-            lblPermissions = new Label();
+            lblUserRoles = new Label();
+            btnAddPermission = new Button();
+            btnRemovePermission = new Button();
+            btnAddRole = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvUsers).BeginInit();
             SuspendLayout();
             // 
@@ -152,19 +154,12 @@
             btnClear.Text = "Limpiar";
             btnClear.Click += btnClear_Click;
             // 
-            // clbRoles
+            // tvUserRoles
             // 
-            clbRoles.Location = new Point(405, 215);
-            clbRoles.Name = "clbRoles";
-            clbRoles.Size = new Size(200, 94);
-            clbRoles.TabIndex = 6;
-            // 
-            // clbPermissions
-            // 
-            clbPermissions.Location = new Point(405, 340);
-            clbPermissions.Name = "clbPermissions";
-            clbPermissions.Size = new Size(200, 94);
-            clbPermissions.TabIndex = 7;
+            tvUserRoles.Location = new Point(384, 237);
+            tvUserRoles.Name = "tvUserRoles";
+            tvUserRoles.Size = new Size(236, 243);
+            tvUserRoles.TabIndex = 6;
             // 
             // lblFirstName
             // 
@@ -198,31 +193,52 @@
             lblPassword.TabIndex = 3;
             lblPassword.Text = "Contraseña";
             // 
-            // lblRoles
+            // lblUserRoles
             // 
-            lblRoles.Location = new Point(405, 184);
-            lblRoles.Name = "lblRoles";
-            lblRoles.Size = new Size(200, 15);
-            lblRoles.TabIndex = 4;
-            lblRoles.Text = "Roles";
+            lblUserRoles.Location = new Point(405, 184);
+            lblUserRoles.Name = "lblUserRoles";
+            lblUserRoles.Size = new Size(200, 15);
+            lblUserRoles.TabIndex = 4;
+            lblUserRoles.Text = "Jerarquía del Usuario";
             // 
-            // lblPermissions
+            // btnAddPermission
             // 
-            lblPermissions.Location = new Point(405, 322);
-            lblPermissions.Name = "lblPermissions";
-            lblPermissions.Size = new Size(200, 15);
-            lblPermissions.TabIndex = 5;
-            lblPermissions.Text = "Permisos";
+            btnAddPermission.Location = new Point(371, 509);
+            btnAddPermission.Name = "btnAddPermission";
+            btnAddPermission.Size = new Size(132, 23);
+            btnAddPermission.TabIndex = 12;
+            btnAddPermission.Text = "Agregar Permiso";
+            btnAddPermission.Click += btnAddPermission_Click;
+            // 
+            // btnRemovePermission
+            // 
+            btnRemovePermission.Location = new Point(509, 509);
+            btnRemovePermission.Name = "btnRemovePermission";
+            btnRemovePermission.Size = new Size(125, 23);
+            btnRemovePermission.TabIndex = 13;
+            btnRemovePermission.Text = "Quitar Elemento";
+            btnRemovePermission.Click += btnRemovePermission_Click;
+            // 
+            // btnAddRole
+            // 
+            btnAddRole.Location = new Point(405, 538);
+            btnAddRole.Name = "btnAddRole";
+            btnAddRole.Size = new Size(200, 23);
+            btnAddRole.TabIndex = 14;
+            btnAddRole.Text = "Agregar Rol";
+            btnAddRole.Click += btnAddRole_Click;
             // 
             // UserForm
             // 
-            ClientSize = new Size(700, 460);
+            ClientSize = new Size(700, 586);
             Controls.Add(lblFirstName);
             Controls.Add(lblLastName);
             Controls.Add(lblEmail);
             Controls.Add(lblPassword);
-            Controls.Add(lblRoles);
-            Controls.Add(lblPermissions);
+            Controls.Add(lblUserRoles);
+            Controls.Add(btnAddPermission);
+            Controls.Add(btnRemovePermission);
+            Controls.Add(btnAddRole);
             Controls.Add(dgvUsers);
             Controls.Add(txtSearch);
             Controls.Add(chkOnlyActive);
@@ -231,8 +247,7 @@
             Controls.Add(txtEmail);
             Controls.Add(txtPassword);
             Controls.Add(chkActive);
-            Controls.Add(clbRoles);
-            Controls.Add(clbPermissions);
+            Controls.Add(tvUserRoles);
             Controls.Add(btnCreate);
             Controls.Add(btnUpdate);
             Controls.Add(btnDelete);

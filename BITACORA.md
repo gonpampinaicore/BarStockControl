@@ -96,3 +96,15 @@ Este archivo registra, en orden cronológico, los cambios realizados en el proye
 - [2024-07-10] Se corrigió el filtrado en LoadPieChart para que el total de tragos vendidos respete el selector de eventos, eliminando el filtro de mes actual y manteniendo solo el filtro por evento seleccionado. Se actualizó el título del gráfico para indicar si muestra datos de un evento específico o de todos los eventos.
 
 - [2024-07-10] En LiveStationForm ahora se muestra el stock de todos los productos de la estación al abrir el formulario. Al buscar una orden, si la cantidad de tragos de algún ítem supera el stock estimado, se muestra un mensaje y se limpia la orden cargada. Solo se puede preparar la orden si está en estado Pagada. Los botones de preparar y entregar se habilitan o deshabilitan según corresponda para evitar errores de operación.
+
+- [2024-07-15] Se corrigió un problema crítico de recursión infinita en RoleService.MapFromXml que causaba que la aplicación se colgara al cargar roles con jerarquía. Se modificó el método para cargar solo IDs sin objetos completos, evitando llamadas recursivas a GetById.
+
+- [2024-07-15] Se actualizó MainMenuForm para usar ComponentService en lugar del método problemático GetPermissionNamesByRoleIds del PermissionService. Se agregó ComponentService como dependencia y se modificaron LoadAvailableCategories y LoadUserRoles para usar los métodos recursivos del ComponentService.
+
+- [2024-07-15] Se corrigió el problema de que no se mostraban botones en MainMenuForm al agregar la llamada a BuildPermissions en LoginForm después de la autenticación exitosa. Esto asegura que los permisos del usuario se construyan correctamente antes de mostrar el menú principal.
+
+- [2024-07-15] Se eliminaron todos los mensajes de debug del flujo de login y MainMenuForm para que la aplicación funcione normalmente sin interrupciones.
+
+- [2024-07-15] Se corrigió el problema de carga de permisos en la jerarquía de roles. Se creó el método GetByIdWithHierarchy en RoleService que carga roles con sus permisos reales (nombres como "UserFullAccess") en lugar de nombres temporales ("Permiso 1"). Se actualizó ComponentService para usar este método y construir correctamente la jerarquía completa de permisos del usuario.
+
+- [2024-07-15] Se resolvió el problema de que no se mostraban botones en MainMenuForm. El problema era que los permisos se cargaban con nombres temporales que no coincidían con los PermissionType requeridos. Ahora los permisos se cargan con sus nombres reales y la comparación funciona correctamente, mostrando los botones correspondientes según los permisos del usuario.

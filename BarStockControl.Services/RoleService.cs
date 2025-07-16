@@ -18,7 +18,15 @@ namespace BarStockControl.Services
 
         protected override Role MapFromXml(XElement element)
         {
-            return RoleMapper.FromXml(element);
+            var role = new Role
+            {
+                Id = int.Parse(element.Attribute("id")?.Value),
+                Name = element.Attribute("name")?.Value,
+                Description = element.Attribute("description")?.Value,
+                IsActive = bool.Parse(element.Attribute("isActive")?.Value ?? "true")
+            };
+
+            return role;
         }
 
         protected override XElement MapToXml(Role role)
@@ -35,7 +43,12 @@ namespace BarStockControl.Services
         {
             var allRoles = GetAll();
             var allPermissions = _permissionService.GetAll();
-            return RoleMapper.ToEntity(dto, allRoles, allPermissions);
+            var role = RoleMapper.ToEntity(dto, allRoles, allPermissions);
+            
+            var componentService = new ComponentService(_xmlDataManager);
+            componentService.ValidateComponentStructure(role);
+            
+            return role;
         }
 
         public List<string> ValidateRole(Role role, bool isUpdate = false)
@@ -124,6 +137,73 @@ namespace BarStockControl.Services
         {
             var role = GetAll().FirstOrDefault(r => r.Name == roleName);
             return role?.Id;
+        }
+
+        public (List<int> RoleIds, List<int> PermissionIds) GetComponentIds(Role role)
+        {
+            if (role == null)
+                return (new List<int>(), new List<int>());
+
+            var componentService = new ComponentService(_xmlDataManager);
+            return componentService.GetIdsFromComponent(role);
+        }
+
+        public RoleDto ToDtoWithComponentService(Role role)
+        {
+            if (role == null) return null;
+
+            var (roleIds, permissionIds) = GetComponentIds(role);
+
+            return new RoleDto
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Description = role.Description,
+                IsActive = role.IsActive,
+                PermissionIds = permissionIds,
+                RoleIds = roleIds
+            };
+        }
+
+        public Role GetByIdWithHierarchy(int id)
+        {
+            var role = GetById(id);
+            if (role == null) return null;
+
+            var xml = _xmlDataManager.LoadDocument();
+            var roleElement = xml.Root.Element("roles")?.Elements("role")
+                .FirstOrDefault(r => int.Parse(r.Attribute("id")?.Value ?? "0") == id);
+
+            if (roleElement != null)
+            {
+                role.ClearChildren();
+
+                foreach (var permRef in roleElement.Elements("rolePermissionRef"))
+                {
+                    if (int.TryParse(permRef.Attribute("ref")?.Value, out int permId))
+                    {
+                        var permission = _permissionService.GetById(permId);
+                        if (permission != null)
+                        {
+                            role.AddChild(permission);
+                        }
+                    }
+                }
+
+                foreach (var roleRef in roleElement.Elements("roleRef"))
+                {
+                    if (int.TryParse(roleRef.Attribute("ref")?.Value, out int subRoleId))
+                    {
+                        var subRole = GetByIdWithHierarchy(subRoleId);
+                        if (subRole != null)
+                        {
+                            role.AddChild(subRole);
+                        }
+                    }
+                }
+            }
+
+            return role;
         }
     }
 }
