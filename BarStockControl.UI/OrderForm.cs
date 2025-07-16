@@ -5,11 +5,11 @@ using System.Windows.Forms;
 using BarStockControl.DTOs;
 using BarStockControl.Models;
 using BarStockControl.Services;
-using BarStockControl.Forms.Invoices;
+using BarStockControl.UI;
 using BarStockControl.Models.Enums;
 using BarStockControl.Core;
 
-namespace BarStockControl.Forms.Orders
+namespace BarStockControl.UI
 {
     public partial class OrderForm : Form
     {

@@ -16,7 +16,7 @@ using QuestPDF.Elements;
 using QuestPDF.Previewer;
 using System.IO;
 
-namespace BarStockControl.Forms.Invoices
+namespace BarStockControl.UI
 {
     public partial class InvoiceForm : Form
     {

@@ -7,7 +7,7 @@ using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class RecipeForm : Form
     {

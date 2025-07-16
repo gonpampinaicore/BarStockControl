@@ -1,4 +1,4 @@
-namespace BarStockControl.Forms.Drinks
+namespace BarStockControl.UI
 {
     partial class DrinkForm
     {

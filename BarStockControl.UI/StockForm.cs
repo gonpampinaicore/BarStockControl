@@ -8,7 +8,7 @@ using BarStockControl.Data;
 using BarStockControl.Mappers;
 using static System.Collections.Specialized.BitVector32;
 
-namespace BarStockControl.Forms
+namespace BarStockControl.UI
 {
     public partial class StockForm : Form
     {

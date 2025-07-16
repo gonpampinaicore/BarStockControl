@@ -1,5 +1,5 @@
 ﻿
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     partial class RoleForm
     {

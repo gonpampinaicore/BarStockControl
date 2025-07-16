@@ -6,7 +6,7 @@ using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.DTOs;
 
-namespace BarStockControl.Forms
+namespace BarStockControl.UI
 {
     public partial class UserRoleSelectionForm : Form
     {

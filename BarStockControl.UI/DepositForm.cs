@@ -9,7 +9,7 @@ using BarStockControl.Services;
 using BarStockControl.Data;
 using System.Xml.Linq;
 
-namespace BarStockControl.Forms.Deposits
+namespace BarStockControl.UI
 {
     public partial class DepositForm : Form
     {

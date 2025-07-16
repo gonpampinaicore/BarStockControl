@@ -1,11 +1,10 @@
 using BarStockControl.Core;
-using BarStockControl.Forms.Events;
-using BarStockControl.Forms.Assignments;
+using BarStockControl.UI;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Models.Enums;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class EventManagementForm : Form
     {

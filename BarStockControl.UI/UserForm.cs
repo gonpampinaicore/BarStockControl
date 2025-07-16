@@ -7,7 +7,7 @@ using BarStockControl.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Models;
 
-namespace BarStockControl.Forms
+namespace BarStockControl.UI
 {
     public partial class UserForm : Form
     {

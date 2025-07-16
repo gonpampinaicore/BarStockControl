@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Orders
+﻿namespace BarStockControl.UI
 {
     partial class OrderForm
     {

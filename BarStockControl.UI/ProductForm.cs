@@ -10,7 +10,7 @@ using BarStockControl.Mappers;
 using BarStockControl.Models.Enums;
 using System.Xml.Linq;
 
-namespace BarStockControl.Forms.Products
+namespace BarStockControl.UI
 {
     public partial class ProductForm : Form
     {

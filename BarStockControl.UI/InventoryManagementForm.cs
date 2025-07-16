@@ -1,16 +1,12 @@
 using System;
 using System.Windows.Forms;
 using BarStockControl.Core;
-using BarStockControl.Forms.Products;
-using BarStockControl.Forms;
-using BarStockControl.Forms.StockMovements;
-using BarStockControl.Forms.Deposits;
-using BarStockControl.Forms.Drinks;
+using BarStockControl.UI;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Models.Enums;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class InventoryManagementForm : Form
     {

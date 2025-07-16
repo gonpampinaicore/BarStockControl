@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Events
+﻿namespace BarStockControl.UI
 {
     partial class EventForm
     {

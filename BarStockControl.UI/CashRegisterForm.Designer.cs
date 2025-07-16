@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.CashRegisters
+﻿namespace BarStockControl.UI
 {
     partial class CashRegisterForm
     {

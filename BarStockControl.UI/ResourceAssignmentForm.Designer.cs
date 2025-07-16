@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Assignments
+﻿namespace BarStockControl.UI
 {
     partial class ResourceAssignmentForm
     {

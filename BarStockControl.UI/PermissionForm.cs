@@ -4,7 +4,7 @@ using BarStockControl.Data;
 using BarStockControl.Mappers;
 using BarStockControl.DTOs;
 
-namespace BarStockControl.Forms.Permissions
+namespace BarStockControl.UI
 {
     public partial class PermissionForm : Form
     {

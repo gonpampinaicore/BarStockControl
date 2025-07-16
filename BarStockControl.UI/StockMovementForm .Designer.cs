@@ -1,5 +1,5 @@
 ﻿// StockMovementForm.Designer.cs
-namespace BarStockControl.Forms.StockMovements
+namespace BarStockControl.UI
 {
     partial class StockMovementForm
     {

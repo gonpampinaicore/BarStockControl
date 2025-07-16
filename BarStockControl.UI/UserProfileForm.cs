@@ -1,10 +1,10 @@
 using BarStockControl.Core;
 using BarStockControl.Services;
 using BarStockControl.Data;
-using BarStockControl.Forms;
+using BarStockControl.UI;
 using BarStockControl.DTOs;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class UserProfileForm : Form
     {

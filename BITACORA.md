@@ -62,8 +62,9 @@ Este archivo registra, en orden cronológico, los cambios realizados en el proye
 
 - 2024-07-08: Se agregó el formulario LiveEvent al EventManagementForm para que sea accesible desde la gestión de eventos. El botón "Evento Vivo" requiere el permiso "Event_full_access" y permite acceder al formulario de eventos en vivo.
 
+- [2024-12-19] Se unificaron todos los namespaces de la UI a `BarStockControl.UI` para mantener coherencia en la arquitectura. Se cambiaron todos los formularios que usaban `BarStockControl.Forms`, `BarStockControl.Forms.[Subcategorías]` y `BarStockControl` sin subcategoría para que usen únicamente `BarStockControl.UI`. Se actualizaron todas las referencias `using` correspondientes. El proyecto compila correctamente y ahora tiene una estructura de namespaces consistente y profesional.
+
 **PENDIENTE:**
-- Unificar el namespace de todos los formularios a BarStockControl.UI para mantener coherencia en la arquitectura. Actualmente algunos formularios usan BarStockControl y otros BarStockControl.UI, lo que puede causar problemas de referencia y organización.
 
 - 2024-07-09: Se refactorizó completamente el alta de asignaciones de recursos. Se eliminó el método AddFromDto y se implementó CreateAssignment en ResourceAssignmentService, que valida, asigna id único y devuelve errores de validación. Ahora ResourceAssignmentForm y todo el flujo de asignaciones usan este método, garantizando ids válidos y mensajes claros de error. El sistema es más robusto y coherente con el resto de la arquitectura.
 

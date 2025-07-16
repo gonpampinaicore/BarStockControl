@@ -2,7 +2,7 @@
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace BarStockControl.Forms.Invoices
+namespace BarStockControl.UI
 {
     partial class InvoiceForm
     {

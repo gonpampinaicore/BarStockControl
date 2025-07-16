@@ -6,7 +6,7 @@ using BarStockControl.Models;
 using BarStockControl.Services;
 using BarStockControl.Data;
 
-namespace BarStockControl.Forms.Bars
+namespace BarStockControl.UI
 {
     public partial class BarForm : Form
     {

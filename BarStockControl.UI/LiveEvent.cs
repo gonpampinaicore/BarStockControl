@@ -5,7 +5,7 @@ using BarStockControl.Services;
 using System.Data;
 using BarStockControl.Models.Enums;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class LiveEvent : Form
     {
@@ -117,7 +117,7 @@ namespace BarStockControl
             switch (assignment.ResourceType)
             {
                 case "deposit":
-                    var stockMovementForm = new BarStockControl.Forms.StockMovements.StockMovementForm();
+                    var stockMovementForm = new BarStockControl.UI.StockMovementForm();
                     stockMovementForm.ShowDialog();
                     break;
                 case "bar":
@@ -135,7 +135,7 @@ namespace BarStockControl
                     var orderItemService = new OrderItemService(dataManager);
                     var eventService = new EventService(dataManager);
                     var userService = new UserService(dataManager);
-                    var orderForm = new BarStockControl.Forms.Orders.OrderForm(drinkService, orderService, orderItemService, eventService, userService, _currentEvent);
+                    var orderForm = new BarStockControl.UI.OrderForm(drinkService, orderService, orderItemService, eventService, userService, _currentEvent);
                     orderForm.ShowDialog();
                     break;
                 default:

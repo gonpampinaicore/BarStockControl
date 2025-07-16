@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Stations
+﻿namespace BarStockControl.UI
 {
     partial class StationForm
     {

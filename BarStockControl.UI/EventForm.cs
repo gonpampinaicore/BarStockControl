@@ -10,7 +10,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
-namespace BarStockControl.Forms.Events
+namespace BarStockControl.UI
 {
     public partial class EventForm : Form
     {

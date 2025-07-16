@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Permissions
+﻿namespace BarStockControl.UI
 {
     partial class PermissionForm
     {

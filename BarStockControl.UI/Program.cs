@@ -1,6 +1,6 @@
-using BarStockControl.Forms;
+using BarStockControl.UI;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     internal static class Program
     {

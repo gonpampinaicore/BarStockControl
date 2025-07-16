@@ -1,12 +1,10 @@
 using BarStockControl.Core;
-using BarStockControl.Forms.Bars;
-using BarStockControl.Forms.Stations;
-using BarStockControl.Forms.CashRegisters;
+using BarStockControl.UI;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Models.Enums;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class InfrastructureManagementForm : Form
     {

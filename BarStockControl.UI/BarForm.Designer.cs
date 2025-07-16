@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Bars
+﻿namespace BarStockControl.UI
 {
     partial class BarForm
     {

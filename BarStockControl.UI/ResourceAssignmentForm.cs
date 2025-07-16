@@ -2,7 +2,7 @@
 using BarStockControl.DTOs;
 using BarStockControl.Services;
 
-namespace BarStockControl.Forms.Assignments
+namespace BarStockControl.UI
 {
     public partial class ResourceAssignmentForm : Form
     {

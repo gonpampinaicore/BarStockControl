@@ -7,7 +7,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
-namespace BarStockControl.Forms.CashRegisters
+namespace BarStockControl.UI
 {
     public partial class CashRegisterForm : Form
     {

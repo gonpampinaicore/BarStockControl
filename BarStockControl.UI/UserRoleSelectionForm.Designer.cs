@@ -1,4 +1,4 @@
-namespace BarStockControl.Forms
+namespace BarStockControl.UI
 {
     partial class UserRoleSelectionForm
     {

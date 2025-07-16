@@ -1,4 +1,4 @@
-﻿namespace BarStockControl.Forms.Deposits
+﻿namespace BarStockControl.UI
 {
     partial class DepositForm
     {

@@ -3,7 +3,7 @@ using BarStockControl.Core;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
 
-namespace BarStockControl.Forms
+namespace BarStockControl.UI
 {
     public partial class BackupForm : Form
     {

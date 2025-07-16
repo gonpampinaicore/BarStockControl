@@ -3,7 +3,7 @@ using BarStockControl.Core;
 using BarStockControl.Models;
 using BarStockControl.Data;
 
-namespace BarStockControl.Forms
+namespace BarStockControl.UI
 {
     public partial class LoginForm : Form
     {

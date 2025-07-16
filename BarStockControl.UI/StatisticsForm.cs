@@ -7,7 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using BarStockControl.Mappers;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class StatisticsForm : Form
     {

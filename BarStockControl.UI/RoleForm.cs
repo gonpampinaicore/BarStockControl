@@ -3,14 +3,14 @@ using BarStockControl.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Services;
 using BarStockControl.Models;
-using BarStockControl.Forms;
+using BarStockControl.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace BarStockControl
+namespace BarStockControl.UI
 {
     public partial class RoleForm : Form
     {
