@@ -4,19 +4,9 @@ namespace BarStockControl.Core
 {
     public class SessionContext
     {
-        private static SessionContext _instance;
-
-        public static SessionContext Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new SessionContext();
-                return _instance;
-            }
-        }
-
-        public User LoggedUser { get; private set; }
+        private static readonly SessionContext _instance = new SessionContext();
+        public static SessionContext Instance => _instance;
+        public User? LoggedUser { get; private set; } = null;
 
         public void SetUser(User user)
         {

@@ -266,8 +266,9 @@ namespace BarStockControl.UI
 
         private void LimpiarOrden()
         {
-            _currentOrder = null;
-            _orderItems = null;
+            _currentOrder = new OrderDto();
+            _orderItems = new List<OrderItemDto>();
+            _selectedDrink = new DrinkDto();
             dgvOrderItems.DataSource = null;
             dgvRecipeItems.DataSource = null;
             btnPreparar.Enabled = false;

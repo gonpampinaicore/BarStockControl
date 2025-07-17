@@ -15,8 +15,8 @@ namespace BarStockControl.UI
         private readonly RoleService _roleService;
         private readonly PermissionService _permissionService;
         private readonly ComponentService _componentService;
-        private UserDto _selectedUser;
-        private List<PermissionDto> _allPermissions;
+        private UserDto _selectedUser = new UserDto();
+        private List<PermissionDto> _allPermissions = new List<PermissionDto>();
 
         public UserForm()
         {
@@ -384,7 +384,7 @@ namespace BarStockControl.UI
             txtEmail.Clear();
             txtPassword.Clear();
             chkActive.Checked = true;
-            _selectedUser = null;
+            _selectedUser = new UserDto();
 
             tvUserRoles.Nodes.Clear();
         }

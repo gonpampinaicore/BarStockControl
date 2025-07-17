@@ -5,13 +5,14 @@ using System.Windows.Forms;
 using BarStockControl.Models;
 using BarStockControl.Services;
 using BarStockControl.Data;
+using BarStockControl.DTOs;
 
 namespace BarStockControl.UI
 {
     public partial class BarForm : Form
     {
         private readonly BarService _barService;
-        private Bar _selectedBar;
+        private Bar _selectedBar = new Bar();
 
         public BarForm()
         {
@@ -42,9 +43,9 @@ namespace BarStockControl.UI
                     b.Active
                 }).ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar barras: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar barras.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -62,7 +63,7 @@ namespace BarStockControl.UI
                         LoadBarToForm();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -100,7 +101,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadBars();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -128,7 +129,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadBars();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -152,7 +153,7 @@ namespace BarStockControl.UI
                     LoadBars();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -162,7 +163,7 @@ namespace BarStockControl.UI
         {
             txtName.Clear();
             chkActive.Checked = true;
-            _selectedBar = null;
+            _selectedBar = new Bar();
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)

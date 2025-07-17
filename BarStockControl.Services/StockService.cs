@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using BarStockControl.Models;
 using BarStockControl.Mappers;
 using BarStockControl.Data;
+using BarStockControl.DTOs;
 
 namespace BarStockControl.Services
 {
@@ -81,6 +82,34 @@ namespace BarStockControl.Services
         public List<Stock> Search(Func<Stock, bool> predicate)
         {
             return GetAll().Where(predicate).ToList();
+        }
+
+        public List<StockDto> GetAllStockDtos()
+        {
+            return GetAll().Select(StockMapper.ToDto).ToList();
+        }
+
+        public StockDto GetByIdDto(int id)
+        {
+            var stock = GetById(id);
+            return StockMapper.ToDto(stock);
+        }
+
+        public List<string> CreateStock(StockDto dto)
+        {
+            var entity = StockMapper.ToEntity(dto);
+            return CreateStock(entity);
+        }
+
+        public List<string> UpdateStock(StockDto dto)
+        {
+            var entity = StockMapper.ToEntity(dto);
+            return UpdateStock(entity);
+        }
+
+        public void DeleteStockDto(int id)
+        {
+            DeleteStock(id);
         }
     }
 }

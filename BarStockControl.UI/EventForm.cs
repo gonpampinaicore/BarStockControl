@@ -15,7 +15,7 @@ namespace BarStockControl.UI
     public partial class EventForm : Form
     {
         private readonly EventService _eventService;
-        private EventDto _selectedEventDto;
+        private EventDto _selectedEventDto = new EventDto();
 
         public EventForm()
         {
@@ -50,9 +50,9 @@ namespace BarStockControl.UI
                     columna.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar eventos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar eventos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -76,7 +76,7 @@ namespace BarStockControl.UI
                     chkActive.Checked = _selectedEventDto?.IsActive ?? true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -123,7 +123,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadEvents();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -158,7 +158,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadEvents();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -188,7 +188,7 @@ namespace BarStockControl.UI
                     LoadEvents();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -207,7 +207,7 @@ namespace BarStockControl.UI
             chkActive.Checked = true;
             dtpStart.Value = DateTime.Now;
             dtpEnd.Value = DateTime.Now;
-            _selectedEventDto = null;
+            _selectedEventDto = new EventDto();
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)

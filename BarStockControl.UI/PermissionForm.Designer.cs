@@ -19,6 +19,7 @@
         private System.Windows.Forms.Button btnGoToRoles;
         private System.Windows.Forms.Button btnGoToMainMenu;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             dgvPermissions = new DataGridView();

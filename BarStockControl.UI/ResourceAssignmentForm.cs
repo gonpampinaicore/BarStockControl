@@ -47,11 +47,12 @@ namespace BarStockControl.UI
                 cmbEvent.DataSource = events;
                 cmbEvent.DisplayMember = "Name";
                 cmbEvent.ValueMember = "Id";
-                cmbEvent.SelectedIndex = -1;
+                if (events.Count > 0)
+                    cmbEvent.SelectedIndex = 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar eventos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar eventos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -70,13 +71,13 @@ namespace BarStockControl.UI
                     Id = u.Id,
                     FullName = $"{u.FirstName} {u.LastName}"
                 }).ToList();
-                cmbUser.DataSource = userList;
+                cmbUser.DataSource = userList.Count > 0 ? userList : new List<object>();
                 cmbUser.DisplayMember = "FullName";
                 cmbUser.ValueMember = "Id";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar usuarios: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar usuarios.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -91,9 +92,9 @@ namespace BarStockControl.UI
                 cmbResourceType.Items.Add("station");
                 cmbResourceType.Items.Add("cash_register");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar tipos de recursos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar tipos de recursos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -188,7 +189,7 @@ namespace BarStockControl.UI
                     RefreshAssignmentGrid();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -213,10 +214,10 @@ namespace BarStockControl.UI
                 RefreshAssignmentGrid();
 
                 cmbResourceType.SelectedIndex = -1;
-                cmbResource.DataSource = null;
+                cmbResource.DataSource = new List<object>();
                 cmbUser.SelectedIndex = -1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -251,9 +252,9 @@ namespace BarStockControl.UI
             {
                 cmbEvent.SelectedIndexChanged += cmbEvent_SelectedIndexChanged;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al configurar eventos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al configurar eventos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -268,9 +269,9 @@ namespace BarStockControl.UI
                 if (selectedEvent == null) return;
                 LoadExistingAssignments(selectedEvent.Id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar asignaciones del evento: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar asignaciones del evento.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -284,9 +285,9 @@ namespace BarStockControl.UI
                 _assignments.AddRange(existingAssignments);
                 RefreshAssignmentGrid();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar asignaciones existentes: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar asignaciones existentes.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -329,7 +330,7 @@ namespace BarStockControl.UI
                     LoadExistingAssignments(selectedEvent.Id);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

@@ -33,6 +33,7 @@
         private System.Windows.Forms.Label lblQualityCategory;
         private System.Windows.Forms.Label lblIsImported;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             dgvProducts = new DataGridView();

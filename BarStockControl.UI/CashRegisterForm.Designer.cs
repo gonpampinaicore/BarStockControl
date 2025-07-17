@@ -16,6 +16,7 @@
         private System.Windows.Forms.Label lblName;
         private System.Windows.Forms.Label lblBar;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             dgvCashRegisters = new System.Windows.Forms.DataGridView();

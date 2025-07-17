@@ -17,257 +17,303 @@ namespace BarStockControl.UI
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            
-            // Controles principales
-            this.dgvDrinks = new System.Windows.Forms.DataGridView();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.txtName = new System.Windows.Forms.TextBox();
-            this.numPrice = new System.Windows.Forms.NumericUpDown();
-            this.chkIsComposed = new System.Windows.Forms.CheckBox();
-            this.btnCreate = new System.Windows.Forms.Button();
-            this.btnUpdate = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.lblSearch = new System.Windows.Forms.Label();
-            this.lblName = new System.Windows.Forms.Label();
-            this.lblPrice = new System.Windows.Forms.Label();
-            this.lblEstimatedCost = new System.Windows.Forms.Label();
-
-            // Panel de receta
-            this.pnlRecipe = new System.Windows.Forms.Panel();
-            this.dgvRecipeItems = new System.Windows.Forms.DataGridView();
-            this.cboProduct = new System.Windows.Forms.ComboBox();
-            this.numQuantity = new System.Windows.Forms.NumericUpDown();
-            this.btnAddProduct = new System.Windows.Forms.Button();
-            this.btnRemoveProduct = new System.Windows.Forms.Button();
-            this.lblProduct = new System.Windows.Forms.Label();
-            this.lblQuantity = new System.Windows.Forms.Label();
-            this.btnCalculateEstimatedCost = new System.Windows.Forms.Button();
-
-            // Configuración de controles
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDrinks)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numPrice)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvRecipeItems)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numQuantity)).BeginInit();
-            this.pnlRecipe.SuspendLayout();
-            this.SuspendLayout();
-
+            dgvDrinks = new DataGridView();
+            txtSearch = new TextBox();
+            txtName = new TextBox();
+            numPrice = new NumericUpDown();
+            chkIsComposed = new CheckBox();
+            btnCreate = new Button();
+            btnUpdate = new Button();
+            btnDelete = new Button();
+            lblSearch = new Label();
+            lblName = new Label();
+            lblPrice = new Label();
+            lblEstimatedCost = new Label();
+            pnlRecipe = new Panel();
+            dgvRecipeItems = new DataGridView();
+            cboProduct = new ComboBox();
+            numQuantity = new NumericUpDown();
+            btnAddProduct = new Button();
+            btnRemoveProduct = new Button();
+            lblProduct = new Label();
+            lblQuantity = new Label();
+            btnCalculateEstimatedCost = new Button();
+            btnClear = new Button();
+            ((System.ComponentModel.ISupportInitialize)dgvDrinks).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numPrice).BeginInit();
+            pnlRecipe.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvRecipeItems).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numQuantity).BeginInit();
+            SuspendLayout();
+            // 
             // dgvDrinks
-            this.dgvDrinks.AllowUserToAddRows = false;
-            this.dgvDrinks.AllowUserToDeleteRows = false;
-            this.dgvDrinks.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvDrinks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDrinks.Location = new System.Drawing.Point(12, 40);
-            this.dgvDrinks.MultiSelect = false;
-            this.dgvDrinks.Name = "dgvDrinks";
-            this.dgvDrinks.ReadOnly = true;
-            this.dgvDrinks.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvDrinks.Size = new System.Drawing.Size(500, 200);
-            this.dgvDrinks.TabIndex = 0;
-
+            // 
+            dgvDrinks.AllowUserToAddRows = false;
+            dgvDrinks.AllowUserToDeleteRows = false;
+            dgvDrinks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvDrinks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvDrinks.Location = new Point(14, 46);
+            dgvDrinks.Margin = new Padding(4, 3, 4, 3);
+            dgvDrinks.MultiSelect = false;
+            dgvDrinks.Name = "dgvDrinks";
+            dgvDrinks.ReadOnly = true;
+            dgvDrinks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDrinks.Size = new Size(583, 231);
+            dgvDrinks.TabIndex = 0;
+            // 
             // txtSearch
-            this.txtSearch.Location = new System.Drawing.Point(70, 12);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(200, 20);
-            this.txtSearch.TabIndex = 1;
-
-            // lblSearch
-            this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(12, 15);
-            this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(43, 13);
-            this.lblSearch.TabIndex = 2;
-            this.lblSearch.Text = "Buscar:";
-
+            // 
+            txtSearch.Location = new Point(82, 14);
+            txtSearch.Margin = new Padding(4, 3, 4, 3);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(233, 23);
+            txtSearch.TabIndex = 1;
+            // 
             // txtName
-            this.txtName.Location = new System.Drawing.Point(70, 250);
-            this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(200, 20);
-            this.txtName.TabIndex = 3;
-
-            // lblName
-            this.lblName.AutoSize = true;
-            this.lblName.Location = new System.Drawing.Point(12, 253);
-            this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(47, 13);
-            this.lblName.TabIndex = 4;
-            this.lblName.Text = "Nombre:";
-
+            // 
+            txtName.Location = new Point(82, 288);
+            txtName.Margin = new Padding(4, 3, 4, 3);
+            txtName.Name = "txtName";
+            txtName.Size = new Size(233, 23);
+            txtName.TabIndex = 3;
+            // 
             // numPrice
-            this.numPrice.DecimalPlaces = 2;
-            this.numPrice.Location = new System.Drawing.Point(70, 280);
-            this.numPrice.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
-            this.numPrice.Name = "numPrice";
-            this.numPrice.Size = new System.Drawing.Size(120, 20);
-            this.numPrice.TabIndex = 5;
-
-            // lblPrice
-            this.lblPrice.AutoSize = true;
-            this.lblPrice.Location = new System.Drawing.Point(12, 282);
-            this.lblPrice.Name = "lblPrice";
-            this.lblPrice.Size = new System.Drawing.Size(40, 13);
-            this.lblPrice.TabIndex = 6;
-            this.lblPrice.Text = "Precio:";
-
+            // 
+            numPrice.DecimalPlaces = 2;
+            numPrice.Location = new Point(82, 323);
+            numPrice.Margin = new Padding(4, 3, 4, 3);
+            numPrice.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            numPrice.Name = "numPrice";
+            numPrice.Size = new Size(140, 23);
+            numPrice.TabIndex = 5;
+            // 
             // chkIsComposed
-            this.chkIsComposed.AutoSize = true;
-            this.chkIsComposed.Location = new System.Drawing.Point(70, 310);
-            this.chkIsComposed.Name = "chkIsComposed";
-            this.chkIsComposed.Size = new System.Drawing.Size(93, 17);
-            this.chkIsComposed.TabIndex = 7;
-            this.chkIsComposed.Text = "Es Compuesto";
-
-            // Panel de Receta
-            this.pnlRecipe.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlRecipe.Controls.Add(this.dgvRecipeItems);
-            this.pnlRecipe.Controls.Add(this.cboProduct);
-            this.pnlRecipe.Controls.Add(this.numQuantity);
-            this.pnlRecipe.Controls.Add(this.btnAddProduct);
-            this.pnlRecipe.Controls.Add(this.btnRemoveProduct);
-            this.pnlRecipe.Controls.Add(this.lblProduct);
-            this.pnlRecipe.Controls.Add(this.lblQuantity);
-            this.pnlRecipe.Controls.Add(this.lblEstimatedCost);
-            this.pnlRecipe.Controls.Add(this.btnCalculateEstimatedCost);
-            this.pnlRecipe.Location = new System.Drawing.Point(12, 340);
-            this.pnlRecipe.Name = "pnlRecipe";
-            this.pnlRecipe.Size = new System.Drawing.Size(500, 300);
-            this.pnlRecipe.TabIndex = 8;
-            this.pnlRecipe.Visible = false;
-
-            // dgvRecipeItems
-            this.dgvRecipeItems.AllowUserToAddRows = false;
-            this.dgvRecipeItems.AllowUserToDeleteRows = false;
-            this.dgvRecipeItems.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvRecipeItems.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvRecipeItems.Location = new System.Drawing.Point(10, 100);
-            this.dgvRecipeItems.MultiSelect = false;
-            this.dgvRecipeItems.Name = "dgvRecipeItems";
-            this.dgvRecipeItems.ReadOnly = true;
-            this.dgvRecipeItems.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRecipeItems.Size = new System.Drawing.Size(480, 150);
-            this.dgvRecipeItems.TabIndex = 9;
-
-            // cboProduct
-            this.cboProduct.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboProduct.FormattingEnabled = true;
-            this.cboProduct.Location = new System.Drawing.Point(70, 10);
-            this.cboProduct.Name = "cboProduct";
-            this.cboProduct.Size = new System.Drawing.Size(200, 21);
-            this.cboProduct.TabIndex = 10;
-
-            // lblProduct
-            this.lblProduct.AutoSize = true;
-            this.lblProduct.Location = new System.Drawing.Point(10, 13);
-            this.lblProduct.Name = "lblProduct";
-            this.lblProduct.Size = new System.Drawing.Size(53, 13);
-            this.lblProduct.TabIndex = 11;
-            this.lblProduct.Text = "Producto:";
-
-            // numQuantity
-            this.numQuantity.DecimalPlaces = 2;
-            this.numQuantity.Location = new System.Drawing.Point(70, 40);
-            this.numQuantity.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
-            this.numQuantity.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
-            this.numQuantity.Name = "numQuantity";
-            this.numQuantity.Size = new System.Drawing.Size(120, 20);
-            this.numQuantity.TabIndex = 12;
-            this.numQuantity.Value = new decimal(new int[] { 1, 0, 0, 0 });
-
-            // lblQuantity
-            this.lblQuantity.AutoSize = true;
-            this.lblQuantity.Location = new System.Drawing.Point(10, 42);
-            this.lblQuantity.Name = "lblQuantity";
-            this.lblQuantity.Size = new System.Drawing.Size(52, 13);
-            this.lblQuantity.TabIndex = 13;
-            this.lblQuantity.Text = "Cantidad:";
-
-            // btnAddProduct
-            this.btnAddProduct.Location = new System.Drawing.Point(70, 70);
-            this.btnAddProduct.Name = "btnAddProduct";
-            this.btnAddProduct.Size = new System.Drawing.Size(75, 23);
-            this.btnAddProduct.TabIndex = 14;
-            this.btnAddProduct.Text = "Agregar";
-            this.btnAddProduct.UseVisualStyleBackColor = true;
-
-            // btnRemoveProduct
-            this.btnRemoveProduct.Location = new System.Drawing.Point(150, 70);
-            this.btnRemoveProduct.Name = "btnRemoveProduct";
-            this.btnRemoveProduct.Size = new System.Drawing.Size(75, 23);
-            this.btnRemoveProduct.TabIndex = 15;
-            this.btnRemoveProduct.Text = "Quitar";
-            this.btnRemoveProduct.UseVisualStyleBackColor = true;
-
+            // 
+            chkIsComposed.AutoSize = true;
+            chkIsComposed.Location = new Point(82, 358);
+            chkIsComposed.Margin = new Padding(4, 3, 4, 3);
+            chkIsComposed.Name = "chkIsComposed";
+            chkIsComposed.Size = new Size(102, 19);
+            chkIsComposed.TabIndex = 7;
+            chkIsComposed.Text = "Es Compuesto";
+            // 
+            // btnCreate
+            // 
+            btnCreate.Location = new Point(14, 750);
+            btnCreate.Margin = new Padding(4, 3, 4, 3);
+            btnCreate.Name = "btnCreate";
+            btnCreate.Size = new Size(88, 27);
+            btnCreate.TabIndex = 18;
+            btnCreate.Text = "Crear";
+            btnCreate.UseVisualStyleBackColor = true;
+            // 
+            // btnUpdate
+            // 
+            btnUpdate.Location = new Point(108, 750);
+            btnUpdate.Margin = new Padding(4, 3, 4, 3);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(88, 27);
+            btnUpdate.TabIndex = 19;
+            btnUpdate.Text = "Actualizar";
+            btnUpdate.UseVisualStyleBackColor = true;
+            // 
+            // btnDelete
+            // 
+            btnDelete.Location = new Point(203, 750);
+            btnDelete.Margin = new Padding(4, 3, 4, 3);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(88, 27);
+            btnDelete.TabIndex = 20;
+            btnDelete.Text = "Eliminar";
+            btnDelete.UseVisualStyleBackColor = true;
+            // 
+            // lblSearch
+            // 
+            lblSearch.AutoSize = true;
+            lblSearch.Location = new Point(14, 17);
+            lblSearch.Margin = new Padding(4, 0, 4, 0);
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new Size(45, 15);
+            lblSearch.TabIndex = 2;
+            lblSearch.Text = "Buscar:";
+            // 
+            // lblName
+            // 
+            lblName.AutoSize = true;
+            lblName.Location = new Point(14, 292);
+            lblName.Margin = new Padding(4, 0, 4, 0);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(54, 15);
+            lblName.TabIndex = 4;
+            lblName.Text = "Nombre:";
+            // 
+            // lblPrice
+            // 
+            lblPrice.AutoSize = true;
+            lblPrice.Location = new Point(14, 325);
+            lblPrice.Margin = new Padding(4, 0, 4, 0);
+            lblPrice.Name = "lblPrice";
+            lblPrice.Size = new Size(43, 15);
+            lblPrice.TabIndex = 6;
+            lblPrice.Text = "Precio:";
+            // 
             // lblEstimatedCost
-            this.lblEstimatedCost.AutoSize = true;
-            this.lblEstimatedCost.Location = new System.Drawing.Point(10, 270);
-            this.lblEstimatedCost.Name = "lblEstimatedCost";
-            this.lblEstimatedCost.Size = new System.Drawing.Size(89, 13);
-            this.lblEstimatedCost.TabIndex = 16;
-            this.lblEstimatedCost.Text = "Costo Estimado: $0.00";
-
+            // 
+            lblEstimatedCost.AutoSize = true;
+            lblEstimatedCost.Location = new Point(12, 312);
+            lblEstimatedCost.Margin = new Padding(4, 0, 4, 0);
+            lblEstimatedCost.Name = "lblEstimatedCost";
+            lblEstimatedCost.Size = new Size(123, 15);
+            lblEstimatedCost.TabIndex = 16;
+            lblEstimatedCost.Text = "Costo Estimado: $0.00";
+            // 
+            // pnlRecipe
+            // 
+            pnlRecipe.BorderStyle = BorderStyle.FixedSingle;
+            pnlRecipe.Controls.Add(dgvRecipeItems);
+            pnlRecipe.Controls.Add(cboProduct);
+            pnlRecipe.Controls.Add(numQuantity);
+            pnlRecipe.Controls.Add(btnAddProduct);
+            pnlRecipe.Controls.Add(btnRemoveProduct);
+            pnlRecipe.Controls.Add(lblProduct);
+            pnlRecipe.Controls.Add(lblQuantity);
+            pnlRecipe.Controls.Add(lblEstimatedCost);
+            pnlRecipe.Controls.Add(btnCalculateEstimatedCost);
+            pnlRecipe.Location = new Point(14, 392);
+            pnlRecipe.Margin = new Padding(4, 3, 4, 3);
+            pnlRecipe.Name = "pnlRecipe";
+            pnlRecipe.Size = new Size(583, 346);
+            pnlRecipe.TabIndex = 8;
+            pnlRecipe.Visible = false;
+            // 
+            // dgvRecipeItems
+            // 
+            dgvRecipeItems.AllowUserToAddRows = false;
+            dgvRecipeItems.AllowUserToDeleteRows = false;
+            dgvRecipeItems.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvRecipeItems.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvRecipeItems.Location = new Point(12, 115);
+            dgvRecipeItems.Margin = new Padding(4, 3, 4, 3);
+            dgvRecipeItems.MultiSelect = false;
+            dgvRecipeItems.Name = "dgvRecipeItems";
+            dgvRecipeItems.ReadOnly = true;
+            dgvRecipeItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvRecipeItems.Size = new Size(560, 173);
+            dgvRecipeItems.TabIndex = 9;
+            // 
+            // cboProduct
+            // 
+            cboProduct.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboProduct.FormattingEnabled = true;
+            cboProduct.Location = new Point(82, 12);
+            cboProduct.Margin = new Padding(4, 3, 4, 3);
+            cboProduct.Name = "cboProduct";
+            cboProduct.Size = new Size(233, 23);
+            cboProduct.TabIndex = 10;
+            // 
+            // numQuantity
+            // 
+            numQuantity.DecimalPlaces = 2;
+            numQuantity.Location = new Point(82, 46);
+            numQuantity.Margin = new Padding(4, 3, 4, 3);
+            numQuantity.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numQuantity.Name = "numQuantity";
+            numQuantity.Size = new Size(140, 23);
+            numQuantity.TabIndex = 12;
+            numQuantity.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            // 
+            // btnAddProduct
+            // 
+            btnAddProduct.Location = new Point(82, 81);
+            btnAddProduct.Margin = new Padding(4, 3, 4, 3);
+            btnAddProduct.Name = "btnAddProduct";
+            btnAddProduct.Size = new Size(88, 27);
+            btnAddProduct.TabIndex = 14;
+            btnAddProduct.Text = "Agregar";
+            btnAddProduct.UseVisualStyleBackColor = true;
+            // 
+            // btnRemoveProduct
+            // 
+            btnRemoveProduct.Location = new Point(175, 81);
+            btnRemoveProduct.Margin = new Padding(4, 3, 4, 3);
+            btnRemoveProduct.Name = "btnRemoveProduct";
+            btnRemoveProduct.Size = new Size(88, 27);
+            btnRemoveProduct.TabIndex = 15;
+            btnRemoveProduct.Text = "Quitar";
+            btnRemoveProduct.UseVisualStyleBackColor = true;
+            // 
+            // lblProduct
+            // 
+            lblProduct.AutoSize = true;
+            lblProduct.Location = new Point(12, 15);
+            lblProduct.Margin = new Padding(4, 0, 4, 0);
+            lblProduct.Name = "lblProduct";
+            lblProduct.Size = new Size(59, 15);
+            lblProduct.TabIndex = 11;
+            lblProduct.Text = "Producto:";
+            // 
+            // lblQuantity
+            // 
+            lblQuantity.AutoSize = true;
+            lblQuantity.Location = new Point(12, 48);
+            lblQuantity.Margin = new Padding(4, 0, 4, 0);
+            lblQuantity.Name = "lblQuantity";
+            lblQuantity.Size = new Size(58, 15);
+            lblQuantity.TabIndex = 13;
+            lblQuantity.Text = "Cantidad:";
+            // 
             // btnCalculateEstimatedCost
-            this.btnCalculateEstimatedCost.Location = new System.Drawing.Point(150, 265);
-            this.btnCalculateEstimatedCost.Name = "btnCalculateEstimatedCost";
-            this.btnCalculateEstimatedCost.Size = new System.Drawing.Size(120, 23);
-            this.btnCalculateEstimatedCost.TabIndex = 17;
-            this.btnCalculateEstimatedCost.Text = "Calcular Costo";
-            this.btnCalculateEstimatedCost.UseVisualStyleBackColor = true;
-
-            // Botones principales
-            this.btnCreate.Location = new System.Drawing.Point(12, 650);
-            this.btnCreate.Name = "btnCreate";
-            this.btnCreate.Size = new System.Drawing.Size(75, 23);
-            this.btnCreate.TabIndex = 18;
-            this.btnCreate.Text = "Crear";
-            this.btnCreate.UseVisualStyleBackColor = true;
-
-            this.btnUpdate.Location = new System.Drawing.Point(93, 650);
-            this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Size = new System.Drawing.Size(75, 23);
-            this.btnUpdate.TabIndex = 19;
-            this.btnUpdate.Text = "Actualizar";
-            this.btnUpdate.UseVisualStyleBackColor = true;
-
-            this.btnDelete.Location = new System.Drawing.Point(174, 650);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 23);
-            this.btnDelete.TabIndex = 20;
-            this.btnDelete.Text = "Eliminar";
-            this.btnDelete.UseVisualStyleBackColor = true;
-
-            this.btnClear = new System.Windows.Forms.Button();
-
-            // Form
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 685);
-            this.Controls.Add(this.btnClear);
-            this.Controls.Add(this.btnDelete);
-            this.Controls.Add(this.btnUpdate);
-            this.Controls.Add(this.btnCreate);
-            this.Controls.Add(this.pnlRecipe);
-            this.Controls.Add(this.chkIsComposed);
-            this.Controls.Add(this.lblPrice);
-            this.Controls.Add(this.numPrice);
-            this.Controls.Add(this.lblName);
-            this.Controls.Add(this.txtName);
-            this.Controls.Add(this.lblSearch);
-            this.Controls.Add(this.txtSearch);
-            this.Controls.Add(this.dgvDrinks);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.Name = "DrinkForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Gestión de Tragos";
-
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDrinks)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numPrice)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvRecipeItems)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numQuantity)).EndInit();
-            this.pnlRecipe.ResumeLayout(false);
-            this.pnlRecipe.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            // 
+            btnCalculateEstimatedCost.Location = new Point(175, 306);
+            btnCalculateEstimatedCost.Margin = new Padding(4, 3, 4, 3);
+            btnCalculateEstimatedCost.Name = "btnCalculateEstimatedCost";
+            btnCalculateEstimatedCost.Size = new Size(140, 27);
+            btnCalculateEstimatedCost.TabIndex = 17;
+            btnCalculateEstimatedCost.Text = "Calcular Costo";
+            btnCalculateEstimatedCost.UseVisualStyleBackColor = true;
+            // 
+            // btnClear
+            // 
+            btnClear.Location = new Point(411, 313);
+            btnClear.Margin = new Padding(4, 3, 4, 3);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(114, 27);
+            btnClear.TabIndex = 0;
+            btnClear.Text = "Limpiar";
+            btnClear.UseVisualStyleBackColor = true;
+            // 
+            // DrinkForm
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(611, 790);
+            Controls.Add(btnClear);
+            Controls.Add(btnDelete);
+            Controls.Add(btnUpdate);
+            Controls.Add(btnCreate);
+            Controls.Add(pnlRecipe);
+            Controls.Add(chkIsComposed);
+            Controls.Add(lblPrice);
+            Controls.Add(numPrice);
+            Controls.Add(lblName);
+            Controls.Add(txtName);
+            Controls.Add(lblSearch);
+            Controls.Add(txtSearch);
+            Controls.Add(dgvDrinks);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Margin = new Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            Name = "DrinkForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Gestión de Tragos";
+            ((System.ComponentModel.ISupportInitialize)dgvDrinks).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numPrice).EndInit();
+            pnlRecipe.ResumeLayout(false);
+            pnlRecipe.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvRecipeItems).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numQuantity).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

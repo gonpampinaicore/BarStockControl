@@ -10,6 +10,7 @@
         private System.Windows.Forms.Label lblWelcome;
         private System.Windows.Forms.Label lblRole;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();

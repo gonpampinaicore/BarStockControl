@@ -15,7 +15,7 @@ namespace BarStockControl.UI
     public partial class ProductForm : Form
     {
         private readonly ProductService _productService;
-        private ProductDto _selectedProduct;
+        private ProductDto _selectedProduct = new ProductDto();
         private bool _isLoading = false;
 
         private ToolTip toolTip = new ToolTip();
@@ -402,8 +402,7 @@ namespace BarStockControl.UI
                 cmbQualityCategory.SelectedIndex = 0;
                 chkActive.Checked = true;
                 chkIsImported.Checked = false;
-                _selectedProduct = null;
-                txtName.Focus();
+                _selectedProduct = new ProductDto();
             }
             catch (Exception ex)
             {

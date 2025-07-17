@@ -8,14 +8,14 @@ namespace BarStockControl.UI
 {
     public partial class InfrastructureManagementForm : Form
     {
-        private readonly PermissionService _permissionService;
+        private readonly ComponentService _componentService;
 
         public InfrastructureManagementForm()
         {
             try
             {
                 InitializeComponent();
-                _permissionService = new PermissionService(new XmlDataManager("Xml/data.xml"));
+                _componentService = new ComponentService(new XmlDataManager("Xml/data.xml"));
                 LoadAvailableForms();
             }
             catch (Exception ex)
@@ -39,8 +39,8 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                var roleIds = user.RoleIds;
-                var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
+                var allUserPermissions = _componentService.GetAllUserPermissionsRecursive(user);
+                var permissionNames = allUserPermissions.Select(p => p.Name).ToList();
 
                 var forms = new (string Label, Func<Form> FormFactory, PermissionType RequiredPermission)[]
                 {

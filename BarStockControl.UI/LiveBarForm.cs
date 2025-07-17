@@ -17,9 +17,9 @@ namespace BarStockControl.UI
         private readonly ProductService _productService;
         private readonly EventService _eventService;
         private readonly ResourceAssignmentService _assignmentService;
-        private EventDto _currentEvent;
-        private List<StationDto> _eventStations;
-        private List<OrderDto> _eventOrders;
+        private EventDto _currentEvent = new EventDto();
+        private List<StationDto> _eventStations = new List<StationDto>();
+        private List<OrderDto> _eventOrders = new List<OrderDto>();
 
         public LiveBarForm(EventDto currentEvent)
         {

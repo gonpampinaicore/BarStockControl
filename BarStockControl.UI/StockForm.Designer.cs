@@ -18,6 +18,7 @@
         private System.Windows.Forms.ComboBox cmbProductFilter;
         private System.Windows.Forms.Label lblProductFilter;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             dgvStock = new DataGridView();

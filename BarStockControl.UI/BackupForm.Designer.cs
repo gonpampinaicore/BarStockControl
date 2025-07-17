@@ -10,6 +10,7 @@
         private System.Windows.Forms.CheckBox chkOnlyBackups;
         private System.Windows.Forms.CheckBox chkOnlyRestores;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             this.dgvBackups = new System.Windows.Forms.DataGridView();

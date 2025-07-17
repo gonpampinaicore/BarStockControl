@@ -14,14 +14,14 @@ namespace BarStockControl.UI
         private readonly DrinkService _drinkService;
         private readonly ProductService _productService;
         private readonly RecipeService _recipeService;
-        private DrinkDto _selectedDrink;
+        private DrinkDto _selectedDrink = new DrinkDto();
         private bool _isLoading = false;
         private List<RecipeItemDto> _currentRecipeItems;
 
         public DrinkForm(XmlDataManager xmlDataManager)
         {
             InitializeComponent();
-            
+
             _drinkService = new DrinkService(xmlDataManager);
             _productService = new ProductService(xmlDataManager);
             _recipeService = new RecipeService(xmlDataManager);
@@ -86,7 +86,7 @@ namespace BarStockControl.UI
             try
             {
                 var toolTip = new ToolTip();
-                toolTip.SetToolTip(btnCalculateEstimatedCost, 
+                toolTip.SetToolTip(btnCalculateEstimatedCost,
                     "Calcula automáticamente el costo estimado basado en los ingredientes de la receta.");
             }
             catch (Exception ex)
@@ -105,7 +105,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar datos iniciales: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar datos iniciales: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -193,7 +193,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -215,7 +215,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar tragos: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar tragos: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -242,7 +242,7 @@ namespace BarStockControl.UI
             {
                 txtSearch.TextChanged += (s, e) => LoadDrinks();
                 dgvDrinks.CellClick += dgvDrinks_CellClick;
-                
+
                 // Eliminar la lógica que oculta o limpia la receta al cambiar el check
                 chkIsComposed.CheckedChanged += (s, e) =>
                 {
@@ -258,7 +258,7 @@ namespace BarStockControl.UI
                 btnAddProduct.Click += btnAddProduct_Click;
                 btnRemoveProduct.Click += btnRemoveProduct_Click;
                 btnCalculateEstimatedCost.Click += (s, e) => UpdateEstimatedCost();
-                
+
                 dgvRecipeItems.CellValueChanged += dgvRecipeItems_CellValueChanged;
                 dgvRecipeItems.CellValidating += dgvRecipeItems_CellValidating;
             }
@@ -285,7 +285,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al seleccionar trago: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al seleccionar trago: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -295,7 +295,7 @@ namespace BarStockControl.UI
             txtName.Text = drink.Name;
             numPrice.Value = drink.Price;
             chkIsComposed.Checked = drink.IsComposed;
-            
+
             // Siempre cargar la receta, sin importar si es compuesto o no
             _currentRecipeItems = _drinkService.GetRecipeItems(drink.Id).ToList();
 
@@ -311,16 +311,15 @@ namespace BarStockControl.UI
             chkIsComposed.Checked = false;
             _currentRecipeItems.Clear();
             RefreshRecipeGrid();
-            _selectedDrink = null;
+            _selectedDrink = new DrinkDto();
             txtName.Focus();
-            // No ocultar el panel de receta
         }
 
         private bool ValidateForm()
         {
             if (string.IsNullOrWhiteSpace(txtName.Text))
             {
-                MessageBox.Show("El nombre del trago es obligatorio.", "Validación", 
+                MessageBox.Show("El nombre del trago es obligatorio.", "Validación",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtName.Focus();
                 return false;
@@ -334,14 +333,14 @@ namespace BarStockControl.UI
             }
             if (numPrice.Value <= 0)
             {
-                MessageBox.Show("El precio debe ser mayor a 0.", "Validación", 
+                MessageBox.Show("El precio debe ser mayor a 0.", "Validación",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 numPrice.Focus();
                 return false;
             }
             if (chkIsComposed.Checked && !_currentRecipeItems.Any())
             {
-                MessageBox.Show("Un trago compuesto debe tener al menos un ingrediente.", "Validación", 
+                MessageBox.Show("Un trago compuesto debe tener al menos un ingrediente.", "Validación",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -382,18 +381,18 @@ namespace BarStockControl.UI
                 string errorMessage;
                 if (!_drinkService.CreateDrink(drinkDto, _currentRecipeItems, out errorMessage))
                 {
-                    MessageBox.Show($"Error al crear el trago: {errorMessage}", "Error", 
+                    MessageBox.Show($"Error al crear el trago: {errorMessage}", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                MessageBox.Show("Trago creado exitosamente.", "Éxito", 
+                MessageBox.Show("Trago creado exitosamente.", "Éxito",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
                 LoadDrinks();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al crear trago: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al crear trago: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -404,7 +403,7 @@ namespace BarStockControl.UI
             {
                 if (_selectedDrink == null)
                 {
-                    MessageBox.Show("Seleccioná un trago para actualizar.", "Aviso", 
+                    MessageBox.Show("Seleccioná un trago para actualizar.", "Aviso",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
@@ -416,7 +415,7 @@ namespace BarStockControl.UI
 
                 if (!_drinkService.UpdateDrink(drinkDto))
                 {
-                    MessageBox.Show("Error al actualizar el trago", "Error", 
+                    MessageBox.Show("Error al actualizar el trago", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -425,20 +424,20 @@ namespace BarStockControl.UI
                 {
                     if (!_drinkService.SaveRecipeItems(drinkDto.Id, _currentRecipeItems))
                     {
-                        MessageBox.Show("Error al guardar los ingredientes del trago", "Error", 
+                        MessageBox.Show("Error al guardar los ingredientes del trago", "Error",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
 
-                MessageBox.Show("Trago actualizado exitosamente.", "Éxito", 
+                MessageBox.Show("Trago actualizado exitosamente.", "Éxito",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
                 LoadDrinks();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al actualizar trago: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al actualizar trago: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -449,22 +448,22 @@ namespace BarStockControl.UI
             {
                 if (_selectedDrink == null)
                 {
-                    MessageBox.Show("Seleccioná un trago para eliminar.", "Aviso", 
+                    MessageBox.Show("Seleccioná un trago para eliminar.", "Aviso",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
                 var confirm = MessageBox.Show(
-                    $"¿Estás seguro de eliminar el trago '{_selectedDrink.Name}'?\n\nEsta acción no se puede deshacer.", 
-                    "Confirmar eliminación", 
-                    MessageBoxButtons.YesNo, 
+                    $"¿Estás seguro de eliminar el trago '{_selectedDrink.Name}'?\n\nEsta acción no se puede deshacer.",
+                    "Confirmar eliminación",
+                    MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
                 if (confirm == DialogResult.Yes)
                 {
                     if (_drinkService.DeleteDrink(_selectedDrink.Id))
                     {
-                        MessageBox.Show("Trago eliminado exitosamente.", "Éxito", 
+                        MessageBox.Show("Trago eliminado exitosamente.", "Éxito",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                         ClearForm();
                         LoadDrinks();
@@ -473,7 +472,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al eliminar trago: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al eliminar trago: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -484,14 +483,14 @@ namespace BarStockControl.UI
             {
                 if (cboProduct.SelectedItem == null)
                 {
-                    MessageBox.Show("Seleccione un producto", "Advertencia", 
+                    MessageBox.Show("Seleccione un producto", "Advertencia",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 if (numQuantity.Value <= 0)
                 {
-                    MessageBox.Show("La cantidad debe ser mayor a 0", "Advertencia", 
+                    MessageBox.Show("La cantidad debe ser mayor a 0", "Advertencia",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -519,7 +518,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al agregar producto: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al agregar producto: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -531,13 +530,13 @@ namespace BarStockControl.UI
                 if (dgvRecipeItems.SelectedRows.Count > 0)
                 {
                     var selectedRowIndex = dgvRecipeItems.SelectedRows[0].Index;
-                    
+
                     if (selectedRowIndex >= 0 && selectedRowIndex < _currentRecipeItems.Count)
                     {
                         var confirm = MessageBox.Show(
-                            "¿Estás seguro de quitar este ingrediente?", 
-                            "Confirmar eliminación", 
-                            MessageBoxButtons.YesNo, 
+                            "¿Estás seguro de quitar este ingrediente?",
+                            "Confirmar eliminación",
+                            MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question);
 
                         if (confirm == DialogResult.Yes)
@@ -550,13 +549,13 @@ namespace BarStockControl.UI
                 }
                 else
                 {
-                    MessageBox.Show("Seleccione un ingrediente para quitar.", "Aviso", 
+                    MessageBox.Show("Seleccione un ingrediente para quitar.", "Aviso",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al remover producto: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al remover producto: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -565,7 +564,8 @@ namespace BarStockControl.UI
         {
             dgvRecipeItems.DataSource = null;
             var products = _productService.GetAllProducts().ToDictionary(p => p.Id, p => p.Name);
-            var displayList = _currentRecipeItems.Select(item => new {
+            var displayList = _currentRecipeItems.Select(item => new
+            {
                 Producto = products.ContainsKey(item.ProductId) ? products[item.ProductId] : $"ID {item.ProductId}",
                 Cantidad = item.Quantity
             }).ToList();
@@ -602,7 +602,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al calcular costo estimado: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al calcular costo estimado: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -620,7 +620,7 @@ namespace BarStockControl.UI
                 {
                     var row = dgvRecipeItems.Rows[e.RowIndex];
                     var quantityValue = row.Cells[1].Value;
-                    
+
                     if (quantityValue != null && decimal.TryParse(quantityValue.ToString(), out decimal newQuantity))
                     {
                         if (newQuantity > 0)
@@ -633,14 +633,14 @@ namespace BarStockControl.UI
                         }
                         else
                         {
-                            MessageBox.Show("La cantidad debe ser mayor a 0.", "Validación", 
+                            MessageBox.Show("La cantidad debe ser mayor a 0.", "Validación",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             row.Cells[1].Value = _currentRecipeItems[e.RowIndex].Quantity;
                         }
                     }
                     else
                     {
-                        MessageBox.Show("Por favor, ingrese un número válido para la cantidad.", "Validación", 
+                        MessageBox.Show("Por favor, ingrese un número válido para la cantidad.", "Validación",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         row.Cells[1].Value = _currentRecipeItems[e.RowIndex].Quantity;
                     }
@@ -648,7 +648,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cambiar cantidad: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cambiar cantidad: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -661,7 +661,7 @@ namespace BarStockControl.UI
                 {
                     if (!decimal.TryParse(e.FormattedValue.ToString(), out decimal quantity) || quantity <= 0)
                     {
-                        MessageBox.Show("Por favor, ingrese un número válido mayor a 0 para la cantidad.", "Validación", 
+                        MessageBox.Show("Por favor, ingrese un número válido mayor a 0 para la cantidad.", "Validación",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         e.Cancel = true;
                     }
@@ -669,7 +669,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al validar cantidad: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al validar cantidad: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
             }

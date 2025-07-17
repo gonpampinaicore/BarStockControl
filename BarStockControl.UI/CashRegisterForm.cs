@@ -13,7 +13,7 @@ namespace BarStockControl.UI
     {
         private readonly CashRegisterService _cashRegisterService;
         private readonly BarService _barService;
-        private CashRegister _selectedCashRegister;
+        private CashRegister _selectedCashRegister = new CashRegister();
 
         public CashRegisterForm()
         {
@@ -33,10 +33,9 @@ namespace BarStockControl.UI
                 cmbBar.DisplayMember = "Name";
                 cmbBar.ValueMember = "Id";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar barras: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al cargar barras.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -63,10 +62,9 @@ namespace BarStockControl.UI
                     Bar = _barService.GetById(cr.BarId)?.Name ?? "Sin asignar"
                 }).ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar cajas registradoras: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al cargar cajas registradoras.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -87,7 +85,7 @@ namespace BarStockControl.UI
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -120,7 +118,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadCashRegisters();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -148,7 +146,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadCashRegisters();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -172,7 +170,7 @@ namespace BarStockControl.UI
                     LoadCashRegisters();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -193,7 +191,7 @@ namespace BarStockControl.UI
             txtName.Clear();
             cmbBar.SelectedIndex = 0;
             chkActive.Checked = true;
-            _selectedCashRegister = null;
+            _selectedCashRegister = new CashRegister();
         }
     }
 }

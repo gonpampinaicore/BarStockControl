@@ -5,12 +5,13 @@ using BarStockControl.UI;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Models.Enums;
+using System.Linq;
 
 namespace BarStockControl.UI
 {
     public partial class InventoryManagementForm : Form
     {
-        private readonly PermissionService _permissionService;
+        private readonly ComponentService _componentService;
         private readonly XmlDataManager _xmlDataManager;
 
         public InventoryManagementForm()
@@ -18,7 +19,7 @@ namespace BarStockControl.UI
             try
             {
                 InitializeComponent();
-                _permissionService = new PermissionService(new XmlDataManager("Xml/data.xml"));
+                _componentService = new ComponentService(new XmlDataManager("Xml/data.xml"));
                 _xmlDataManager = new XmlDataManager("Xml/data.xml");
                 LoadAvailableForms();
             }
@@ -43,8 +44,8 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                var roleIds = user.RoleIds;
-                var permissionNames = _permissionService.GetPermissionNamesByRoleIds(roleIds);
+                var allUserPermissions = _componentService.GetAllUserPermissionsRecursive(user);
+                var permissionNames = allUserPermissions.Select(p => p.Name).ToList();
 
                 var forms = new (string Label, Func<Form> FormFactory, PermissionType RequiredPermission)[]
                 {

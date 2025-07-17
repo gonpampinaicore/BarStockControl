@@ -12,15 +12,14 @@ namespace BarStockControl.UI
     {
         private readonly RoleService _roleService;
         private readonly List<int> _excludedRoleIds;
-        public List<int> SelectedRoleIds { get; private set; }
+        public List<int> SelectedRoleIds { get; private set; } = new List<int>();
 
-        public UserRoleSelectionForm(List<int> excludedRoleIds = null)
+        public UserRoleSelectionForm(List<int>? excludedRoleIds = null)
         {
             InitializeComponent();
             _roleService = new RoleService(new XmlDataManager("Xml/data.xml"));
             _excludedRoleIds = excludedRoleIds ?? new List<int>();
             SelectedRoleIds = new List<int>();
-
             LoadRoles();
         }
 

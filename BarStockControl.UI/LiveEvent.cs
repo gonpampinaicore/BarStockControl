@@ -12,9 +12,9 @@ namespace BarStockControl.UI
         private readonly EventService _eventService;
         private readonly ResourceAssignmentService _assignmentService;
         private readonly UserService _userService;
-        private EventDto _currentEvent;
-        private List<ResourceAssignmentDto> _assignments;
-        private List<UserDto> _assignedUsers;
+        private EventDto _currentEvent = new EventDto();
+        private List<ResourceAssignmentDto> _assignments = new List<ResourceAssignmentDto>();
+        private List<UserDto> _assignedUsers = new List<UserDto>();
         private static readonly int[] ROLES_SUPER_ACCESO = { 1, 2 }; // 1=AdminAdmin, 2=Gerente
 
         public LiveEvent()
@@ -25,6 +25,19 @@ namespace BarStockControl.UI
             _assignmentService = new ResourceAssignmentService(dataManager);
             _userService = new UserService(dataManager);
             LoadLiveEvent();
+        }
+
+        public LiveEvent(EventDto eventDto)
+        {
+            if (eventDto == null || eventDto.Id == 0)
+                throw new ArgumentException("Evento no válido para LiveEvent");
+            InitializeComponent();
+            var dataManager = new XmlDataManager(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Xml", "data.xml"));
+            _eventService = new EventService(dataManager);
+            _assignmentService = new ResourceAssignmentService(dataManager);
+            _userService = new UserService(dataManager);
+            _currentEvent = eventDto;
+            LoadLiveEventWithEvent();
         }
 
         private void LoadLiveEvent()
@@ -43,6 +56,23 @@ namespace BarStockControl.UI
                 return;
             }
 
+            LoadEventData();
+        }
+
+        private void LoadLiveEventWithEvent()
+        {
+            if (_currentEvent == null)
+            {
+                MessageBox.Show("Evento no válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            LoadEventData();
+        }
+
+        private void LoadEventData()
+        {
             lblTitle.Text = _currentEvent.Status.ToFriendlyString();
             lblEventName.Text = _currentEvent.Name;
             lblEventDate.Text = $"{_currentEvent.StartDate:dd/MM/yyyy HH:mm} - {_currentEvent.EndDate:dd/MM/yyyy HH:mm}";
@@ -50,12 +80,6 @@ namespace BarStockControl.UI
             try
             {
                 _assignments = _assignmentService.GetByEvent(_currentEvent.Id);
-                if (_assignments == null || !_assignments.Any())
-                {
-                    MessageBox.Show("No hay asignaciones de recursos para este evento.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Close();
-                    return;
-                }
             }
             catch (FormatException ex)
             {

@@ -6,6 +6,7 @@ using BarStockControl.Models;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
+using BarStockControl.DTOs;
 using static System.Collections.Specialized.BitVector32;
 
 namespace BarStockControl.UI
@@ -16,11 +17,10 @@ namespace BarStockControl.UI
         private readonly ProductService _productService;
         private readonly DepositService _depositService;
         private readonly StationService _stationService;
-
-        private Stock _selectedStock;
-        private List<Product> _products;
-        private List<Deposit> _deposits;
-        private List<Station> _stations;
+        private StockDto _selectedStock = new StockDto();
+        private List<ProductDto> _products = new List<ProductDto>();
+        private List<DepositDto> _deposits = new List<DepositDto>();
+        private List<StationDto> _stations = new List<StationDto>();
 
         public StockForm()
         {
@@ -41,12 +41,12 @@ namespace BarStockControl.UI
         {
             try
             {
-                var stockList = _stockService.GetAllStock();
-                var products = _productService.GetAll();
-                var deposits = _depositService.GetAll();
-                var stations = _stationService.GetAll();
+                var stockList = _stockService.GetAllStockDtos();
+                var products = _productService.GetAllProductDtos();
+                var deposits = _depositService.GetAllDepositDtos();
+                var stations = _stationService.GetAllStationDtos();
 
-                var selectedProduct = cmbProductFilter.SelectedItem as Product;
+                var selectedProduct = cmbProductFilter.SelectedItem as ProductDto;
                 int? selectedProductId = (selectedProduct != null && selectedProduct.Id != -1) ? selectedProduct.Id : (int?)null;
 
                 var filteredStock = stockList
@@ -63,9 +63,9 @@ namespace BarStockControl.UI
 
                 dgvStock.DataSource = filteredStock;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar stock: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar stock.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -74,19 +74,19 @@ namespace BarStockControl.UI
         {
             try
             {
-                _products = _productService.GetAll();
+                _products = _productService.GetAllProductDtos();
                 dgvProducts.DataSource = _products.Select(p => new { p.Id, p.Name }).ToList();
-                var productosFiltro = new List<Product>();
-                productosFiltro.Add(new Product { Id = -1, Name = "Todos los productos" });
+                var productosFiltro = new List<ProductDto>();
+                productosFiltro.Add(new ProductDto { Id = -1, Name = "Todos los productos" });
                 productosFiltro.AddRange(_products);
                 cmbProductFilter.DataSource = productosFiltro;
                 cmbProductFilter.DisplayMember = "Name";
                 cmbProductFilter.ValueMember = "Id";
                 cmbProductFilter.SelectedIndex = 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar productos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -97,7 +97,7 @@ namespace BarStockControl.UI
             {
                 if (rdoDeposit.Checked)
                 {
-                    _deposits = _depositService.GetAll();
+                    _deposits = _depositService.GetAllDepositDtos();
                     dgvLocations.DataSource = _deposits.Select(d => new
                     {
                         d.Id,
@@ -106,7 +106,7 @@ namespace BarStockControl.UI
                 }
                 else if (rdoStation.Checked)
                 {
-                    _stations = _stationService.GetAll();
+                    _stations = _stationService.GetAllStationDtos();
                     dgvLocations.DataSource = _stations.Select(s => new
                     {
                         s.Id,
@@ -114,9 +114,9 @@ namespace BarStockControl.UI
                     }).ToList();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar ubicaciones: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar ubicaciones.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -137,7 +137,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadStock();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -166,7 +166,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadStock();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -185,20 +185,20 @@ namespace BarStockControl.UI
                 var confirm = MessageBox.Show("¿Eliminar este registro de stock?", "Confirmar", MessageBoxButtons.YesNo);
                 if (confirm == DialogResult.Yes)
                 {
-                    _stockService.DeleteStock(_selectedStock.Id);
+                    _stockService.DeleteStockDto(_selectedStock.Id);
                     ClearForm();
                     LoadStock();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private Stock GetStockFromForm()
+        private StockDto GetStockFromForm()
         {
-            var stock = new Stock();
+            var stock = new StockDto();
 
             dynamic selectedProduct = dgvProducts.CurrentRow?.DataBoundItem;
             if (selectedProduct != null)
@@ -224,7 +224,7 @@ namespace BarStockControl.UI
 
                 var row = dgvStock.Rows[e.RowIndex];
                 int id = Convert.ToInt32(row.Cells["Id"].Value);
-                _selectedStock = _stockService.GetById(id);
+                _selectedStock = _stockService.GetByIdDto(id);
 
                 txtQuantity.Text = _selectedStock.Quantity.ToString();
                 rdoDeposit.Checked = _selectedStock.DepositId.HasValue;
@@ -246,7 +246,7 @@ namespace BarStockControl.UI
                     lblSelectedLocation.Text = $"Ubicación seleccionada: {station?.Name ?? "-"}";
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -260,7 +260,7 @@ namespace BarStockControl.UI
 
         private void ClearForm()
         {
-            _selectedStock = null;
+            _selectedStock = new StockDto();
             txtQuantity.Clear();
             dgvProducts.ClearSelection();
             dgvLocations.ClearSelection();

@@ -9,7 +9,9 @@ namespace BarStockControl.UI
     public partial class PermissionForm : Form
     {
         private readonly PermissionService _permissionService;
-        private PermissionDto _selectedPermission;
+        private readonly UserService _userService;
+        private readonly RoleService _roleService;
+        private PermissionDto _selectedPermission = new PermissionDto();
 
         public PermissionForm()
         {
@@ -37,9 +39,9 @@ namespace BarStockControl.UI
 
                 dgvPermissions.DataSource = permissions;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar permisos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar permisos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -60,7 +62,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadPermissions();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -89,7 +91,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadPermissions();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -113,7 +115,7 @@ namespace BarStockControl.UI
                     LoadPermissions();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -132,7 +134,7 @@ namespace BarStockControl.UI
                     chkActive.Checked = _selectedPermission.IsActive;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -154,7 +156,7 @@ namespace BarStockControl.UI
             txtName.Clear();
             txtDescription.Clear();
             chkActive.Checked = true;
-            _selectedPermission = null;
+            _selectedPermission = new PermissionDto();
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
@@ -174,9 +176,9 @@ namespace BarStockControl.UI
                 var userForm = new UserForm();
                 userForm.Show();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al abrir formulario de usuarios: {ex.Message}", "Error", 
+                MessageBox.Show("Error al abrir formulario de usuarios.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -188,9 +190,9 @@ namespace BarStockControl.UI
                 var roleForm = new RoleForm();
                 roleForm.Show();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al abrir formulario de roles: {ex.Message}", "Error", 
+                MessageBox.Show("Error al abrir formulario de roles.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -203,9 +205,9 @@ namespace BarStockControl.UI
                 mainMenuForm.Show();
                 this.Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al abrir menú principal: {ex.Message}", "Error", 
+                MessageBox.Show("Error al abrir menú principal.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -218,9 +220,9 @@ namespace BarStockControl.UI
                 var mainMenuForm = new MainMenuForm();
                 mainMenuForm.Show();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al abrir menú principal: {ex.Message}", "Error", 
+                MessageBox.Show("Error al abrir menú principal.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

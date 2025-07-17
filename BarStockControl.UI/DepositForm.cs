@@ -14,7 +14,7 @@ namespace BarStockControl.UI
     public partial class DepositForm : Form
     {
         private readonly DepositService _depositService;
-        private DepositDto _selectedDeposit;
+        private DepositDto _selectedDeposit = new DepositDto();
 
         public DepositForm()
         {
@@ -30,9 +30,9 @@ namespace BarStockControl.UI
                 var deposits = _depositService.GetAllDeposits();
                 dgvDeposits.DataSource = deposits.Select(DepositMapper.ToDto).ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar depósitos: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar depósitos.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -53,7 +53,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadDeposits();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -82,7 +82,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadDeposits();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -106,7 +106,7 @@ namespace BarStockControl.UI
                     LoadDeposits();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -126,7 +126,7 @@ namespace BarStockControl.UI
                     chkActive.Checked = _selectedDeposit.Active;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -145,7 +145,7 @@ namespace BarStockControl.UI
         {
             txtName.Clear();
             chkActive.Checked = true;
-            _selectedDeposit = null;
+            _selectedDeposit = new DepositDto();
         }
     }
 }

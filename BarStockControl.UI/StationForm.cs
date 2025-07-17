@@ -16,7 +16,7 @@ namespace BarStockControl.UI
     {
         private readonly StationService _stationService;
         private readonly BarService _barService;
-        private Station _selectedStation;
+        private Station _selectedStation = new Station();
 
         public StationForm()
         {
@@ -34,9 +34,9 @@ namespace BarStockControl.UI
             {
                 cmbStatus.DataSource = Enum.GetValues(typeof(StationStatus));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar enumeraciones: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar enumeraciones.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -50,9 +50,9 @@ namespace BarStockControl.UI
                 cmbBar.DisplayMember = "Name";
                 cmbBar.ValueMember = "Id";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar barras: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar barras.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -81,9 +81,9 @@ namespace BarStockControl.UI
                     Bar = _barService.GetById(s.BarId)?.Name ?? "Sin asignar"
                 }).ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Error al cargar estaciones: {ex.Message}", "Error", 
+                MessageBox.Show("Error al cargar estaciones.", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -107,7 +107,7 @@ namespace BarStockControl.UI
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -141,7 +141,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadStations();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -171,7 +171,7 @@ namespace BarStockControl.UI
                 ClearForm();
                 LoadStations();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -195,7 +195,7 @@ namespace BarStockControl.UI
                     LoadStations();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -218,7 +218,7 @@ namespace BarStockControl.UI
             cmbBar.SelectedIndex = 0;
             chkActive.Checked = true;
             txtComment.Clear();
-            _selectedStation = null;
+            _selectedStation = new Station();
         }
     }
 }

@@ -24,6 +24,7 @@
         private System.Windows.Forms.Label lblEnd;
         private System.Windows.Forms.Label lblStatus;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             dgvEvents = new DataGridView();

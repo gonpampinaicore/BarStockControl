@@ -9,7 +9,7 @@ namespace BarStockControl.UI
     public partial class UserProfileForm : Form
     {
         private readonly UserService _userService;
-        private UserDto _currentUserDto;
+        private UserDto _currentUserDto = new UserDto();
 
         public UserProfileForm()
         {

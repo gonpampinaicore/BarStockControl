@@ -20,6 +20,7 @@
         private System.Windows.Forms.TextBox txtComment;
         private System.Windows.Forms.Label lblComment;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             dgvStations = new System.Windows.Forms.DataGridView();

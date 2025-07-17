@@ -17,8 +17,8 @@ namespace BarStockControl.UI
         private readonly RoleService _roleService;
         private readonly PermissionService _permissionService;
         private readonly ComponentService _componentService;
-        private RoleDto _selectedRole;
-        private Role _currentRoleEntity;
+        private RoleDto _selectedRole = new RoleDto();
+        private Role _currentRoleEntity = new Role();
 
         public RoleForm()
         {
@@ -431,8 +431,8 @@ namespace BarStockControl.UI
             txtName.Clear();
             txtDescription.Clear();
             chkActive.Checked = true;
-            _selectedRole = null;
-            _currentRoleEntity = null;
+            _selectedRole = new RoleDto();
+            _currentRoleEntity = new Role();
             tvRoleHierarchy.Nodes.Clear();
         }
 

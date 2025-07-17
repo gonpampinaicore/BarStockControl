@@ -31,6 +31,7 @@ namespace BarStockControl.UI
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnRollback;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         private void InitializeComponent()
         {
             cmbEvent = new ComboBox();

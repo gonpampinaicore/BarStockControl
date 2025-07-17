@@ -20,10 +20,10 @@ namespace BarStockControl.UI
         private readonly UserService _userService;
 
         private List<OrderItemDto> _items = new();
-        private List<DrinkDto> _drinks;
+        private List<DrinkDto> _drinks = new();
         private int _currentUserId;
-        private EventDto _currentEvent;
-        private DrinkDto _selectedDrink;
+        private EventDto _currentEvent = new EventDto();
+        private DrinkDto _selectedDrink = new DrinkDto();
 
         public OrderForm(DrinkService drinkService,
                          OrderService orderService,
@@ -55,7 +55,7 @@ namespace BarStockControl.UI
                 dgvDrinks.Columns["Name"].HeaderText = "Trago";
                 dgvDrinks.Columns["Price"].HeaderText = "Precio";
                 dgvDrinks.ClearSelection();
-                _selectedDrink = null;
+                _selectedDrink = new DrinkDto();
             }
             catch (Exception ex)
             {
@@ -72,7 +72,7 @@ namespace BarStockControl.UI
             }
             else
             {
-                _selectedDrink = null;
+                _selectedDrink = new DrinkDto();
             }
         }
 
@@ -232,7 +232,7 @@ namespace BarStockControl.UI
             _items.Clear();
             dgvItems.Rows.Clear();
             dgvDrinks.ClearSelection();
-            _selectedDrink = null;
+            _selectedDrink = new DrinkDto();
             nudQuantity.Value = 1;
             UpdateTotal();
         }

@@ -13,13 +13,14 @@ namespace BarStockControl.UI
     {
         private readonly RecipeService _recipeService;
         private readonly ProductService _productService;
-        private RecipeDto _selectedRecipe;
+        private RecipeDto _selectedRecipe = new RecipeDto();
         private bool _isLoading = false;
-        private List<RecipeItemDto> _currentRecipeItems;
+        private List<RecipeItemDto> _currentRecipeItems = new List<RecipeItemDto>();
 
         private ToolTip toolTip = new ToolTip();
         private bool tooltipShown = false;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0414:El campo está asignado pero su valor nunca se usa")]
         public RecipeForm()
         {
             try
@@ -75,7 +76,6 @@ namespace BarStockControl.UI
 
                 dgvRecipes.DataSource = recipes;
                 
-                // Actualizar contador
                 UpdateRecipeCount(recipes.Count());
             }
             catch (Exception ex)
@@ -95,7 +95,7 @@ namespace BarStockControl.UI
             {
                 this.Text = $"Gestión de Recetas ({count} recetas)";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silenciar error en actualización de título
             }
@@ -296,7 +296,7 @@ namespace BarStockControl.UI
                 txtName.Clear();
                 _currentRecipeItems.Clear();
                 RefreshRecipeGrid();
-                _selectedRecipe = null;
+                _selectedRecipe = new RecipeDto();
                 txtName.Focus();
             }
             catch (Exception ex)
