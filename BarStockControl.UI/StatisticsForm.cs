@@ -70,16 +70,16 @@ namespace BarStockControl.UI
         {
             cboMeses.DropDownStyle = ComboBoxStyle.DropDownList;
             cboMeses.SelectedIndexChanged += CboMeses_SelectedIndexChanged;
-            
+
             var meses = new List<string>();
             var añoActual = DateTime.Now.Year;
-            
+
             for (int mes = 1; mes <= 12; mes++)
             {
                 var fecha = new DateTime(añoActual, mes, 1);
                 meses.Add(fecha.ToString("MMMM yyyy"));
             }
-            
+
             meses.Reverse();
             cboMeses.Items.Clear();
             cboMeses.Items.Add("Últimos 30 días");
@@ -143,12 +143,12 @@ namespace BarStockControl.UI
                     desde = new DateTime(fecha.Year, fecha.Month, 1);
                     hasta = desde.AddMonths(1).AddDays(-1);
                 }
-                
+
                 var eventosFiltrados = eventos
                     .Where(e => e.StartDate <= hasta && e.EndDate >= desde)
                     .OrderBy(e => e.StartDate)
                     .ToList();
-                
+
                 if (eventosFiltrados.Count == 0)
                 {
                     decimal totalVentas2 = orders.Sum(o => o.Total);
@@ -157,7 +157,7 @@ namespace BarStockControl.UI
                     chartSales.Titles.Add("No hay eventos en el período seleccionado. Mostrando total histórico.");
                     return;
                 }
-                
+
                 decimal totalVentas = 0;
                 foreach (var evento in eventosFiltrados)
                 {
@@ -165,13 +165,13 @@ namespace BarStockControl.UI
                     series.Points.AddXY(evento.Name, total);
                     totalVentas += total;
                 }
-                
+
                 if (series.Points.Count == 0)
                 {
                     MessageBox.Show($"No hay ventas registradas para los eventos en el período seleccionado. Total de órdenes: {orders.Count}");
                     return;
                 }
-                
+
                 chartSales.Series.Add(series);
                 chartSales.Titles.Add("Ventas por evento en el período seleccionado");
                 chartSales.ChartAreas[0].AxisX.Title = "Evento";
@@ -223,7 +223,7 @@ namespace BarStockControl.UI
                     series.Points[pointIndex].LegendText = name;
                     totalTragos += item.Cantidad;
                 }
-                
+
 
                 chartPie.Series.Add(series);
                 chartPie.Titles.Add(_selectedEventId.HasValue ? "Ventas por Trago (Evento Seleccionado)" : "Ventas por Trago (Todos los Eventos)");
@@ -232,7 +232,9 @@ namespace BarStockControl.UI
                 series.Label = "#PERCENT{P2} (#VAL{N0})";
                 if (salesByDrink.Count > 0)
                 {
-                } else {
+                }
+                else
+                {
                 }
                 if (salesByDrink.Count == 0)
                 {
@@ -317,9 +319,9 @@ namespace BarStockControl.UI
 
                 var selectedOption = cboTipoBarra.SelectedItem?.ToString();
                 var consumptions = _stationProductConsumptionService.GetAllDtos();
-                
+
                 if (_selectedEventId.HasValue)
-                    consumptions = consumptions.Where(c => c.EventoId == _selectedEventId.Value).ToList();
+                    consumptions = consumptions.Where(c => c.EventId == _selectedEventId.Value).ToList();
 
                 var orderItems = _orderItemService.GetAllOrderItemDtos();
                 var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
@@ -338,7 +340,7 @@ namespace BarStockControl.UI
                             })
                             .OrderByDescending(x => x.TragosEntregados)
                             .ToList();
-                        
+
                         foreach (var item in deliveriesByStation)
                         {
                             var station = stations.FirstOrDefault(s => s.Id == item.StationId);
@@ -358,7 +360,7 @@ namespace BarStockControl.UI
                             })
                             .OrderByDescending(x => x.TragosEntregados)
                             .ToList();
-                        
+
                         foreach (var item in deliveriesByBar)
                         {
                             var station = stations.FirstOrDefault(s => s.Id == item.StationId);
@@ -374,8 +376,8 @@ namespace BarStockControl.UI
 
                     case "Ventas por barman":
                         var deliveriesByBarman = consumptions
-                            .Where(c => c.UsuarioId.HasValue)
-                            .GroupBy(c => c.UsuarioId.Value)
+                            .Where(c => c.UserId.HasValue)
+                            .GroupBy(c => c.UserId.Value)
                             .Select(g => new
                             {
                                 BarmanId = g.Key,
@@ -383,7 +385,7 @@ namespace BarStockControl.UI
                             })
                             .OrderByDescending(x => x.TragosEntregados)
                             .ToList();
-                        
+
                         foreach (var item in deliveriesByBarman)
                         {
                             var user = userService.GetById(item.BarmanId);
@@ -393,7 +395,7 @@ namespace BarStockControl.UI
                         chartBarras.Titles.Add("Tragos Entregados por Barman");
                         break;
                 }
-                
+
                 chartBarras.Series.Add(series);
                 series.IsValueShownAsLabel = true;
                 series.Label = "#VAL{N0}";
@@ -408,7 +410,7 @@ namespace BarStockControl.UI
         {
             clbProductos.Items.Clear();
             var productos = _productService.GetAll();
-            var productosDto = productos.Select(ProductMapper.ToDto).ToList();
+            var productosDto = _productService.GetAllProductDtos();
             foreach (var p in productosDto)
                 clbProductos.Items.Add(p, true);
         }
@@ -450,7 +452,7 @@ namespace BarStockControl.UI
                     var recItem = recipeItems.FirstOrDefault(ri => ri.RecipeId == recipe.Id && ri.ProductId == prod.Id);
                     if (recItem == null) continue;
                     totalVendido += oi.Subtotal;
-                    var costoUnitario = prod.Precio;
+                    var costoUnitario = prod.Price;
                     costoTotal += (decimal)recItem.Quantity * oi.Quantity * costoUnitario;
                 }
                 seriesCosto.Points.AddXY(prod.Name, costoTotal);

@@ -20,10 +20,11 @@ namespace BarStockControl.UI
         private readonly DepositService _depositService;
         private readonly BarService _barService;
         private readonly StockService _stockService;
+        private readonly UserService _userService;
 
         private List<ResourceSelectorOption> _fromOptions;
         private List<ResourceSelectorOption> _toOptions;
-        private List<Stock> _fromStockList;
+        private List<StockDto> _fromStockList;
 
         public StockMovementForm()
         {
@@ -37,6 +38,7 @@ namespace BarStockControl.UI
             _depositService = new DepositService(dataManager);
             _barService = new BarService(dataManager);
             _stockService = new StockService(dataManager);
+            _userService = new UserService(dataManager);
 
             LoadEvents();
             LoadResourceOptions();
@@ -56,7 +58,8 @@ namespace BarStockControl.UI
         {
             try
             {
-                cmbEvent.DataSource = _eventService.GetAllEvents().Where(e => e.IsActive && e.StartDate > DateTime.Now).ToList();
+                var events = _eventService.GetAllEventDtos().Where(e => e.IsActive && e.StartDate > DateTime.Now).ToList();
+                cmbEvent.DataSource = events;
                 cmbEvent.DisplayMember = "Name";
                 cmbEvent.ValueMember = "Id";
             }
@@ -74,13 +77,15 @@ namespace BarStockControl.UI
                 _fromOptions = new List<ResourceSelectorOption>();
                 _toOptions = new List<ResourceSelectorOption>();
 
-                foreach (var deposit in _depositService.Search(d => d.Active))
+                var deposits = _depositService.GetAllDepositDtos().Where(d => d.Active).ToList();
+                foreach (var deposit in deposits)
                 {
                     _fromOptions.Add(new ResourceSelectorOption { Id = deposit.Id, Type = "deposit", Name = "Depósito - " + deposit.Name });
                     _toOptions.Add(new ResourceSelectorOption { Id = deposit.Id, Type = "deposit", Name = "Depósito - " + deposit.Name });
                 }
 
-                foreach (var station in _stationService.Search(s => s.Active))
+                var stations = _stationService.GetAllStationDtos().Where(s => s.Active).ToList();
+                foreach (var station in stations)
                 {
                     var bar = _barService.GetById(station.BarId);
                     var barName = bar != null ? bar.Name : "Sin Barra";
@@ -123,7 +128,7 @@ namespace BarStockControl.UI
             try
             {
                 var type = rdoToDeposit.Checked ? "deposit" : "station";
-                var selectedEvent = cmbEvent.SelectedItem as Event;
+                var selectedEvent = cmbEvent.SelectedItem as EventDto;
                 if (selectedEvent == null)
                 {
                     cmbToLocation.DataSource = null;
@@ -139,7 +144,7 @@ namespace BarStockControl.UI
                 List<ResourceSelectorOption> options;
                 if (type == "deposit")
                 {
-                    var allDeposits = _depositService.Search(d => d.Active).ToList();
+                    var allDeposits = _depositService.GetAllDepositDtos().Where(d => d.Active).ToList();
                     options = allDeposits
                         .Where(d => assignments.Any(a => a.ResourceId == d.Id))
                         .Select(d => new ResourceSelectorOption { Id = d.Id, Type = "deposit", Name = "Depósito - " + d.Name })
@@ -147,7 +152,7 @@ namespace BarStockControl.UI
                 }
                 else
                 {
-                    var allStations = _stationService.Search(s => s.Active).ToList();
+                    var allStations = _stationService.GetAllStationDtos().Where(s => s.Active).ToList();
                     options = allStations
                         .Where(s => assignments.Any(a => a.ResourceId == s.Id))
                         .Select(s => {
@@ -178,12 +183,13 @@ namespace BarStockControl.UI
                 var selected = cmbFromLocation.SelectedItem as ResourceSelectorOption;
                 if (selected == null || cmbEvent.SelectedItem == null) return;
 
-                _fromStockList = _stockService.Search(s =>
+                var stockList = _stockService.GetAllStockDtos().Where(s =>
                     (selected.Type == "deposit" && s.DepositId == selected.Id) ||
                     (selected.Type == "station" && s.StationId == selected.Id)
                 ).ToList();
+                _fromStockList = stockList;
 
-                var products = _productService.GetAll();
+                var products = _productService.GetAllProductDtos();
                 var display = _fromStockList.Select(s => new
                 {
                     Producto = products.FirstOrDefault(p => p.Id == s.ProductId)?.Name ?? "Desconocido",
@@ -209,12 +215,12 @@ namespace BarStockControl.UI
                 var selected = cmbToLocation.SelectedItem as ResourceSelectorOption;
                 if (selected == null || cmbEvent.SelectedItem == null) return;
 
-                var stock = _stockService.Search(s =>
+                var stock = _stockService.GetAllStockDtos().Where(s =>
                     (selected.Type == "deposit" && s.DepositId == selected.Id) ||
                     (selected.Type == "station" && s.StationId == selected.Id)
                 ).ToList();
 
-                var products = _productService.GetAll();
+                var products = _productService.GetAllProductDtos();
                 var display = stock.Select(s => new
                 {
                     Producto = products.FirstOrDefault(p => p.Id == s.ProductId)?.Name ?? "Desconocido",
@@ -236,14 +242,15 @@ namespace BarStockControl.UI
         {
             try
             {
-                var selectedEvent = cmbEvent.SelectedItem as Event;
+                var selectedEvent = cmbEvent.SelectedItem as EventDto;
                 if (selectedEvent == null) return;
 
-                var products = _productService.GetAll();
-                var deposits = _depositService.GetAll();
-                var stations = _stationService.GetAll();
+                var products = _productService.GetAllProductDtos();
+                var deposits = _depositService.GetAllDepositDtos();
+                var stations = _stationService.GetAllStationDtos();
 
-                var movements = _movementService.GetAll()
+                var users = _userService.GetAllUserDtos();
+                var movements = _movementService.GetAllMovementDtos()
                     .Where(m => m.EventId == selectedEvent.Id)
                     .Select(m => new
                     {
@@ -254,6 +261,7 @@ namespace BarStockControl.UI
                         To = m.ToDepositId.HasValue ? $"Depósito: {deposits.FirstOrDefault(d => d.Id == m.ToDepositId)?.Name}" :
                              m.ToStationId.HasValue ? $"Estación: {stations.FirstOrDefault(s => s.Id == m.ToStationId)?.Name}" : "",
                         m.Quantity,
+                        User = users.FirstOrDefault(u => u.Id == m.UserId)?.FirstName + " " + users.FirstOrDefault(u => u.Id == m.UserId)?.LastName,
                         Status = m.Status.ToString()
                     }).ToList();
 
@@ -272,7 +280,7 @@ namespace BarStockControl.UI
             {
                 var selectedIndex = dgvFromStock.SelectedRows.Count > 0 ? dgvFromStock.SelectedRows[0].Index : -1;
                 var fromStock = selectedIndex >= 0 && selectedIndex < _fromStockList.Count ? _fromStockList[selectedIndex] : null;
-                var selectedEvent = cmbEvent.SelectedItem as Event;
+                var selectedEvent = cmbEvent.SelectedItem as EventDto;
                 var selectedTo = cmbToLocation.SelectedItem as ResourceSelectorOption;
 
                 var dto = new StockMovementDto
@@ -286,7 +294,7 @@ namespace BarStockControl.UI
                     ToStationId = selectedTo?.Type == "station" ? selectedTo.Id : (int?)null,
                     Comment = txtComment.Text,
                     Status = StockMovementStatus.Created,
-                    RequestedByUserId = SessionContext.Instance.LoggedUser.Id,
+                    UserId = SessionContext.Instance.LoggedUser.Id
                 };
 
                 var errors = _movementService.CreateMovement(dto);
@@ -384,7 +392,7 @@ namespace BarStockControl.UI
             }
 
             var id = Convert.ToInt32(dgvMovements.SelectedRows[0].Cells["Id"].Value);
-            var movimiento = _movementService.GetAll().FirstOrDefault(m => m.Id == id);
+            var movimiento = _movementService.GetAllMovementDtos().FirstOrDefault(m => m.Id == id);
             if (movimiento == null)
             {
                 MessageBox.Show("No se encontró el movimiento seleccionado.");
@@ -398,17 +406,17 @@ namespace BarStockControl.UI
                 return;
             }
 
-            var fromStock = _stockService.Search(s =>
+            var fromStock = _stockService.GetAllStockDtos().FirstOrDefault(s =>
                 s.ProductId == movimiento.ProductId &&
                 s.DepositId == movimiento.FromDepositId &&
                 s.StationId == movimiento.FromStationId
-            ).FirstOrDefault();
+            );
 
-            var toStock = _stockService.Search(s =>
+            var toStock = _stockService.GetAllStockDtos().FirstOrDefault(s =>
                 s.ProductId == movimiento.ProductId &&
                 s.DepositId == movimiento.ToDepositId &&
                 s.StationId == movimiento.ToStationId
-            ).FirstOrDefault();
+            );
 
             if (toStock == null || toStock.Quantity < movimiento.Quantity)
             {
@@ -423,7 +431,7 @@ namespace BarStockControl.UI
             }
             else
             {
-                var nuevoStock = new Stock
+                var nuevoStock = new StockDto
                 {
                     ProductId = movimiento.ProductId,
                     Quantity = movimiento.Quantity,

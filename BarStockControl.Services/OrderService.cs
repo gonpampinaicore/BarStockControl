@@ -35,6 +35,13 @@ namespace BarStockControl.Services
             Update(id, order);
         }
 
+        public void UpdateOrder(int id, OrderDto orderDto)
+        {
+            var order = OrderMapper.FromDto(orderDto);
+            order.Id = id;
+            Update(id, order);
+        }
+
         public void DeleteOrder(int id)
         {
             Delete(id);

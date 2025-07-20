@@ -41,7 +41,6 @@ namespace BarStockControl.Mappers
             entity.Price = dto.Price;
             entity.IsComposed = dto.IsComposed;
             entity.IsActive = dto.IsActive;
-            entity.UpdatedAt = DateTime.Now;
         }
 
         public static Drink FromXml(XElement element)
@@ -53,9 +52,7 @@ namespace BarStockControl.Mappers
                 Price = decimal.Parse((string)element.Attribute("price")),
                 IsComposed = bool.Parse((string)element.Attribute("isComposed") ?? "false"),
                 IsActive = bool.Parse((string)element.Attribute("isActive") ?? "true"),
-                EstimatedCost = decimal.Parse((string)element.Attribute("estimatedCost") ?? "0"),
-                CreatedAt = DateTime.TryParse((string)element.Attribute("createdAt"), out var createdAt) ? createdAt : DateTime.Now,
-                UpdatedAt = DateTime.TryParse((string)element.Attribute("updatedAt"), out var updatedAt) ? updatedAt : null
+                EstimatedCost = decimal.Parse((string)element.Attribute("estimatedCost") ?? "0")
             };
         }
 
@@ -67,9 +64,7 @@ namespace BarStockControl.Mappers
                 new XAttribute("price", drink.Price),
                 new XAttribute("isComposed", drink.IsComposed),
                 new XAttribute("isActive", drink.IsActive),
-                new XAttribute("estimatedCost", drink.EstimatedCost),
-                new XAttribute("createdAt", drink.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")),
-                new XAttribute("updatedAt", drink.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty)
+                new XAttribute("estimatedCost", drink.EstimatedCost)
             );
         }
 

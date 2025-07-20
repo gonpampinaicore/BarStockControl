@@ -15,9 +15,9 @@ namespace BarStockControl.Mappers
                 StationId = entity.StationId,
                 ProductId = entity.ProductId,
                 OrderItemId = entity.OrderItemId,
-                FechaHora = entity.FechaHora,
-                EventoId = entity.EventoId,
-                UsuarioId = entity.UsuarioId
+                DateTime = entity.DateTime,
+                EventId = entity.EventId,
+                UserId = entity.UserId
             };
         }
 
@@ -29,9 +29,9 @@ namespace BarStockControl.Mappers
                 StationId = dto.StationId,
                 ProductId = dto.ProductId,
                 OrderItemId = dto.OrderItemId,
-                FechaHora = dto.FechaHora,
-                EventoId = dto.EventoId,
-                UsuarioId = dto.UsuarioId
+                DateTime = dto.DateTime,
+                EventId = dto.EventId,
+                UserId = dto.UserId
             };
         }
 
@@ -43,9 +43,9 @@ namespace BarStockControl.Mappers
                 StationId = (int)element.Attribute("stationId"),
                 ProductId = (int)element.Attribute("productId"),
                 OrderItemId = (int)element.Attribute("orderItemId"),
-                FechaHora = DateTime.Parse((string)element.Attribute("fechaHora")),
-                EventoId = (int)element.Attribute("eventoId"),
-                UsuarioId = (int?)element.Attribute("usuarioId")
+                DateTime = DateTime.Parse((string)element.Attribute("dateTime")),
+                EventId = (int)element.Attribute("eventId"),
+                UserId = (int?)element.Attribute("userId")
             };
         }
 
@@ -56,9 +56,9 @@ namespace BarStockControl.Mappers
                 new XAttribute("stationId", entity.StationId),
                 new XAttribute("productId", entity.ProductId),
                 new XAttribute("orderItemId", entity.OrderItemId),
-                new XAttribute("fechaHora", entity.FechaHora.ToString("o")),
-                new XAttribute("eventoId", entity.EventoId),
-                new XAttribute("usuarioId", entity.UsuarioId.HasValue ? entity.UsuarioId.Value.ToString() : "")
+                new XAttribute("dateTime", entity.DateTime.ToString("o")),
+                new XAttribute("eventId", entity.EventId),
+                new XAttribute("userId", entity.UserId.HasValue ? entity.UserId.Value.ToString() : "")
             );
         }
     }

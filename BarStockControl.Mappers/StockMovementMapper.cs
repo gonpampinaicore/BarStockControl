@@ -20,8 +20,7 @@ namespace BarStockControl.Mappers
                 ToStationId = movement.ToStationId,
                 Quantity = movement.Quantity,
                 EventId = movement.EventId,
-                RequestedByUserId = movement.RequestedByUserId,
-                ConfirmedByUserId = movement.ConfirmedByUserId,
+                UserId = movement.UserId,
                 Timestamp = movement.Timestamp,
                 Status = movement.Status,
                 Comment = movement.Comment
@@ -40,8 +39,7 @@ namespace BarStockControl.Mappers
                 ToStationId = dto.ToStationId,
                 Quantity = dto.Quantity,
                 EventId = dto.EventId,
-                RequestedByUserId = dto.RequestedByUserId,
-                ConfirmedByUserId = dto.ConfirmedByUserId,
+                UserId = dto.UserId,
                 Timestamp = dto.Timestamp,
                 Status = dto.Status,
                 Comment = dto.Comment
@@ -55,13 +53,12 @@ namespace BarStockControl.Mappers
                 new XAttribute("productId", movement.ProductId),
                 new XAttribute("quantity", movement.Quantity),
                 new XAttribute("eventId", movement.EventId),
-                new XAttribute("requestedByUserId", movement.RequestedByUserId),
+                new XAttribute("userId", movement.UserId),
                 new XAttribute("timestamp", movement.Timestamp.ToString("o")), // ISO 8601
                 new XAttribute("status", movement.Status.ToString())
             );
 
-            if (movement.ConfirmedByUserId.HasValue)
-                element.Add(new XAttribute("confirmedByUserId", movement.ConfirmedByUserId));
+
 
             if (movement.FromDepositId.HasValue)
                 element.Add(new XAttribute("fromDepositId", movement.FromDepositId));
@@ -89,8 +86,8 @@ namespace BarStockControl.Mappers
                 ProductId = int.Parse(element.Attribute("productId")?.Value),
                 Quantity = double.Parse(element.Attribute("quantity")?.Value),
                 EventId = int.Parse(element.Attribute("eventId")?.Value),
-                RequestedByUserId = int.Parse(element.Attribute("requestedByUserId")?.Value),
-                ConfirmedByUserId = element.Attribute("confirmedByUserId") != null ? int.Parse(element.Attribute("confirmedByUserId")?.Value) : (int?)null,
+                UserId = int.Parse(element.Attribute("userId")?.Value),
+
                 FromDepositId = element.Attribute("fromDepositId") != null ? int.Parse(element.Attribute("fromDepositId")?.Value) : (int?)null,
                 FromStationId = element.Attribute("fromStationId") != null ? int.Parse(element.Attribute("fromStationId")?.Value) : (int?)null,
                 ToDepositId = element.Attribute("toDepositId") != null ? int.Parse(element.Attribute("toDepositId")?.Value) : (int?)null,

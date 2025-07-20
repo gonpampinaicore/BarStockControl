@@ -47,7 +47,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                var products = _productService.GetAllProducts();
+                var products = _productService.GetAllProductDtos();
                 cboProduct.DataSource = products;
                 cboProduct.DisplayMember = "Name";
                 cboProduct.ValueMember = "Id";
@@ -386,7 +386,7 @@ namespace BarStockControl.UI
         private void RefreshRecipeGrid()
         {
             dgvRecipeItems.DataSource = null;
-            var products = _productService.GetAllProducts().ToDictionary(p => p.Id, p => p.Name);
+            var products = _productService.GetAllProductDtos().ToDictionary(p => p.Id, p => p.Name);
             var displayList = _currentRecipeItems.Select(item => new {
                 Producto = products.ContainsKey(item.ProductId) ? products[item.ProductId] : $"ID {item.ProductId}",
                 Cantidad = item.Quantity

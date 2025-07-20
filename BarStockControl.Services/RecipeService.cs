@@ -30,15 +30,7 @@ namespace BarStockControl.Services
 
         public List<RecipeDto> GetAllRecipes()
         {
-            var recipes = GetAll().Select(r => r.ToDto()).ToList();
-            
-            // Cargar los items de cada receta
-            foreach (var recipe in recipes)
-            {
-                recipe.Items = GetRecipeItems(recipe.Id).ToList();
-            }
-            
-            return recipes;
+            return GetAll().Select(r => r.ToDto()).ToList();
         }
 
         public RecipeDto GetRecipeById(int id)

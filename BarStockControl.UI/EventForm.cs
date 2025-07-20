@@ -22,7 +22,23 @@ namespace BarStockControl.UI
             InitializeComponent();
             _eventService = new EventService(new XmlDataManager("Xml/data.xml"));
             LoadEvents();
-            cmbStatus.DataSource = Enum.GetValues(typeof(EventStatus));
+            SetupStatusComboBox();
+        }
+
+        private void SetupStatusComboBox()
+        {
+            var statusOptions = Enum.GetValues(typeof(EventStatus))
+                .Cast<EventStatus>()
+                .Select(status => new
+                {
+                    Value = status,
+                    DisplayText = status.ToFriendlyString()
+                })
+                .ToList();
+
+            cmbStatus.DataSource = statusOptions;
+            cmbStatus.DisplayMember = "DisplayText";
+            cmbStatus.ValueMember = "Value";
         }
 
         private void LoadEvents()
@@ -72,7 +88,7 @@ namespace BarStockControl.UI
                     txtDescription.Text = _selectedEventDto?.Description ?? "";
                     dtpStart.Value = _selectedEventDto?.StartDate ?? DateTime.Now;
                     dtpEnd.Value = _selectedEventDto?.EndDate ?? DateTime.Now;
-                    cmbStatus.SelectedItem = _selectedEventDto?.Status ?? EventStatus.InPreparation;
+                    cmbStatus.SelectedValue = _selectedEventDto?.Status ?? EventStatus.InPreparation;
                     chkActive.Checked = _selectedEventDto?.IsActive ?? true;
                 }
             }
@@ -93,7 +109,7 @@ namespace BarStockControl.UI
                 Description = txtDescription.Text,
                 StartDate = startDate,
                 EndDate = endDate,
-                Status = (EventStatus)cmbStatus.SelectedItem,
+                Status = (EventStatus)cmbStatus.SelectedValue,
                 IsActive = chkActive.Checked
             };
         }
@@ -203,7 +219,7 @@ namespace BarStockControl.UI
         {
             txtName.Clear();
             txtDescription.Clear();
-            cmbStatus.SelectedIndex = 0;
+            cmbStatus.SelectedValue = EventStatus.InPreparation;
             chkActive.Checked = true;
             dtpStart.Value = DateTime.Now;
             dtpEnd.Value = DateTime.Now;

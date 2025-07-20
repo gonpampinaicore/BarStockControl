@@ -16,8 +16,7 @@ namespace BarStockControl.Mappers
                 Id = recipe.Id,
                 Name = recipe.Name,
                 DrinkId = recipe.DrinkId,
-                IsActive = true,
-                Items = new List<RecipeItemDto>() // Se cargan por separado en el servicio
+                IsActive = true
             };
         }
 
@@ -27,8 +26,7 @@ namespace BarStockControl.Mappers
             {
                 Id = recipeDto.Id,
                 Name = recipeDto.Name,
-                DrinkId = recipeDto.DrinkId,
-                Items = new List<RecipeItem>() // Se manejan por separado
+                DrinkId = recipeDto.DrinkId
             };
         }
 
@@ -48,10 +46,7 @@ namespace BarStockControl.Mappers
             {
                 Id = int.Parse((string)element.Attribute("id")),
                 Name = (string)element.Attribute("name"),
-                DrinkId = int.Parse((string)element.Attribute("drinkRef")),
-                Items = element.Elements("items").Any()
-                    ? element.Element("items").Elements().Select(itemElement => RecipeItemMapper.FromXml(itemElement)).ToList()
-                    : new List<RecipeItem>()
+                DrinkId = int.Parse((string)element.Attribute("drinkRef"))
             };
         }
 

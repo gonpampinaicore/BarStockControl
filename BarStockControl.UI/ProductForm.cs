@@ -102,7 +102,7 @@ namespace BarStockControl.UI
             try
             {
                 _isLoading = true;
-                var products = _productService.GetAllProducts();
+                var products = _productService.GetAllProductDtos();
 
                 if (!string.IsNullOrWhiteSpace(txtSearch.Text))
                 {
@@ -115,7 +115,7 @@ namespace BarStockControl.UI
                 }
 
                 dgvProducts.AutoGenerateColumns = true;
-                dgvProducts.DataSource = products.Select(ProductMapper.ToDto).ToList();
+                dgvProducts.DataSource = products;
                 
                 UpdateProductCount(products.Count);
             }
@@ -151,8 +151,7 @@ namespace BarStockControl.UI
 
                 var productDto = GetProductFromForm();
                 if (productDto == null) return;
-                var product = ProductMapper.ToEntity(productDto);
-                var errors = _productService.CreateProduct(product);
+                var errors = _productService.CreateProduct(productDto);
 
                 if (errors.Any())
                 {
@@ -188,11 +187,9 @@ namespace BarStockControl.UI
                     return;
 
                 var productDto = GetProductFromForm();
-                if (productDto == null) return; // Check if GetProductFromForm returned null
+                if (productDto == null) return; 
                 productDto.Id = _selectedProduct.Id;
-                var product = ProductMapper.ToEntity(productDto);
-
-                var errors = _productService.UpdateProduct(product);
+                var errors = _productService.UpdateProduct(productDto);
 
                 if (errors.Any())
                 {
@@ -268,7 +265,7 @@ namespace BarStockControl.UI
             {
                 txtName.Text = product.Name;
                 txtCapacity.Text = product.Capacity.ToString();
-                txtPrecio.Text = product.Precio.ToString("F2");
+                txtPrecio.Text = product.Price.ToString("F2");
                 txtEstimatedServings.Text = product.EstimatedServings.ToString();
                 cmbUnit.SelectedItem = product.Unit;
                 cmbCategory.SelectedItem = product.Category;
@@ -371,7 +368,7 @@ namespace BarStockControl.UI
                 {
                     Name = txtName.Text.Trim(),
                     Capacity = double.Parse(txtCapacity.Text),
-                    Precio = decimal.Parse(txtPrecio.Text),
+                    Price = decimal.Parse(txtPrecio.Text),
                     Unit = (UnitType)cmbUnit.SelectedItem,
                     Category = (ProductCategory)cmbCategory.SelectedItem,
                     EstimatedServings = int.Parse(txtEstimatedServings.Text),
@@ -603,13 +600,11 @@ namespace BarStockControl.UI
                     Capacity = capacity,
                     Unit = (UnitType)cmbUnit.SelectedItem,
                     Category = cmbCategory.SelectedItem != null ? (ProductCategory)cmbCategory.SelectedItem : ProductCategory.BebidaAlcoholica,
-                    Precio = decimal.TryParse(txtPrecio.Text, out var precio) ? precio : 0,
+                    Price = decimal.TryParse(txtPrecio.Text, out var precio) ? precio : 0,
                     IsActive = chkActive.Checked
                 };
 
-                var tempProduct = ProductMapper.ToEntity(tempDto);
-                
-                int estimatedServings = tempProduct.GetEstimatedServings();
+                int estimatedServings = _productService.CalculateEstimatedServings(tempDto);
                 txtEstimatedServings.Text = estimatedServings.ToString();
 
                 string unitName = tempDto.Unit.ToString();
@@ -646,13 +641,11 @@ namespace BarStockControl.UI
                     Capacity = capacity,
                     Unit = (UnitType)cmbUnit.SelectedItem,
                     Category = cmbCategory.SelectedItem != null ? (ProductCategory)cmbCategory.SelectedItem : ProductCategory.BebidaAlcoholica,
-                    Precio = decimal.TryParse(txtPrecio.Text, out var precio) ? precio : 0,
+                    Price = decimal.TryParse(txtPrecio.Text, out var precio) ? precio : 0,
                     IsActive = chkActive.Checked
                 };
 
-                var tempProduct = ProductMapper.ToEntity(tempDto);
-                
-                int estimatedServings = tempProduct.GetEstimatedServings();
+                int estimatedServings = _productService.CalculateEstimatedServings(tempDto);
                 txtEstimatedServings.Text = estimatedServings.ToString();
             }
             catch (Exception ex)

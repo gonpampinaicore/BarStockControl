@@ -9,8 +9,6 @@ namespace BarStockControl.DTOs
         public decimal Price { get; set; }
         public bool IsComposed { get; set; }
         public bool IsActive { get; set; } = true;
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
         public decimal EstimatedCost { get; set; }
     }
 } 

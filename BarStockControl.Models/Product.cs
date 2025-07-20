@@ -17,7 +17,7 @@ namespace BarStockControl.Models
         public ProductCategory Category { get; set; }
 
         public double Capacity { get; set; }
-        public decimal Precio { get; set; }
+        public decimal Price { get; set; }
         public int EstimatedServings { get; set; }
         public bool IsActive { get; set; }
 

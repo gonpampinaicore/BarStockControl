@@ -25,9 +25,7 @@ namespace BarStockControl.DTOs
 
         public int EventId { get; set; }
 
-        public int RequestedByUserId { get; set; }
-
-        public int? ConfirmedByUserId { get; set; }
+        public int UserId { get; set; }
 
         public StockMovementStatus Status { get; set; } = StockMovementStatus.Created;
 

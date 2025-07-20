@@ -107,7 +107,7 @@
             cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbStatus.Location = new Point(100, 390);
             cmbStatus.Name = "cmbStatus";
-            cmbStatus.Size = new Size(200, 23);
+            cmbStatus.Size = new Size(229, 23);
             cmbStatus.TabIndex = 7;
             // 
             // chkActive

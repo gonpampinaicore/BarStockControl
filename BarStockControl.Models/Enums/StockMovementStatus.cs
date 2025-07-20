@@ -15,4 +15,5 @@ namespace BarStockControl.Models.Enums
         CancelledByRequester,
         RejectedOutOfStock
     }
+
 }

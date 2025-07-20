@@ -62,7 +62,6 @@ namespace BarStockControl.Services
 
                 var drink = drinkDto.ToModel();
                 drink.Id = GetNextId();
-                drink.CreatedAt = DateTime.Now;
 
                 var productIds = new HashSet<int>();
                 foreach (var item in recipeItems)
@@ -169,14 +168,15 @@ namespace BarStockControl.Services
 
                 decimal totalCost = 0;
                 var products = _productService.GetAll().ToDictionary(p => p.Id);
+                var recipeItems = GetRecipeItems(drinkId);
 
-                foreach (var item in recipeDto.Items)
+                foreach (var item in recipeItems)
                 {
                     if (products.TryGetValue(item.ProductId, out var product))
                     {
                         if (product.EstimatedServings > 0)
                         {
-                            decimal costPerServing = product.Precio / product.EstimatedServings;
+                            decimal costPerServing = product.Price / product.EstimatedServings;
                             totalCost += costPerServing * item.Quantity;
                         }
                     }
@@ -199,7 +199,7 @@ namespace BarStockControl.Services
                 if (recipeDto == null)
                     return new List<RecipeItemDto>();
 
-                return recipeDto.Items;
+                return _recipeService.GetRecipeItems(recipeDto.Id).ToList();
             }
             catch (Exception)
             {
@@ -216,38 +216,7 @@ namespace BarStockControl.Services
                 if (recipeDto == null)
                     return false;
 
-                var existingItems = _recipeItemService.GetAllRecipeItems()
-                    .Where(item => item.RecipeId == recipeDto.Id)
-                    .ToList();
-
-                foreach (var existingItem in existingItems)
-                {
-                    _recipeItemService.DeleteRecipeItem(existingItem.Id);
-                }
-
-                recipeDto.Items.Clear();
-                foreach (var itemDto in items)
-                {
-                    var newItem = new RecipeItemDto
-                    {
-                        Id = GetNextRecipeItemId(),
-                        RecipeId = recipeDto.Id,
-                        ProductId = itemDto.ProductId,
-                        Quantity = itemDto.Quantity,
-                        IsActive = true
-                    };
-
-                    if (_recipeItemService.CreateRecipeItem(newItem))
-                    {
-                        recipeDto.Items.Add(newItem);
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-
-                return _recipeService.UpdateRecipe(recipeDto);
+                return _recipeService.SaveRecipeItems(recipeDto.Id, items);
             }
             catch (Exception)
             {

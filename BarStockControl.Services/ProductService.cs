@@ -53,9 +53,9 @@ namespace BarStockControl.Services
             else if (product.Capacity > 999999)
                 errors.Add("La capacidad no puede exceder 999,999.");
 
-            if (product.Precio < 0)
+            if (product.Price < 0)
                 errors.Add("El precio no puede ser negativo.");
-            else if (product.Precio > 999999.99m)
+            else if (product.Price > 999999.99m)
                 errors.Add("El precio no puede exceder 999,999.99.");
 
             if (product.EstimatedServings < 0)
@@ -93,6 +93,22 @@ namespace BarStockControl.Services
             }
         }
 
+        public List<string> CreateProduct(ProductDto productDto)
+        {
+            try
+            {
+                if (productDto == null)
+                    throw new ArgumentNullException(nameof(productDto), "El producto no puede ser null.");
+
+                var product = ProductMapper.ToEntity(productDto);
+                return CreateProduct(product);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al crear producto: {ex.Message}", ex);
+            }
+        }
+
         public List<string> UpdateProduct(Product product)
         {
             try
@@ -106,6 +122,22 @@ namespace BarStockControl.Services
 
                 Update(product.Id, product);
                 return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al actualizar producto: {ex.Message}", ex);
+            }
+        }
+
+        public List<string> UpdateProduct(ProductDto productDto)
+        {
+            try
+            {
+                if (productDto == null)
+                    throw new ArgumentNullException(nameof(productDto), "El producto no puede ser null.");
+
+                var product = ProductMapper.ToEntity(productDto);
+                return UpdateProduct(product);
             }
             catch (Exception ex)
             {
@@ -271,7 +303,7 @@ namespace BarStockControl.Services
 
                 foreach (var product in products)
                 {
-                    lines.Add($"{product.Id},\"{product.Name}\",{product.Unit},{product.Category},{product.Capacity},{product.Precio:F2},{product.EstimatedServings},{(product.IsActive ? "Sí" : "No")},{product.Type},{product.QualityCategory},{(product.IsImported ? "Sí" : "No")}");
+                    lines.Add($"{product.Id},\"{product.Name}\",{product.Unit},{product.Category},{product.Capacity},{product.Price:F2},{product.EstimatedServings},{(product.IsActive ? "Sí" : "No")},{product.Type},{product.QualityCategory},{(product.IsImported ? "Sí" : "No")}");
                 }
 
                 System.IO.File.WriteAllLines(filePath, lines);
@@ -285,6 +317,22 @@ namespace BarStockControl.Services
         public List<ProductDto> GetAllProductDtos()
         {
             return GetAll().Select(ProductMapper.ToDto).ToList();
+        }
+
+        public int CalculateEstimatedServings(ProductDto productDto)
+        {
+            try
+            {
+                if (productDto == null)
+                    throw new ArgumentNullException(nameof(productDto), "El producto no puede ser null.");
+
+                var product = ProductMapper.ToEntity(productDto);
+                return product.GetEstimatedServings();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al calcular servings estimados: {ex.Message}", ex);
+            }
         }
     }
 }

@@ -6,8 +6,8 @@ namespace BarStockControl.Models
         public int StationId { get; set; }
         public int ProductId { get; set; }
         public int OrderItemId { get; set; }
-        public DateTime FechaHora { get; set; }
-        public int EventoId { get; set; }
-        public int? UsuarioId { get; set; }
+        public DateTime DateTime { get; set; }
+        public int EventId { get; set; }
+        public int? UserId { get; set; }
     }
 } 

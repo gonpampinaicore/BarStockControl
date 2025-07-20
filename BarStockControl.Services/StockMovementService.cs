@@ -130,5 +130,12 @@ namespace BarStockControl.Services
                 .ToList();
         }
 
+        public List<StockMovementDto> GetAllMovementDtos()
+        {
+            return GetAll()
+                .Select(StockMovementMapper.ToDto)
+                .ToList();
+        }
+
     }
 }

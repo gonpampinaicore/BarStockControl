@@ -17,7 +17,7 @@ namespace BarStockControl.Mappers
                 Unit = product.Unit,
                 Category = product.Category,
                 Capacity = product.Capacity,
-                Precio = product.Precio,
+                Price = product.Price,
                 EstimatedServings = product.EstimatedServings,
                 IsActive = product.IsActive,
                 Type = product.Type,
@@ -36,7 +36,7 @@ namespace BarStockControl.Mappers
                 Unit = dto.Unit,
                 Category = dto.Category,
                 Capacity = dto.Capacity,
-                Precio = dto.Precio,
+                Price = dto.Price,
                 EstimatedServings = dto.EstimatedServings,
                 IsActive = dto.IsActive,
                 Type = dto.Type,
@@ -59,7 +59,7 @@ namespace BarStockControl.Mappers
                     Unit = Enum.TryParse<UnitType>((string)element.Attribute("unit"), out var unit) ? unit : UnitType.Unidad,
                     Category = Enum.TryParse<ProductCategory>((string)element.Attribute("category"), out var category) ? category : ProductCategory.BebidaAlcoholica,
                     Capacity = double.TryParse((string)element.Attribute("capacity"), out var capacity) ? capacity : 0,
-                    Precio = decimal.TryParse((string)element.Attribute("precio"), out var precio) ? precio : 0,
+                    Price = decimal.TryParse((string)element.Attribute("price"), out var precio) ? precio : 0,
                     EstimatedServings = int.TryParse((string)element.Attribute("estimatedServings"), out var servings) ? servings : 0,
                     IsActive = bool.TryParse((string)element.Attribute("isActive"), out var isActive) ? isActive : true
                 };
@@ -83,7 +83,7 @@ namespace BarStockControl.Mappers
                     new XAttribute("unit", product.Unit.ToString()),
                     new XAttribute("category", product.Category.ToString()),
                     new XAttribute("capacity", product.Capacity.ToString("F2")),
-                    new XAttribute("precio", product.Precio.ToString("F2")),
+                    new XAttribute("price", product.Price.ToString("F2")),
                     new XAttribute("estimatedServings", product.EstimatedServings),
                     new XAttribute("isActive", product.IsActive.ToString().ToLower())
                 );
@@ -107,7 +107,7 @@ namespace BarStockControl.Mappers
                 if (product.Capacity <= 0)
                     return false;
 
-                if (product.Precio < 0)
+                if (product.Price < 0)
                     return false;
 
                 if (product.EstimatedServings <= 0)

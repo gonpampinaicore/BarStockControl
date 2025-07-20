@@ -162,7 +162,7 @@ namespace BarStockControl.UI
             try
             {
                 var stock = _stockService.GetAll().Where(s => s.StationId == stationId).ToList();
-                var productos = _productService.GetAllProducts();
+                var productos = _productService.GetAllProductDtos();
                 var stockDisplay = stock.Select(s => {
                     var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
                     var estimados = prod != null ? prod.EstimatedServings * s.Quantity : 0;
@@ -197,7 +197,7 @@ namespace BarStockControl.UI
                     .GroupBy(s => s.ProductId)
                     .Select(g => new
                     {
-                        Producto = _productService.GetAllProducts().FirstOrDefault(p => p.Id == g.Key)?.Name ?? "Desconocido",
+                        Producto = _productService.GetAllProductDtos().FirstOrDefault(p => p.Id == g.Key)?.Name ?? "Desconocido",
                         Cantidad_Total = g.Sum(s => s.Quantity),
                         Estaciones = string.Join(", ", g.Select(s => _stationService.GetAll().FirstOrDefault(st => st.Id == s.StationId)?.Name ?? "Desconocida").Distinct())
                     })

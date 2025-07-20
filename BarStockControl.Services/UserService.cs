@@ -150,6 +150,18 @@ namespace BarStockControl.Services
             }
         }
 
+        public List<UserDto> GetAllUserDtos()
+        {
+            try
+            {
+                return GetAll().Select(UserMapper.ToDto).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al obtener todos los usuarios: {ex.Message}", ex);
+            }
+        }
+
         public List<User> Search(Func<User, bool> predicate)
         {
             try

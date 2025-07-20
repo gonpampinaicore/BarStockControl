@@ -187,9 +187,8 @@ namespace BarStockControl.UI
         {
             try
             {
-                var products = _productService.GetAllProducts();
-                var productDtos = products.Select(ProductMapper.ToDto).ToList();
-                cboProduct.DataSource = productDtos;
+                            var products = _productService.GetAllProductDtos();
+            cboProduct.DataSource = products;
             }
             catch (Exception ex)
             {
@@ -563,7 +562,7 @@ namespace BarStockControl.UI
         private void RefreshRecipeGrid()
         {
             dgvRecipeItems.DataSource = null;
-            var products = _productService.GetAllProducts().ToDictionary(p => p.Id, p => p.Name);
+            var products = _productService.GetAllProductDtos().ToDictionary(p => p.Id, p => p.Name);
             var displayList = _currentRecipeItems.Select(item => new
             {
                 Producto = products.ContainsKey(item.ProductId) ? products[item.ProductId] : $"ID {item.ProductId}",
@@ -584,12 +583,12 @@ namespace BarStockControl.UI
                 else if (_currentRecipeItems.Any())
                 {
                     decimal estimatedCost = 0;
-                    var products = _productService.GetAllProducts().ToDictionary(p => p.Id);
+                    var products = _productService.GetAllProductDtos().ToDictionary(p => p.Id);
                     foreach (var item in _currentRecipeItems)
                     {
                         if (products.TryGetValue(item.ProductId, out var product) && product.EstimatedServings > 0)
                         {
-                            decimal costPerServing = product.Precio / product.EstimatedServings;
+                            decimal costPerServing = product.Price / product.EstimatedServings;
                             estimatedCost += costPerServing * item.Quantity;
                         }
                     }

@@ -75,7 +75,7 @@ namespace BarStockControl.UI
                     MessageBox.Show("Ingrese un ID de orden válido.");
                     return;
                 }
-                _currentOrder = _orderService.GetAllOrders().Select(OrderMapper.ToDto).FirstOrDefault(o => o.Id == orderId);
+                _currentOrder = _orderService.GetAllOrderDtos().FirstOrDefault(o => o.Id == orderId);
                 if (_currentOrder == null)
                 {
                     MessageBox.Show("Orden no encontrada.");
@@ -88,21 +88,21 @@ namespace BarStockControl.UI
                     LimpiarOrden();
                     return;
                 }
-                _orderItems = _orderItemService.GetAll().Where(oi => oi.OrderId == orderId).Select(OrderItemMapper.ToDto).ToList();
+                _orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
                 var orderItemsDisplay = _orderItems.Select(i => new {
                     Trago = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Id == i.DrinkId)?.Name ?? "Desconocido",
                     Cantidad = i.Quantity
                 }).ToList();
                 dgvOrderItems.DataSource = orderItemsDisplay;
                 var stock = _stockService.GetAll().Where(s => s.StationId == _stationId).ToList();
-                var productos = _productService.GetAllProducts();
+                var productos = _productService.GetAllProductDtos();
                 foreach (var item in _orderItems)
                 {
                     var drink = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Id == item.DrinkId);
                     if (drink == null) continue;
-                    var recipe = _recipeService.GetAll().Select(RecipeMapper.ToDto).FirstOrDefault(r => r.DrinkId == drink.Id);
+                    var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                     if (recipe == null) continue;
-                    var recipeItems = _recipeItemService.GetAll().Select(RecipeItemMapper.ToDto).Where(ri => ri.RecipeId == recipe.Id).ToList();
+                    var recipeItems = _recipeItemService.GetAllRecipeItems().Where(ri => ri.RecipeId == recipe.Id).ToList();
                     foreach (var ri in recipeItems)
                     {
                         var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
@@ -136,11 +136,11 @@ namespace BarStockControl.UI
                 var drink = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Name == drinkName);
                 if (drink == null) return;
                 _selectedDrink = drink;
-                var recipe = _recipeService.GetAll().Select(RecipeMapper.ToDto).FirstOrDefault(r => r.DrinkId == drink.Id);
+                var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) return;
-                var recipeItems = _recipeItemService.GetAll().Select(RecipeItemMapper.ToDto).Where(ri => ri.RecipeId == recipe.Id).ToList();
+                var recipeItems = _recipeItemService.GetAllRecipeItems().Where(ri => ri.RecipeId == recipe.Id).ToList();
                 var recipeDisplay = recipeItems.Select(ri => new {
-                    Ingrediente = _productService.GetAllProducts().FirstOrDefault(p => p.Id == ri.ProductId)?.Name ?? "Desconocido",
+                    Ingrediente = _productService.GetAllProductDtos().FirstOrDefault(p => p.Id == ri.ProductId)?.Name ?? "Desconocido",
                     Cantidad = ri.Quantity
                 }).ToList();
                 dgvRecipeItems.DataSource = recipeDisplay;
@@ -156,7 +156,7 @@ namespace BarStockControl.UI
             try
             {
                 var stock = _stockService.GetAll().Where(s => s.StationId == _stationId).ToList();
-                var productos = _productService.GetAllProducts();
+                var productos = _productService.GetAllProductDtos();
                 var stockDisplay = stock.Select(s => {
                     var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
                     var estimados = prod != null ? prod.EstimatedServings * s.Quantity : 0;
@@ -209,7 +209,7 @@ namespace BarStockControl.UI
             };
             _barmanOrderService.CreateBarmanOrder(barmanOrder);
             _currentOrder.Status = OrderStatus.EnPreparacion;
-            _orderService.UpdateOrder(_currentOrder.Id, OrderMapper.FromDto(_currentOrder));
+            _orderService.UpdateOrder(_currentOrder.Id, _currentOrder);
             MessageBox.Show("Orden marcada como En preparación.");
             btnPreparar.Enabled = false;
             btnEntregar.Enabled = true;
@@ -218,14 +218,14 @@ namespace BarStockControl.UI
         private void BtnEntregar_Click(object sender, EventArgs e)
         {
             if (_currentOrder == null) return;
-            var productos = _productService.GetAllProducts();
+            var productos = _productService.GetAllProductDtos();
             foreach (var item in _orderItems)
             {
                 var drink = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Id == item.DrinkId);
                 if (drink == null) continue;
-                var recipe = _recipeService.GetAll().Select(RecipeMapper.ToDto).FirstOrDefault(r => r.DrinkId == drink.Id);
+                var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) continue;
-                var recipeItems = _recipeItemService.GetAll().Select(RecipeItemMapper.ToDto).Where(ri => ri.RecipeId == recipe.Id).ToList();
+                var recipeItems = _recipeItemService.GetAllRecipeItems().Where(ri => ri.RecipeId == recipe.Id).ToList();
                 foreach (var ri in recipeItems)
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
@@ -243,15 +243,15 @@ namespace BarStockControl.UI
                         StationId = _stationId,
                         ProductId = prod.Id,
                         OrderItemId = item.Id,
-                        FechaHora = DateTime.Now,
-                        EventoId = _currentOrder.EventId,
-                        UsuarioId = SessionContext.Instance.LoggedUser?.Id
+                        DateTime = DateTime.Now,
+                        EventId = _currentOrder.EventId,
+                        UserId = SessionContext.Instance.LoggedUser?.Id
                     };
                     _stationProductConsumptionService.Create(consumo);
                 }
             }
             _currentOrder.Status = OrderStatus.Entregado;
-            _orderService.UpdateOrder(_currentOrder.Id, OrderMapper.FromDto(_currentOrder));
+            _orderService.UpdateOrder(_currentOrder.Id, _currentOrder);
             MessageBox.Show("Orden marcada como Entregada.");
             LoadStationStock();
             txtOrderId.Clear();

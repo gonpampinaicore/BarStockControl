@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace BarStockControl.DTOs
 {
     public class RecipeDto
@@ -8,6 +6,5 @@ namespace BarStockControl.DTOs
         public string Name { get; set; } = string.Empty;
         public int DrinkId { get; set; }
         public bool IsActive { get; set; } = true;
-        public List<RecipeItemDto> Items { get; set; } = new List<RecipeItemDto>();
     }
 } 
