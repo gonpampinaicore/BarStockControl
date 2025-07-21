@@ -71,7 +71,7 @@ namespace BarStockControl.UI
             {
                 if (_currentEvent == null) return;
                 
-                var allOrders = _orderService.GetAllOrders().Select(OrderMapper.ToDto).ToList();
+                var allOrders = _orderService.GetAllOrderDtos();
                 _eventOrders = allOrders.Where(o => o.EventId == _currentEvent.Id).ToList();
 
                 var ordersDisplay = _eventOrders.Select(o => new
@@ -133,12 +133,12 @@ namespace BarStockControl.UI
             try
             {
                 var barmanOrderService = new BarmanOrderService(new Data.XmlDataManager("Xml/data.xml"));
-                var allBarmanOrders = barmanOrderService.GetAllBarmanOrders();
+                var barmanOrderDtos = barmanOrderService.GetByStationId(stationId);
                 var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
                 var orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
-                var orders = orderService.GetAllOrders();
-                var barmanOrders = allBarmanOrders
-                    .Where(bo => bo.StationId == stationId && bo.EventId == _currentEvent.Id)
+                var orders = orderService.GetAllOrderDtos();
+                var barmanOrders = barmanOrderDtos
+                    .Where(bo => bo.EventId == _currentEvent.Id)
                     .Select(bo => new
                     {
                         Orden = bo.OrderId,

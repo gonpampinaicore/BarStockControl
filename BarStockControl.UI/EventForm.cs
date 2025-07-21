@@ -45,7 +45,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                var events = _eventService.GetAllEvents();
+                var events = _eventService.GetAllEventDtos();
 
                 if (chkOnlyActive.Checked)
                     events = events.Where(e => e.IsActive).ToList();
@@ -58,8 +58,7 @@ namespace BarStockControl.UI
 
                 events = events.OrderBy(e => e.StartDate).ToList();
 
-                var dtos = events.Select(EventMapper.ToDto).ToList();
-                dgvEvents.DataSource = dtos;
+                dgvEvents.DataSource = events;
 
                 foreach (DataGridViewColumn columna in dgvEvents.Columns)
                 {
@@ -80,9 +79,7 @@ namespace BarStockControl.UI
                 if (e.RowIndex >= 0)
                 {
                     var selected = (EventDto)dgvEvents.Rows[e.RowIndex].DataBoundItem;
-                    _selectedEventDto = _eventService.GetById(selected.Id) is Event ev
-                        ? EventMapper.ToDto(ev)
-                        : null;
+                    _selectedEventDto = _eventService.GetEventDtoById(selected.Id);
 
                     txtName.Text = _selectedEventDto?.Name ?? "";
                     txtDescription.Text = _selectedEventDto?.Description ?? "";
@@ -98,11 +95,11 @@ namespace BarStockControl.UI
             }
         }
 
-        private Event GetEventFromForm()
+        private EventDto GetEventFromForm()
         {
             var startDate = dtpStart.Value.Date.AddHours(19);
             var endDate = dtpEnd.Value.Date.AddHours(10);
-            return new Event
+            return new EventDto
             {
                 Id = _selectedEventDto?.Id ?? 0,
                 Name = txtName.Text,
@@ -119,9 +116,7 @@ namespace BarStockControl.UI
             try
             {
                 var ev = GetEventFromForm();
-
-                // Validación: no permitir eventos con el mismo StartDate
-                var eventosExistentes = _eventService.GetAllEvents();
+                var eventosExistentes = _eventService.GetAllEventDtos();
                 if (eventosExistentes.Any(e => e.StartDate.Date == ev.StartDate.Date))
                 {
                     MessageBox.Show("Ya existe un evento con la misma fecha de inicio.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);

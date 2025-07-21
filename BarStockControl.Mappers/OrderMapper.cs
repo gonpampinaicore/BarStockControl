@@ -15,6 +15,7 @@ namespace BarStockControl.Mappers
                 Id = order.Id,
                 EventId = order.EventId,
                 UserId = order.UserId,
+                CashRegisterId = order.CashRegisterId,
                 CreatedAt = order.CreatedAt,
                 Status = order.Status,
                 PaymentMethod = order.PaymentMethod,
@@ -30,6 +31,7 @@ namespace BarStockControl.Mappers
                 Id = dto.Id,
                 EventId = dto.EventId,
                 UserId = dto.UserId,
+                CashRegisterId = dto.CashRegisterId,
                 CreatedAt = dto.CreatedAt,
                 Status = dto.Status,
                 PaymentMethod = dto.PaymentMethod,
@@ -45,6 +47,7 @@ namespace BarStockControl.Mappers
                 Id = (int)element.Attribute("id"),
                 EventId = (int)element.Attribute("eventId"),
                 UserId = (int)element.Attribute("userId"),
+                CashRegisterId = element.Attribute("cashRegisterId") != null ? (int?)element.Attribute("cashRegisterId") : null,
                 CreatedAt = DateTime.Parse((string)element.Attribute("createdAt")),
                 Status = Enum.TryParse((string)element.Attribute("status"), out OrderStatus status) ? status : OrderStatus.PendienteDePago,
                 PaymentMethod = (string)element.Attribute("paymentMethod"),
@@ -55,15 +58,22 @@ namespace BarStockControl.Mappers
         public static XElement ToXml(Order order)
         {
             if (order == null) return null;
-            return new XElement("order",
+            var element = new XElement("order",
                 new XAttribute("id", order.Id),
                 new XAttribute("eventId", order.EventId),
                 new XAttribute("userId", order.UserId),
-                new XAttribute("createdAt", order.CreatedAt.ToString("o")),
+                new XAttribute("createdAt", order.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")),
                 new XAttribute("status", order.Status.ToString()),
                 new XAttribute("paymentMethod", order.PaymentMethod),
                 new XAttribute("total", order.Total)
             );
+            
+            if (order.CashRegisterId.HasValue)
+            {
+                element.Add(new XAttribute("cashRegisterId", order.CashRegisterId.Value));
+            }
+            
+            return element;
         }
     }
 } 

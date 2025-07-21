@@ -28,7 +28,7 @@ namespace BarStockControl.UI
             try
             {
                 var deposits = _depositService.GetAllDeposits();
-                dgvDeposits.DataSource = deposits.Select(DepositMapper.ToDto).ToList();
+                dgvDeposits.DataSource = deposits;
             }
             catch (Exception)
             {
@@ -41,8 +41,8 @@ namespace BarStockControl.UI
         {
             try
             {
-                var deposit = GetDepositFromForm();
-                var errors = _depositService.CreateDeposit(deposit);
+                var dto = GetDepositFromForm();
+                var errors = _depositService.CreateDeposit(dto);
 
                 if (errors.Any())
                 {
@@ -69,9 +69,9 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                var deposit = GetDepositFromForm();
-                deposit.Id = _selectedDeposit.Id;
-                var errors = _depositService.UpdateDeposit(deposit);
+                var dto = GetDepositFromForm();
+                dto.Id = _selectedDeposit.Id;
+                var errors = _depositService.UpdateDeposit(dto);
 
                 if (errors.Any())
                 {
@@ -119,8 +119,7 @@ namespace BarStockControl.UI
                 if (e.RowIndex >= 0)
                 {
                     var selectedRow = (DepositDto)dgvDeposits.Rows[e.RowIndex].DataBoundItem;
-                    var fullDeposit = _depositService.GetById(selectedRow.Id);
-                    _selectedDeposit = DepositMapper.ToDto(fullDeposit);
+                    _selectedDeposit = _depositService.GetDepositDtoById(selectedRow.Id);
 
                     txtName.Text = _selectedDeposit.Name;
                     chkActive.Checked = _selectedDeposit.Active;
@@ -132,9 +131,9 @@ namespace BarStockControl.UI
             }
         }
 
-        private Deposit GetDepositFromForm()
+        private DepositDto GetDepositFromForm()
         {
-            return new Deposit
+            return new DepositDto
             {
                 Name = txtName.Text,
                 Active = chkActive.Checked

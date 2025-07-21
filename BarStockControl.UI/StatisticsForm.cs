@@ -217,7 +217,7 @@ namespace BarStockControl.UI
                 int totalTragos = 0;
                 foreach (var item in salesByDrink)
                 {
-                    var drink = _drinkService.GetById(item.DrinkId);
+                    var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
                     var name = drink != null ? drink.Name : $"Trago {item.DrinkId}";
                     var pointIndex = series.Points.AddXY(name, item.Total);
                     series.Points[pointIndex].LegendText = name;
@@ -326,7 +326,7 @@ namespace BarStockControl.UI
                 var orderItems = _orderItemService.GetAllOrderItemDtos();
                 var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
                 var stations = _stationService.GetAllStationDtos();
-                var bars = _barService.GetAllBarDtos();
+                var bars = _barService.GetAllBars();
 
                 switch (selectedOption)
                 {
@@ -429,11 +429,11 @@ namespace BarStockControl.UI
             if (!selectedProducts.Any())
                 selectedProducts = clbProductos.Items.Cast<ProductDto>().ToList();
 
-            var orders = _orderService.GetAll().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.Entregado);
+            var orders = _orderService.GetAllOrderDtos().Where(o => o.Status == OrderStatus.Pagado || o.Status == OrderStatus.Entregado);
             if (eventId.HasValue)
                 orders = orders.Where(o => o.EventId == eventId.Value);
 
-            var orderItems = _orderItemService.GetAll().Where(oi => orders.Any(o => o.Id == oi.OrderId)).ToList();
+            var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => orders.Any(o => o.Id == oi.OrderId)).ToList();
             var recipes = _recipeService.GetAll().ToList();
             var recipeItems = _recipeItemService.GetAll().ToList();
             var productos = _productService.GetAll();

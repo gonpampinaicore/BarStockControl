@@ -194,22 +194,32 @@ namespace BarStockControl.UI
                 return;
             }
             var barmanId = assignment.UserId;
-            var allBarmanOrders = _barmanOrderService.GetAllBarmanOrders();
-            int newId = allBarmanOrders.Any() ? allBarmanOrders.Max(x => x.Id) + 1 : 1;
             var station = _stationService.GetAllStations().FirstOrDefault(s => s.Id == _stationId);
             int barId = station != null ? station.BarId : 0;
-            var barmanOrder = new Models.BarmanOrder
+            
+            var barmanOrderDto = new BarmanOrderDto
             {
-                Id = newId,
                 OrderId = _currentOrder.Id,
                 BarmanId = barmanId,
                 StationId = _stationId,
                 BarId = barId,
-                EventId = _currentOrder.EventId
+                EventId = _currentOrder.EventId,
+                DateTime = DateTime.Now
             };
-            _barmanOrderService.CreateBarmanOrder(barmanOrder);
+            
+            var errors = _barmanOrderService.CreateBarmanOrder(barmanOrderDto);
+            if (errors.Any())
+            {
+                MessageBox.Show($"Error al crear orden de barman: {string.Join(", ", errors)}");
+                return;
+            }
             _currentOrder.Status = OrderStatus.EnPreparacion;
-            _orderService.UpdateOrder(_currentOrder.Id, _currentOrder);
+            var updateErrors = _orderService.UpdateOrder(_currentOrder);
+            if (updateErrors.Any())
+            {
+                MessageBox.Show(string.Join("\n", updateErrors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             MessageBox.Show("Orden marcada como En preparación.");
             btnPreparar.Enabled = false;
             btnEntregar.Enabled = true;
@@ -251,7 +261,12 @@ namespace BarStockControl.UI
                 }
             }
             _currentOrder.Status = OrderStatus.Entregado;
-            _orderService.UpdateOrder(_currentOrder.Id, _currentOrder);
+            var errors = _orderService.UpdateOrder(_currentOrder);
+            if (errors.Any())
+            {
+                MessageBox.Show(string.Join("\n", errors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             MessageBox.Show("Orden marcada como Entregada.");
             LoadStationStock();
             txtOrderId.Clear();

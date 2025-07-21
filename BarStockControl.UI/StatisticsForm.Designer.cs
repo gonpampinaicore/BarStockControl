@@ -34,8 +34,14 @@
             cboTipoBarra = new ComboBox();
             clbProductos = new CheckedListBox();
             chartsTableLayout = new TableLayoutPanel();
+            chartSales = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartPie = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartPieEventos = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartBarras = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartCostVsSales = new System.Windows.Forms.DataVisualization.Charting.Chart();
             mainTableLayout.SuspendLayout();
             selectorsPanel.SuspendLayout();
+            chartsTableLayout.SuspendLayout();
             SuspendLayout();
             // 
             // mainTableLayout
@@ -101,6 +107,11 @@
             chartsTableLayout.ColumnCount = 2;
             chartsTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             chartsTableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            chartsTableLayout.Controls.Add(chartSales, 0, 0);
+            chartsTableLayout.Controls.Add(chartPie, 1, 0);
+            chartsTableLayout.Controls.Add(chartPieEventos, 0, 1);
+            chartsTableLayout.Controls.Add(chartBarras, 1, 1);
+            chartsTableLayout.Controls.Add(chartCostVsSales, 0, 2);
             chartsTableLayout.Dock = DockStyle.Fill;
             chartsTableLayout.Location = new Point(3, 103);
             chartsTableLayout.Name = "chartsTableLayout";
@@ -112,6 +123,46 @@
             chartsTableLayout.Size = new Size(1914, 957);
             chartsTableLayout.TabIndex = 1;
             // 
+            // chartSales
+            // 
+            chartSales.Dock = DockStyle.Fill;
+            chartSales.Location = new Point(13, 13);
+            chartSales.Name = "chartSales";
+            chartSales.Size = new Size(940, 300);
+            chartSales.TabIndex = 0;
+            // 
+            // chartPie
+            // 
+            chartPie.Dock = DockStyle.Fill;
+            chartPie.Location = new Point(973, 13);
+            chartPie.Name = "chartPie";
+            chartPie.Size = new Size(940, 300);
+            chartPie.TabIndex = 1;
+            // 
+            // chartPieEventos
+            // 
+            chartPieEventos.Dock = DockStyle.Fill;
+            chartPieEventos.Location = new Point(13, 333);
+            chartPieEventos.Name = "chartPieEventos";
+            chartPieEventos.Size = new Size(940, 300);
+            chartPieEventos.TabIndex = 2;
+            // 
+            // chartBarras
+            // 
+            chartBarras.Dock = DockStyle.Fill;
+            chartBarras.Location = new Point(973, 333);
+            chartBarras.Name = "chartBarras";
+            chartBarras.Size = new Size(940, 300);
+            chartBarras.TabIndex = 3;
+            // 
+            // chartCostVsSales
+            // 
+            chartCostVsSales.Dock = DockStyle.Fill;
+            chartCostVsSales.Location = new Point(13, 653);
+            chartCostVsSales.Name = "chartCostVsSales";
+            chartCostVsSales.Size = new Size(940, 300);
+            chartCostVsSales.TabIndex = 4;
+            // 
             // StatisticsForm
             // 
             ClientSize = new Size(1920, 1063);
@@ -121,6 +172,7 @@
             WindowState = FormWindowState.Maximized;
             mainTableLayout.ResumeLayout(false);
             selectorsPanel.ResumeLayout(false);
+            chartsTableLayout.ResumeLayout(false);
             ResumeLayout(false);
         }
     }

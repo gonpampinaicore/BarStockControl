@@ -377,10 +377,10 @@ namespace BarStockControl.UI
             {
                 if (!ValidateForm()) return;
                 var drinkDto = GetDrinkFromForm();
-                string errorMessage;
-                if (!_drinkService.CreateDrink(drinkDto, _currentRecipeItems, out errorMessage))
+                var errors = _drinkService.CreateDrink(drinkDto, _currentRecipeItems);
+                if (errors.Any())
                 {
-                    MessageBox.Show($"Error al crear el trago: {errorMessage}", "Error",
+                    MessageBox.Show($"Error al crear el trago:\n{string.Join("\n", errors)}", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -412,9 +412,10 @@ namespace BarStockControl.UI
                 var drinkDto = GetDrinkFromForm();
                 drinkDto.Id = _selectedDrink.Id;
 
-                if (!_drinkService.UpdateDrink(drinkDto))
+                var errors = _drinkService.UpdateDrink(drinkDto);
+                if (errors.Any())
                 {
-                    MessageBox.Show("Error al actualizar el trago", "Error",
+                    MessageBox.Show($"Error al actualizar el trago:\n{string.Join("\n", errors)}", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -460,13 +461,11 @@ namespace BarStockControl.UI
 
                 if (confirm == DialogResult.Yes)
                 {
-                    if (_drinkService.DeleteDrink(_selectedDrink.Id))
-                    {
-                        MessageBox.Show("Trago eliminado exitosamente.", "Éxito",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        ClearForm();
-                        LoadDrinks();
-                    }
+                                    _drinkService.DeleteDrink(_selectedDrink.Id);
+                MessageBox.Show("Trago eliminado exitosamente.", "Éxito",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearForm();
+                LoadDrinks();
                 }
             }
             catch (Exception ex)

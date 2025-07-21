@@ -1,3 +1,5 @@
+using System;
+
 namespace BarStockControl.DTOs
 {
     public class BarmanOrderDto
@@ -8,5 +10,6 @@ namespace BarStockControl.DTOs
         public int StationId { get; set; }
         public int BarId { get; set; }
         public int EventId { get; set; }
+        public DateTime DateTime { get; set; }
     }
 } 

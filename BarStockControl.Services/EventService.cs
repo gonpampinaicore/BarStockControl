@@ -24,7 +24,7 @@ namespace BarStockControl.Services
             return EventMapper.ToXml(ev);
         }
 
-        public List<string> ValidateEvent(Event ev, bool isUpdate = false)
+        public List<string> ValidateEvent(EventDto ev, bool isUpdate = false)
         {
             var errors = new List<string>();
 
@@ -37,24 +37,26 @@ namespace BarStockControl.Services
             return errors;
         }
 
-        public List<string> CreateEvent(Event ev)
+        public List<string> CreateEvent(EventDto ev)
         {
             var errors = ValidateEvent(ev);
             if (errors.Any())
                 return errors;
 
-            ev.Id = GetNextId();
-            Add(ev);
+            var entity = EventMapper.ToEntity(ev);
+            entity.Id = GetNextId();
+            Add(entity);
             return new List<string>();
         }
 
-        public List<string> UpdateEvent(Event ev)
+        public List<string> UpdateEvent(EventDto ev)
         {
             var errors = ValidateEvent(ev, isUpdate: true);
             if (errors.Any())
                 return errors;
 
-            Update(ev.Id, ev);
+            var entity = EventMapper.ToEntity(ev);
+            Update(entity.Id, entity);
             return new List<string>();
         }
 
@@ -63,19 +65,10 @@ namespace BarStockControl.Services
             Delete(id);
         }
 
-        public Event GetById(int id)
+        public EventDto GetEventDtoById(int id)
         {
-            return GetAll().FirstOrDefault(e => e.Id == id);
-        }
-
-        public List<Event> GetAllEvents()
-        {
-            return GetAll();
-        }
-
-        public List<Event> Search(Func<Event, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
+            var ev = GetAll().FirstOrDefault(e => e.Id == id);
+            return ev != null ? EventMapper.ToDto(ev) : null;
         }
 
         public List<EventDto> GetAllEventDtos()

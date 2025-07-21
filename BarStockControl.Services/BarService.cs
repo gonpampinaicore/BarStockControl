@@ -33,25 +33,47 @@ namespace BarStockControl.Services
             return errors;
         }
 
-        public List<string> CreateBar(Bar bar)
+        public List<string> CreateBar(BarDto barDto)
         {
-            var errors = ValidateBar(bar);
-            if (errors.Any())
-                return errors;
+            try
+            {
+                if (barDto == null)
+                    throw new ArgumentNullException(nameof(barDto), "El DTO de barra no puede ser null.");
 
-            bar.Id = GetNextId();
-            Add(bar);
-            return new List<string>();
+                var bar = BarMapper.ToEntity(barDto);
+                var errors = ValidateBar(bar);
+                if (errors.Any())
+                    return errors;
+
+                bar.Id = GetNextId();
+                Add(bar);
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al crear barra: {ex.Message}", ex);
+            }
         }
 
-        public List<string> UpdateBar(Bar bar)
+        public List<string> UpdateBar(BarDto barDto)
         {
-            var errors = ValidateBar(bar, isUpdate: true);
-            if (errors.Any())
-                return errors;
+            try
+            {
+                if (barDto == null)
+                    throw new ArgumentNullException(nameof(barDto), "El DTO de barra no puede ser null.");
 
-            Update(bar.Id, bar);
-            return new List<string>();
+                var bar = BarMapper.ToEntity(barDto);
+                var errors = ValidateBar(bar, isUpdate: true);
+                if (errors.Any())
+                    return errors;
+
+                Update(bar.Id, bar);
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al actualizar barra: {ex.Message}", ex);
+            }
         }
 
         public void DeleteBar(int id)
@@ -59,24 +81,29 @@ namespace BarStockControl.Services
             Delete(id);
         }
 
-        public Bar GetById(int id)
+        public BarDto GetById(int id)
         {
-            return GetAll().FirstOrDefault(b => b.Id == id);
+            try
+            {
+                var bar = GetAll().FirstOrDefault(b => b.Id == id);
+                return bar != null ? BarMapper.ToDto(bar) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al obtener barra con ID {id}: {ex.Message}", ex);
+            }
         }
 
-        public List<Bar> GetAllBars()
+        public List<BarDto> GetAllBars()
         {
-            return GetAll();
-        }
-
-        public List<Bar> Search(Func<Bar, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
-        }
-
-        public List<BarDto> GetAllBarDtos()
-        {
-            return GetAll().Select(BarMapper.ToDto).ToList();
+            try
+            {
+                return GetAll().Select(BarMapper.ToDto).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al obtener todas las barras: {ex.Message}", ex);
+            }
         }
     }
 }

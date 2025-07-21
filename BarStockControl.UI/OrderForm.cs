@@ -144,7 +144,7 @@ namespace BarStockControl.UI
                     return;
                 }
                 var total = _items.Sum(i => i.Subtotal);
-                var order = new Order
+                var order = new OrderDto
                 {
                     EventId = _currentEvent.Id,
                     UserId = _currentUserId,
@@ -153,14 +153,17 @@ namespace BarStockControl.UI
                     Status = OrderStatus.PendienteDePago,
                     Total = total
                 };
-                order.Id = _orderService.GetAll().Any() ? _orderService.GetAll().Max(o => o.Id) + 1 : 1;
-                _orderService.CreateOrder(order);
+                var errors = _orderService.CreateOrder(order);
+                if (errors.Any())
+                {
+                    MessageBox.Show(string.Join("\n", errors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 int orderId = order.Id;
                 foreach (var item in _items)
                 {
-                    var orderItem = new OrderItem
+                    var orderItem = new OrderItemDto
                     {
-                        Id = _orderItemService.GetAll().Any() ? _orderItemService.GetAll().Max(oi => oi.Id) + 1 : 1,
                         OrderId = orderId,
                         DrinkId = item.DrinkId,
                         Quantity = item.Quantity,
@@ -168,15 +171,24 @@ namespace BarStockControl.UI
                         Discount = item.Discount,
                         Subtotal = item.Subtotal
                     };
-                    _orderItemService.CreateOrderItem(orderItem);
+                    var itemErrors = _orderItemService.CreateOrderItem(orderItem);
+                    if (itemErrors.Any())
+                    {
+                        MessageBox.Show(string.Join("\n", itemErrors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
                 }
-                // Al facturar, actualizar el estado a Pagado
                 order.Status = OrderStatus.Pagado;
-                _orderService.UpdateOrder(order.Id, order);
-                var orderObj = _orderService.GetOrderById(orderId);
+                var updateErrors = _orderService.UpdateOrder(order);
+                if (updateErrors.Any())
+                {
+                    MessageBox.Show(string.Join("\n", updateErrors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                var orderObj = _orderService.GetOrderDtoById(orderId);
                 var user = _userService.GetById(orderObj.UserId);
-                var eventObj = _eventService.GetById(orderObj.EventId);
-                var orderItems = _orderItemService.GetAll().Where(oi => oi.OrderId == orderId).ToList();
+                var eventObj = _eventService.GetEventDtoById(orderObj.EventId);
+                var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
                 var invoiceItems = new List<InvoiceItemDto>();
                 decimal totalFactura = 0;
                 foreach (var item in orderItems)

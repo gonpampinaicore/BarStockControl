@@ -43,7 +43,7 @@ namespace BarStockControl.UI
             {
                 var stockList = _stockService.GetAllStockDtos();
                 var products = _productService.GetAllProductDtos();
-                var deposits = _depositService.GetAllDepositDtos();
+                var deposits = _depositService.GetAllDeposits();
                 var stations = _stationService.GetAllStationDtos();
 
                 var selectedProduct = cmbProductFilter.SelectedItem as ProductDto;
@@ -97,7 +97,7 @@ namespace BarStockControl.UI
             {
                 if (rdoDeposit.Checked)
                 {
-                    _deposits = _depositService.GetAllDepositDtos();
+                    _deposits = _depositService.GetAllDeposits();
                     dgvLocations.DataSource = _deposits.Select(d => new
                     {
                         d.Id,
@@ -237,7 +237,7 @@ namespace BarStockControl.UI
 
                 if (_selectedStock.DepositId.HasValue)
                 {
-                    var deposit = _depositService.GetById(_selectedStock.DepositId.Value);
+                    var deposit = _depositService.GetDepositDtoById(_selectedStock.DepositId.Value);
                     lblSelectedLocation.Text = $"Ubicación seleccionada: {deposit?.Name ?? "-"}";
                 }
                 else if (_selectedStock.StationId.HasValue)

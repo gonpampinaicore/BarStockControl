@@ -39,12 +39,12 @@ namespace BarStockControl.Mappers
         {
             return new StationProductConsumption
             {
-                Id = (int)element.Attribute("id"),
-                StationId = (int)element.Attribute("stationId"),
-                ProductId = (int)element.Attribute("productId"),
-                OrderItemId = (int)element.Attribute("orderItemId"),
-                DateTime = DateTime.Parse((string)element.Attribute("dateTime")),
-                EventId = (int)element.Attribute("eventId"),
+                Id = (int?)element.Attribute("id") ?? 0,
+                StationId = (int?)element.Attribute("stationId") ?? 0,
+                ProductId = (int?)element.Attribute("productId") ?? 0,
+                OrderItemId = (int?)element.Attribute("orderItemId") ?? 0,
+                DateTime = DateTime.TryParse((string)element.Attribute("dateTime"), out var dateTime) ? dateTime : DateTime.Now,
+                EventId = (int?)element.Attribute("eventId") ?? 0,
                 UserId = (int?)element.Attribute("userId")
             };
         }

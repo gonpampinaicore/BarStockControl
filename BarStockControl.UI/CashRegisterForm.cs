@@ -1,6 +1,7 @@
 ﻿using BarStockControl.Data;
 using BarStockControl.Models;
 using BarStockControl.Services;
+using BarStockControl.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace BarStockControl.UI
     {
         private readonly CashRegisterService _cashRegisterService;
         private readonly BarService _barService;
-        private CashRegister _selectedCashRegister = new CashRegister();
+        private CashRegisterDto _selectedCashRegister = new CashRegisterDto();
 
         public CashRegisterForm()
         {
@@ -75,7 +76,7 @@ namespace BarStockControl.UI
                 if (e.RowIndex >= 0)
                 {
                     var id = (int)dgvCashRegisters.Rows[e.RowIndex].Cells["Id"].Value;
-                    _selectedCashRegister = _cashRegisterService.GetById(id);
+                    _selectedCashRegister = _cashRegisterService.GetCashRegisterDtoById(id);
 
                     if (_selectedCashRegister != null)
                     {
@@ -91,9 +92,9 @@ namespace BarStockControl.UI
             }
         }
 
-        private CashRegister GetCashRegisterFromForm()
+        private CashRegisterDto GetCashRegisterFromForm()
         {
-            return new CashRegister
+            return new CashRegisterDto
             {
                 Id = _selectedCashRegister?.Id ?? 0,
                 Name = txtName.Text.Trim(),
@@ -106,8 +107,8 @@ namespace BarStockControl.UI
         {
             try
             {
-                var entity = GetCashRegisterFromForm();
-                var errors = _cashRegisterService.CreateCashRegister(entity);
+                var dto = GetCashRegisterFromForm();
+                var errors = _cashRegisterService.CreateCashRegister(dto);
 
                 if (errors.Any())
                 {
@@ -134,8 +135,8 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                var entity = GetCashRegisterFromForm();
-                var errors = _cashRegisterService.UpdateCashRegister(entity);
+                var dto = GetCashRegisterFromForm();
+                var errors = _cashRegisterService.UpdateCashRegister(dto);
 
                 if (errors.Any())
                 {
@@ -191,7 +192,7 @@ namespace BarStockControl.UI
             txtName.Clear();
             cmbBar.SelectedIndex = 0;
             chkActive.Checked = true;
-            _selectedCashRegister = new CashRegister();
+            _selectedCashRegister = new CashRegisterDto();
         }
     }
 }

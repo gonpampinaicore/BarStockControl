@@ -254,6 +254,7 @@
     stationId IDREF #REQUIRED
     barId IDREF #REQUIRED
     eventId IDREF #REQUIRED
+    dateTime CDATA #REQUIRED
 >
 
 <!-- ========== STATION PRODUCT CONSUMPTIONS ========== -->

@@ -12,7 +12,7 @@ namespace BarStockControl.UI
     public partial class BarForm : Form
     {
         private readonly BarService _barService;
-        private Bar _selectedBar = new Bar();
+        private BarDto _selectedBar = new BarDto();
 
         public BarForm()
         {
@@ -75,9 +75,9 @@ namespace BarStockControl.UI
             chkActive.Checked = _selectedBar?.Active ?? true;
         }
 
-        private Bar GetBarFromForm()
+        private BarDto GetBarFromForm()
         {
-            return new Bar
+            return new BarDto
             {
                 Id = _selectedBar?.Id ?? 0,
                 Name = txtName.Text.Trim(),
@@ -163,7 +163,7 @@ namespace BarStockControl.UI
         {
             txtName.Clear();
             chkActive.Checked = true;
-            _selectedBar = new Bar();
+            _selectedBar = new BarDto();
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)

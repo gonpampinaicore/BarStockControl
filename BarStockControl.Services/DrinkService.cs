@@ -37,52 +37,55 @@ namespace BarStockControl.Services
             return GetAll().Select(d => d.ToDto()).ToList();
         }
 
-        public DrinkDto GetDrinkById(int id)
+        public DrinkDto GetDrinkDtoById(int id)
         {
             var drink = GetById(id);
             return drink?.ToDto();
         }
 
-        public bool CreateDrink(DrinkDto drinkDto, List<RecipeItemDto> recipeItems, out string errorMessage)
+        public List<string> ValidateDrink(DrinkDto drinkDto, List<RecipeItemDto> recipeItems, bool isUpdate = false)
         {
-            errorMessage = string.Empty;
-            try
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(drinkDto.Name))
+                errors.Add("El nombre del trago es obligatorio.");
+
+            if (!isUpdate && GetAll().Any(d => d.Name.Equals(drinkDto.Name, StringComparison.OrdinalIgnoreCase)))
+                errors.Add("Ya existe un trago con ese nombre.");
+
+            if (recipeItems == null || !recipeItems.Any())
+                errors.Add("Todo trago debe tener al menos un ingrediente.");
+
+            if (recipeItems != null)
             {
-                if (GetAll().Any(d => d.Name.Equals(drinkDto.Name, StringComparison.OrdinalIgnoreCase)))
-                {
-                    errorMessage = "Ya existe un trago con ese nombre.";
-                    return false;
-                }
-
-                if (recipeItems == null || !recipeItems.Any())
-                {
-                    errorMessage = "Todo trago debe tener al menos un ingrediente.";
-                    return false;
-                }
-
-                var drink = drinkDto.ToModel();
-                drink.Id = GetNextId();
-
                 var productIds = new HashSet<int>();
                 foreach (var item in recipeItems)
                 {
                     if (item.Quantity <= 0)
-                    {
-                        errorMessage = "La cantidad de cada ingrediente debe ser mayor a 0.";
-                        return false;
-                    }
+                        errors.Add("La cantidad de cada ingrediente debe ser mayor a 0.");
+
                     var product = _productService.GetById(item.ProductId);
                     if (product == null || !product.IsActive)
-                    {
-                        errorMessage = $"El producto con ID {item.ProductId} no existe o está inactivo.";
-                        return false;
-                    }
+                        errors.Add($"El producto con ID {item.ProductId} no existe o está inactivo.");
+
                     if (!productIds.Add(item.ProductId))
-                    {
-                        errorMessage = "No se puede repetir el mismo producto en la receta.";
-                        return false;
-                    }
+                        errors.Add("No se puede repetir el mismo producto en la receta.");
                 }
+            }
+
+            return errors;
+        }
+
+        public List<string> CreateDrink(DrinkDto drinkDto, List<RecipeItemDto> recipeItems)
+        {
+            try
+            {
+                var errors = ValidateDrink(drinkDto, recipeItems);
+                if (errors.Any())
+                    return errors;
+
+                var drink = drinkDto.ToModel();
+                drink.Id = GetNextId();
 
                 Add(drink);
 
@@ -96,45 +99,46 @@ namespace BarStockControl.Services
                 if (!_recipeService.CreateRecipe(recipe.ToDto()))
                 {
                     Delete(drink.Id);
-                    errorMessage = "Error al crear la receta asociada al trago.";
-                    return false;
+                    return new List<string> { "Error al crear la receta asociada al trago." };
                 }
 
                 if (!SaveRecipeItems(drink.Id, recipeItems))
                 {
                     _recipeService.DeleteRecipe(recipe.Id);
                     Delete(drink.Id);
-                    errorMessage = "Error al guardar los ingredientes de la receta.";
-                    return false;
+                    return new List<string> { "Error al guardar los ingredientes de la receta." };
                 }
 
                 drink.EstimatedCost = CalculateEstimatedCost(drink.Id);
                 Update(drink.Id, drink);
 
-                return true;
+                return new List<string>();
             }
             catch (Exception ex)
             {
-                errorMessage = $"Error inesperado: {ex.Message}";
-                return false;
+                return new List<string> { $"Error inesperado: {ex.Message}" };
             }
         }
 
-        public bool UpdateDrink(DrinkDto drinkDto)
+        public List<string> UpdateDrink(DrinkDto drinkDto)
         {
             try
             {
+                var errors = ValidateDrink(drinkDto, null, isUpdate: true);
+                if (errors.Any())
+                    return errors;
+
                 var drink = drinkDto.ToModel();
                 Update(drink.Id, drink);
-                return true;
+                return new List<string>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                return new List<string> { $"Error inesperado: {ex.Message}" };
             }
         }
 
-        public bool DeleteDrink(int id)
+        public void DeleteDrink(int id)
         {
             try
             {
@@ -145,11 +149,10 @@ namespace BarStockControl.Services
                     _recipeService.DeleteRecipe(associatedRecipe.Id);
                 }
                 Delete(id);
-                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw new InvalidOperationException($"Error al eliminar trago con ID {id}: {ex.Message}", ex);
             }
         }
 

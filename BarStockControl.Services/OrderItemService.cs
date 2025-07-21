@@ -3,6 +3,8 @@ using BarStockControl.Data;
 using BarStockControl.Mappers;
 using System.Xml.Linq;
 using BarStockControl.DTOs;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BarStockControl.Services
 {
@@ -21,14 +23,46 @@ namespace BarStockControl.Services
             return OrderItemMapper.ToXml(item);
         }
 
-        public void CreateOrderItem(OrderItem item)
+        public List<string> ValidateOrderItem(OrderItemDto item, bool isUpdate = false)
         {
-            Add(item);
+            var errors = new List<string>();
+
+            if (item.OrderId <= 0)
+                errors.Add("Order ID is required.");
+
+            if (item.DrinkId <= 0)
+                errors.Add("Drink ID is required.");
+
+            if (item.Quantity <= 0)
+                errors.Add("Quantity must be greater than 0.");
+
+            if (item.UnitPrice <= 0)
+                errors.Add("Unit price must be greater than 0.");
+
+            return errors;
         }
 
-        public void UpdateOrderItem(int id, OrderItem item)
+        public List<string> CreateOrderItem(OrderItemDto item)
         {
-            Update(id, item);
+            var errors = ValidateOrderItem(item);
+            if (errors.Any())
+                return errors;
+
+            var entity = OrderItemMapper.FromDto(item);
+            entity.Id = GetNextId();
+            Add(entity);
+            return new List<string>();
+        }
+
+        public List<string> UpdateOrderItem(OrderItemDto item)
+        {
+            var errors = ValidateOrderItem(item, isUpdate: true);
+            if (errors.Any())
+                return errors;
+
+            var entity = OrderItemMapper.FromDto(item);
+            Update(entity.Id, entity);
+            return new List<string>();
         }
 
         public void DeleteOrderItem(int id)
@@ -36,14 +70,10 @@ namespace BarStockControl.Services
             Delete(id);
         }
 
-        public OrderItem GetOrderItemById(int id)
+        public OrderItemDto GetOrderItemDtoById(int id)
         {
-            return GetById(id);
-        }
-
-        public List<OrderItem> GetAllOrderItems()
-        {
-            return GetAll();
+            var item = GetAll().FirstOrDefault(i => i.Id == id);
+            return item != null ? OrderItemMapper.ToDto(item) : null;
         }
 
         public List<OrderItemDto> GetAllOrderItemDtos()

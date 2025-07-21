@@ -77,7 +77,7 @@ namespace BarStockControl.UI
                 _fromOptions = new List<ResourceSelectorOption>();
                 _toOptions = new List<ResourceSelectorOption>();
 
-                var deposits = _depositService.GetAllDepositDtos().Where(d => d.Active).ToList();
+                var deposits = _depositService.GetAllDeposits().Where(d => d.Active).ToList();
                 foreach (var deposit in deposits)
                 {
                     _fromOptions.Add(new ResourceSelectorOption { Id = deposit.Id, Type = "deposit", Name = "Depósito - " + deposit.Name });
@@ -144,7 +144,7 @@ namespace BarStockControl.UI
                 List<ResourceSelectorOption> options;
                 if (type == "deposit")
                 {
-                    var allDeposits = _depositService.GetAllDepositDtos().Where(d => d.Active).ToList();
+                    var allDeposits = _depositService.GetAllDeposits().Where(d => d.Active).ToList();
                     options = allDeposits
                         .Where(d => assignments.Any(a => a.ResourceId == d.Id))
                         .Select(d => new ResourceSelectorOption { Id = d.Id, Type = "deposit", Name = "Depósito - " + d.Name })
@@ -246,7 +246,7 @@ namespace BarStockControl.UI
                 if (selectedEvent == null) return;
 
                 var products = _productService.GetAllProductDtos();
-                var deposits = _depositService.GetAllDepositDtos();
+                var deposits = _depositService.GetAllDeposits();
                 var stations = _stationService.GetAllStationDtos();
 
                 var users = _userService.GetAllUserDtos();
@@ -399,7 +399,7 @@ namespace BarStockControl.UI
                 return;
             }
 
-            var evento = _eventService.GetById(movimiento.EventId);
+            var evento = _eventService.GetEventDtoById(movimiento.EventId);
             if (evento != null && evento.StartDate <= DateTime.Now)
             {
                 MessageBox.Show("No se puede deshacer un movimiento de un evento pasado.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);

@@ -119,7 +119,7 @@ namespace BarStockControl.UI
             switch (selectedType)
             {
                 case "deposit":
-                    cmbResource.DataSource = _depositService.GetAllDepositDtos()
+                    cmbResource.DataSource = _depositService.GetAllDeposits()
                         .Where(d => !usedResourceIds.Contains(d.Id))
                         .ToList();
                     cmbResource.DisplayMember = "Name";
@@ -127,7 +127,7 @@ namespace BarStockControl.UI
                     break;
 
                 case "bar":
-                    cmbResource.DataSource = _barService.GetAllBarDtos()
+                    cmbResource.DataSource = _barService.GetAllBars()
                         .Where(b => !usedResourceIds.Contains(b.Id))
                         .ToList();
                     cmbResource.DisplayMember = "Name";
@@ -142,7 +142,7 @@ namespace BarStockControl.UI
                         .Select(s => new
                         {
                             Id = s.Id,
-                            Display = $"{s.Name} ({_barService.GetAllBarDtos().FirstOrDefault(b => b.Id == s.BarId)?.Name})"
+                            Display = $"{s.Name} ({_barService.GetAllBars().FirstOrDefault(b => b.Id == s.BarId)?.Name})"
                         })
                         .ToList();
                     cmbResource.DataSource = stationDisplayList;
@@ -151,14 +151,14 @@ namespace BarStockControl.UI
                     break;
 
                 case "cash_register":
-                    var allCashRegisters = _cashRegisterService.GetAllCashRegisterDtos()
+                    var allCashRegisters = _cashRegisterService.GetAllCashRegisters()
                         .Where(c => assignedBarIds.Contains(c.BarId) && !usedResourceIds.Contains(c.Id))
                         .ToList();
                     var cashRegisterDisplayList = allCashRegisters
                         .Select(c => new
                         {
                             Id = c.Id,
-                            Display = $"{c.Name} ({_barService.GetAllBarDtos().FirstOrDefault(b => b.Id == c.BarId)?.Name})"
+                            Display = $"{c.Name} ({_barService.GetAllBars().FirstOrDefault(b => b.Id == c.BarId)?.Name})"
                         })
                         .ToList();
                     cmbResource.DataSource = cashRegisterDisplayList;
@@ -238,10 +238,10 @@ namespace BarStockControl.UI
         {
             return type switch
             {
-                "deposit" => _depositService.GetById(id)?.Name,
+                "deposit" => _depositService.GetDepositDtoById(id)?.Name,
                 "bar" => _barService.GetById(id)?.Name,
                 "station" => _stationService.GetById(id)?.Name,
-                "cash_register" => _cashRegisterService.GetById(id)?.Name,
+                "cash_register" => _cashRegisterService.GetCashRegisterDtoById(id)?.Name,
                 _ => "Desconocido"
             };
         }

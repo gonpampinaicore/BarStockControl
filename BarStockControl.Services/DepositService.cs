@@ -36,24 +36,26 @@ namespace BarStockControl.Services
             return errors;
         }
 
-        public List<string> CreateDeposit(Deposit deposit)
+        public List<string> CreateDeposit(DepositDto dto)
         {
-            var errors = ValidateDeposit(deposit);
+            var entity = DepositMapper.ToEntity(dto);
+            var errors = ValidateDeposit(entity);
             if (errors.Any())
                 return errors;
 
-            deposit.Id = GetNextId();
-            Add(deposit);
+            entity.Id = GetNextId();
+            Add(entity);
             return new List<string>();
         }
 
-        public List<string> UpdateDeposit(Deposit deposit)
+        public List<string> UpdateDeposit(DepositDto dto)
         {
-            var errors = ValidateDeposit(deposit, isUpdate: true);
+            var entity = DepositMapper.ToEntity(dto);
+            var errors = ValidateDeposit(entity, isUpdate: true);
             if (errors.Any())
                 return errors;
 
-            Update(deposit.Id, deposit);
+            Update(entity.Id, entity);
             return new List<string>();
         }
 
@@ -62,29 +64,13 @@ namespace BarStockControl.Services
             Delete(id);
         }
 
-        public Deposit GetById(int id)
+        public DepositDto GetDepositDtoById(int id)
         {
-            return GetAll().FirstOrDefault(d => d.Id == id);
+            var entity = GetAll().FirstOrDefault(d => d.Id == id);
+            return entity != null ? DepositMapper.ToDto(entity) : null;
         }
 
-        public List<Deposit> GetAllDeposits()
-        {
-            return GetAll();
-        }
-
-        public List<Deposit> Search(Func<Deposit, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
-        }
-
-        public List<Deposit> SearchByName(string searchTerm)
-        {
-            return GetAll()
-                .Where(d => d.Name.ToLower().Contains(searchTerm.ToLower()))
-                .ToList();
-        }
-
-        public List<DepositDto> GetAllDepositDtos()
+        public List<DepositDto> GetAllDeposits()
         {
             return GetAll().Select(DepositMapper.ToDto).ToList();
         }

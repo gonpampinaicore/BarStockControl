@@ -1,3 +1,4 @@
+using System;
 using System.Xml.Linq;
 using BarStockControl.Models;
 using BarStockControl.DTOs;
@@ -16,7 +17,8 @@ namespace BarStockControl.Mappers
                 BarmanId = entity.BarmanId,
                 StationId = entity.StationId,
                 BarId = entity.BarId,
-                EventId = entity.EventId
+                EventId = entity.EventId,
+                DateTime = entity.DateTime
             };
         }
 
@@ -30,7 +32,8 @@ namespace BarStockControl.Mappers
                 BarmanId = dto.BarmanId,
                 StationId = dto.StationId,
                 BarId = dto.BarId,
-                EventId = dto.EventId
+                EventId = dto.EventId,
+                DateTime = dto.DateTime
             };
         }
 
@@ -44,7 +47,8 @@ namespace BarStockControl.Mappers
                 BarmanId = (int)element.Attribute("barmanId"),
                 StationId = (int)element.Attribute("stationId"),
                 BarId = (int)element.Attribute("barId"),
-                EventId = (int)element.Attribute("eventId")
+                EventId = (int)element.Attribute("eventId"),
+                DateTime = DateTime.Parse((string)element.Attribute("dateTime"))
             };
         }
 
@@ -57,7 +61,8 @@ namespace BarStockControl.Mappers
                 new XAttribute("barmanId", entity.BarmanId),
                 new XAttribute("stationId", entity.StationId),
                 new XAttribute("barId", entity.BarId),
-                new XAttribute("eventId", entity.EventId)
+                new XAttribute("eventId", entity.EventId),
+                new XAttribute("dateTime", entity.DateTime.ToString("yyyy-MM-ddTHH:mm:ss"))
             );
         }
     }

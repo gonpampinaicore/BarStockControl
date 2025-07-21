@@ -25,36 +25,49 @@ namespace BarStockControl.Services
             return OrderMapper.ToXml(order);
         }
 
-        public void CreateOrder(Order order)
+        public List<string> ValidateOrder(OrderDto order, bool isUpdate = false)
         {
-            Add(order);
+            var errors = new List<string>();
+
+            if (order.EventId <= 0)
+                errors.Add("Event ID is required.");
+
+            if (order.UserId <= 0)
+                errors.Add("User ID is required.");
+
+            if (order.Total <= 0)
+                errors.Add("Total must be greater than 0.");
+
+            return errors;
         }
 
-        public void UpdateOrder(int id, Order order)
+        public List<string> CreateOrder(OrderDto order)
         {
-            Update(id, order);
+            var errors = ValidateOrder(order);
+            if (errors.Any())
+                return errors;
+
+            var entity = OrderMapper.FromDto(order);
+            entity.Id = GetNextId();
+            Add(entity);
+            return new List<string>();
         }
 
-        public void UpdateOrder(int id, OrderDto orderDto)
+        public List<string> UpdateOrder(OrderDto order)
         {
-            var order = OrderMapper.FromDto(orderDto);
-            order.Id = id;
-            Update(id, order);
+            var errors = ValidateOrder(order, isUpdate: true);
+            if (errors.Any())
+                return errors;
+
+            var entity = OrderMapper.FromDto(order);
+            Update(entity.Id, entity);
+            return new List<string>();
         }
 
-        public void DeleteOrder(int id)
+        public OrderDto GetOrderDtoById(int id)
         {
-            Delete(id);
-        }
-
-        public Order GetOrderById(int id)
-        {
-            return GetById(id);
-        }
-
-        public List<Order> GetAllOrders()
-        {
-            return GetAll();
+            var order = GetAll().FirstOrDefault(o => o.Id == id);
+            return order != null ? OrderMapper.ToDto(order) : null;
         }
 
         public List<OrderDto> GetAllOrderDtos()

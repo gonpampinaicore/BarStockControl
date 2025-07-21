@@ -33,24 +33,26 @@ namespace BarStockControl.Services
             return errors;
         }
 
-        public List<string> CreateCashRegister(CashRegister cashRegister)
+        public List<string> CreateCashRegister(CashRegisterDto dto)
         {
-            var errors = ValidateCashRegister(cashRegister);
+            var entity = CashRegisterMapper.ToEntity(dto);
+            var errors = ValidateCashRegister(entity);
             if (errors.Any())
                 return errors;
 
-            cashRegister.Id = GetNextId();
-            Add(cashRegister);
+            entity.Id = GetNextId();
+            Add(entity);
             return new List<string>();
         }
 
-        public List<string> UpdateCashRegister(CashRegister cashRegister)
+        public List<string> UpdateCashRegister(CashRegisterDto dto)
         {
-            var errors = ValidateCashRegister(cashRegister, isUpdate: true);
+            var entity = CashRegisterMapper.ToEntity(dto);
+            var errors = ValidateCashRegister(entity, isUpdate: true);
             if (errors.Any())
                 return errors;
 
-            Update(cashRegister.Id, cashRegister);
+            Update(entity.Id, entity);
             return new List<string>();
         }
 
@@ -59,22 +61,13 @@ namespace BarStockControl.Services
             Delete(id);
         }
 
-        public CashRegister GetById(int id)
+        public CashRegisterDto GetCashRegisterDtoById(int id)
         {
-            return GetAll().FirstOrDefault(c => c.Id == id);
+            var entity = GetAll().FirstOrDefault(c => c.Id == id);
+            return entity != null ? CashRegisterMapper.ToDto(entity) : null;
         }
 
-        public List<CashRegister> GetAllCashRegisters()
-        {
-            return GetAll();
-        }
-
-        public List<CashRegister> Search(Func<CashRegister, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
-        }
-
-        public List<CashRegisterDto> GetAllCashRegisterDtos()
+        public List<CashRegisterDto> GetAllCashRegisters()
         {
             return GetAll().Select(CashRegisterMapper.ToDto).ToList();
         }
