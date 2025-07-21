@@ -72,13 +72,14 @@ namespace BarStockControl.Services
             return errors;
         }
 
-        public List<string> CreateProduct(Product product)
+        public List<string> CreateProduct(ProductDto productDto)
         {
             try
             {
-                if (product == null)
-                    throw new ArgumentNullException(nameof(product), "El producto no puede ser null.");
+                if (productDto == null)
+                    throw new ArgumentNullException(nameof(productDto), "El producto no puede ser null.");
 
+                var product = ProductMapper.ToEntity(productDto);
                 var errors = ValidateProduct(product);
                 if (errors.Any())
                     return errors;
@@ -93,42 +94,6 @@ namespace BarStockControl.Services
             }
         }
 
-        public List<string> CreateProduct(ProductDto productDto)
-        {
-            try
-            {
-                if (productDto == null)
-                    throw new ArgumentNullException(nameof(productDto), "El producto no puede ser null.");
-
-                var product = ProductMapper.ToEntity(productDto);
-                return CreateProduct(product);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al crear producto: {ex.Message}", ex);
-            }
-        }
-
-        public List<string> UpdateProduct(Product product)
-        {
-            try
-            {
-                if (product == null)
-                    throw new ArgumentNullException(nameof(product), "El producto no puede ser null.");
-
-                var errors = ValidateProduct(product, isUpdate: true);
-                if (errors.Any())
-                    return errors;
-
-                Update(product.Id, product);
-                return new List<string>();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al actualizar producto: {ex.Message}", ex);
-            }
-        }
-
         public List<string> UpdateProduct(ProductDto productDto)
         {
             try
@@ -137,7 +102,12 @@ namespace BarStockControl.Services
                     throw new ArgumentNullException(nameof(productDto), "El producto no puede ser null.");
 
                 var product = ProductMapper.ToEntity(productDto);
-                return UpdateProduct(product);
+                var errors = ValidateProduct(product, isUpdate: true);
+                if (errors.Any())
+                    return errors;
+
+                Update(product.Id, product);
+                return new List<string>();
             }
             catch (Exception ex)
             {
@@ -152,13 +122,14 @@ namespace BarStockControl.Services
                 if (id <= 0)
                     throw new ArgumentException("El ID del producto debe ser mayor a 0.", nameof(id));
 
-                var product = GetById(id);
-                if (product == null)
+                var productDto = GetById(id);
+                if (productDto == null)
                     throw new InvalidOperationException($"Producto con ID {id} no encontrado.");
 
-                product.IsActive = false;
+                productDto.IsActive = false;
+                var product = ProductMapper.ToEntity(productDto);
                 Update(product.Id, product);
-                return $"El producto '{product.Name}' fue puesto en inactivo.";
+                return $"El producto '{productDto.Name}' fue puesto en inactivo.";
             }
             catch (Exception ex)
             {
@@ -166,53 +137,15 @@ namespace BarStockControl.Services
             }
         }
 
-        public void DeleteProduct(int id)
-        {
-            try
-            {
-                if (id <= 0)
-                    throw new ArgumentException("El ID del producto debe ser mayor a 0.", nameof(id));
-
-                var product = GetById(id);
-                if (product == null)
-                    throw new InvalidOperationException($"Producto con ID {id} no encontrado.");
-
-                if (IsProductInUse(id))
-                {
-                    throw new InvalidOperationException(
-                        $"No se puede eliminar el producto '{product.Name}' porque está siendo usado en el inventario. " +
-                        "Primero debe eliminar todas las referencias en stock.");
-                }
-
-                Delete(id);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al eliminar producto: {ex.Message}", ex);
-            }
-        }
-
-        private bool IsProductInUse(int productId)
-        {
-            try
-            {
-                var stockElements = _xmlDataManager.GetElements("stocks");
-                return stockElements.Any(s => (int)s.Attribute("productId") == productId);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al verificar uso del producto: {ex.Message}", ex);
-            }
-        }
-
-        public Product GetById(int id)
+        public ProductDto GetById(int id)
         {
             try
             {
                 if (id <= 0)
                     return null;
 
-                return GetAll().FirstOrDefault(p => p.Id == id);
+                var product = GetAll().FirstOrDefault(p => p.Id == id);
+                return product != null ? ProductMapper.ToDto(product) : null;
             }
             catch (Exception ex)
             {
@@ -220,72 +153,9 @@ namespace BarStockControl.Services
             }
         }
 
-        public List<Product> GetAllProducts()
+        public List<ProductDto> GetAllProductDtos()
         {
-            try
-            {
-                return GetAll();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener todos los productos: {ex.Message}", ex);
-            }
-        }
-
-        public List<Product> Search(Func<Product, bool> predicate)
-        {
-            try
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate), "El predicado de búsqueda no puede ser null.");
-
-                return GetAll().Where(predicate).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al buscar productos: {ex.Message}", ex);
-            }
-        }
-
-        public List<Product> GetProductsByCategory(ProductCategory category)
-        {
-            try
-            {
-                return GetAll().Where(p => p.Category == category && p.IsActive).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener productos por categoría: {ex.Message}", ex);
-            }
-        }
-
-        public List<Product> GetActiveProducts()
-        {
-            try
-            {
-                return GetAll().Where(p => p.IsActive).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener productos activos: {ex.Message}", ex);
-            }
-        }
-
-        public List<Product> GetProductsByName(string name)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(name))
-                    return new List<Product>();
-
-                return GetAll().Where(p => 
-                    p.Name.Contains(name, System.StringComparison.OrdinalIgnoreCase) && 
-                    p.IsActive).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al buscar productos por nombre: {ex.Message}", ex);
-            }
+            return GetAll().Select(ProductMapper.ToDto).ToList();
         }
 
         public void ExportToCsv(string filePath)
@@ -312,11 +182,6 @@ namespace BarStockControl.Services
             {
                 throw new InvalidOperationException($"Error al exportar productos a CSV: {ex.Message}", ex);
             }
-        }
-
-        public List<ProductDto> GetAllProductDtos()
-        {
-            return GetAll().Select(ProductMapper.ToDto).ToList();
         }
 
         public int CalculateEstimatedServings(ProductDto productDto)

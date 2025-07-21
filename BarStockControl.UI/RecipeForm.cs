@@ -109,18 +109,18 @@ namespace BarStockControl.UI
                     return;
 
                 var recipeDto = GetRecipeFromForm();
-                bool success = _recipeService.CreateRecipe(recipeDto);
+                var errors = _recipeService.CreateRecipe(recipeDto);
 
-                if (!success)
+                if (errors.Any())
                 {
-                    MessageBox.Show("Error al crear la receta", "Error", 
+                    MessageBox.Show($"Error al crear la receta:\n\n{string.Join("\n", errors)}", "Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 if (_currentRecipeItems.Any())
                 {
-                    success = _recipeService.SaveRecipeItems(recipeDto.Id, _currentRecipeItems);
+                    bool success = _recipeService.SaveRecipeItems(recipeDto.Id, _currentRecipeItems);
                     if (!success)
                     {
                         MessageBox.Show("Error al guardar los ingredientes de la receta", "Error", 
@@ -157,16 +157,16 @@ namespace BarStockControl.UI
 
                 var recipeDto = GetRecipeFromForm();
                 recipeDto.Id = _selectedRecipe.Id;
-                bool success = _recipeService.UpdateRecipe(recipeDto);
+                var errors = _recipeService.UpdateRecipe(recipeDto);
 
-                if (!success)
+                if (errors.Any())
                 {
-                    MessageBox.Show("Error al actualizar la receta", "Error", 
+                    MessageBox.Show($"Error al actualizar la receta:\n\n{string.Join("\n", errors)}", "Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                success = _recipeService.SaveRecipeItems(recipeDto.Id, _currentRecipeItems);
+                bool success = _recipeService.SaveRecipeItems(recipeDto.Id, _currentRecipeItems);
                 if (!success)
                 {
                     MessageBox.Show("Error al guardar los ingredientes de la receta", "Error", 
@@ -205,12 +205,18 @@ namespace BarStockControl.UI
 
                 if (confirm == DialogResult.Yes)
                 {
-                    if (_recipeService.DeleteRecipe(_selectedRecipe.Id))
+                    try
                     {
+                        _recipeService.DeleteRecipe(_selectedRecipe.Id);
                         MessageBox.Show("Receta eliminada exitosamente.", "Éxito", 
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                         ClearForm();
                         LoadRecipes();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al eliminar la receta: {ex.Message}", "Error", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -243,7 +249,7 @@ namespace BarStockControl.UI
             try
             {
                 txtName.Text = recipe.Name;
-                _currentRecipeItems = _recipeService.GetRecipeItems(recipe.Id).ToList();
+                _currentRecipeItems = _recipeService.GetRecipeItems(recipe.Id);
                 RefreshRecipeGrid();
             }
             catch (Exception ex)

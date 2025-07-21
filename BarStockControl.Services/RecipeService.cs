@@ -28,74 +28,108 @@ namespace BarStockControl.Services
             return RecipeMapper.ToXml(recipe);
         }
 
-        public List<RecipeDto> GetAllRecipes()
+        public List<string> ValidateRecipe(RecipeDto recipe, bool isUpdate = false)
         {
-            return GetAll().Select(r => r.ToDto()).ToList();
+            var errors = new List<string>();
+
+            if (recipe == null)
+            {
+                errors.Add("La receta no puede ser null.");
+                return errors;
+            }
+
+            if (string.IsNullOrWhiteSpace(recipe.Name))
+                errors.Add("El nombre de la receta es requerido.");
+
+            if (recipe.Name?.Length > 100)
+                errors.Add("El nombre de la receta no puede exceder 100 caracteres.");
+
+            if (recipe.DrinkId <= 0)
+                errors.Add("El ID del trago debe ser mayor a 0.");
+
+            if (recipe.Description?.Length > 500)
+                errors.Add("La descripción no puede exceder 500 caracteres.");
+
+            var existing = GetAll().FirstOrDefault(r => 
+                r.Name.Equals(recipe.Name, StringComparison.OrdinalIgnoreCase) && 
+                r.DrinkId == recipe.DrinkId);
+            
+            if (existing != null && (!isUpdate || existing.Id != recipe.Id))
+                errors.Add("Ya existe una receta con el mismo nombre para este trago.");
+
+            return errors;
         }
 
-        public RecipeDto GetRecipeById(int id)
-        {
-            var recipe = GetById(id);
-            return recipe?.ToDto();
-        }
-
-        public RecipeDto GetRecipeByDrinkId(int drinkId)
-        {
-            var recipe = GetAll().FirstOrDefault(r => r.DrinkId == drinkId);
-            return recipe?.ToDto();
-        }
-
-        public bool CreateRecipe(RecipeDto recipeDto)
+        public List<string> CreateRecipe(RecipeDto recipeDto)
         {
             try
             {
+                if (recipeDto == null)
+                    throw new ArgumentNullException(nameof(recipeDto), "La receta no puede ser null.");
+
+                var errors = ValidateRecipe(recipeDto);
+                if (errors.Any())
+                    return errors;
+
                 var recipe = recipeDto.ToModel();
                 recipe.Id = GetNextId();
                 Add(recipe);
-                return true;
+                return new List<string>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw new InvalidOperationException($"Error al crear receta: {ex.Message}", ex);
             }
         }
 
-        public bool UpdateRecipe(RecipeDto recipeDto)
+        public List<string> UpdateRecipe(RecipeDto recipeDto)
         {
             try
             {
+                if (recipeDto == null)
+                    throw new ArgumentNullException(nameof(recipeDto), "La receta no puede ser null.");
+
+                var errors = ValidateRecipe(recipeDto, isUpdate: true);
+                if (errors.Any())
+                    return errors;
+
                 var recipe = recipeDto.ToModel();
                 Update(recipe.Id, recipe);
-                return true;
+                return new List<string>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw new InvalidOperationException($"Error al actualizar receta: {ex.Message}", ex);
             }
         }
 
-        public bool DeleteRecipe(int id)
+        public void DeleteRecipe(int id)
         {
             try
             {
+                if (id <= 0)
+                    throw new ArgumentException("El ID de la receta debe ser mayor a 0.", nameof(id));
+
+                var recipe = GetById(id);
+                if (recipe == null)
+                    throw new InvalidOperationException($"Receta con ID {id} no encontrada.");
+
                 Delete(id);
-                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw new InvalidOperationException($"Error al eliminar receta: {ex.Message}", ex);
             }
         }
 
-        public IEnumerable<RecipeItemDto> GetRecipeItems(int recipeId)
+        public List<RecipeItemDto> GetRecipeItems(int recipeId)
         {
             try
             {
                 var recipe = GetById(recipeId);
                 if (recipe == null) return new List<RecipeItemDto>();
 
-                return _recipeItemService.GetByRecipeId(recipeId)
-                    .Select(item => item.ToDto());
+                return _recipeItemService.GetRecipeItemDtosByRecipeId(recipeId);
             }
             catch (Exception)
             {
@@ -103,28 +137,26 @@ namespace BarStockControl.Services
             }
         }
 
+        public List<RecipeDto> GetAllRecipes()
+        {
+            return GetAll().Select(r => r.ToDto()).ToList();
+        }
+
         public bool SaveRecipeItems(int recipeId, IEnumerable<RecipeItemDto> items)
         {
             try
             {
-                // Eliminar items existentes
-                var existingItems = _recipeItemService.GetByRecipeId(recipeId);
+                var existingItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipeId);
                 foreach (var item in existingItems)
                 {
-                    _recipeItemService.Delete(item.Id);
+                    _recipeItemService.DeleteRecipeItem(item.Id);
                 }
 
-                // Agregar nuevos items
                 foreach (var itemDto in items)
                 {
-                    var newItem = new RecipeItem
-                    {
-                        Id = _recipeItemService.GetNextId(),
-                        RecipeId = recipeId,
-                        ProductId = itemDto.ProductId,
-                        Quantity = itemDto.Quantity
-                    };
-                    if (!_recipeItemService.Add(newItem))
+                    itemDto.RecipeId = recipeId;
+                    var errors = _recipeItemService.CreateRecipeItem(itemDto);
+                    if (errors.Any())
                     {
                         return false;
                     }

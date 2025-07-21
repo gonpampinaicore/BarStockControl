@@ -102,7 +102,7 @@ namespace BarStockControl.UI
                     if (drink == null) continue;
                     var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                     if (recipe == null) continue;
-                    var recipeItems = _recipeItemService.GetAllRecipeItems().Where(ri => ri.RecipeId == recipe.Id).ToList();
+                    var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
                     foreach (var ri in recipeItems)
                     {
                         var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
@@ -138,7 +138,7 @@ namespace BarStockControl.UI
                 _selectedDrink = drink;
                 var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) return;
-                var recipeItems = _recipeItemService.GetAllRecipeItems().Where(ri => ri.RecipeId == recipe.Id).ToList();
+                var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
                 var recipeDisplay = recipeItems.Select(ri => new {
                     Ingrediente = _productService.GetAllProductDtos().FirstOrDefault(p => p.Id == ri.ProductId)?.Name ?? "Desconocido",
                     Cantidad = ri.Quantity
@@ -235,7 +235,7 @@ namespace BarStockControl.UI
                 if (drink == null) continue;
                 var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) continue;
-                var recipeItems = _recipeItemService.GetAllRecipeItems().Where(ri => ri.RecipeId == recipe.Id).ToList();
+                var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
                 foreach (var ri in recipeItems)
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);

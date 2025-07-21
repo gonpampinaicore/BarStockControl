@@ -96,10 +96,11 @@ namespace BarStockControl.Services
                     Name = drink.Name + " - Receta"
                 };
 
-                if (!_recipeService.CreateRecipe(recipe.ToDto()))
+                var recipeErrors = _recipeService.CreateRecipe(recipe.ToDto());
+                if (recipeErrors.Any())
                 {
                     Delete(drink.Id);
-                    return new List<string> { "Error al crear la receta asociada al trago." };
+                    return new List<string> { "Error al crear la receta asociada al trago." }.Concat(recipeErrors).ToList();
                 }
 
                 if (!SaveRecipeItems(drink.Id, recipeItems))
@@ -202,7 +203,7 @@ namespace BarStockControl.Services
                 if (recipeDto == null)
                     return new List<RecipeItemDto>();
 
-                return _recipeService.GetRecipeItems(recipeDto.Id).ToList();
+                return _recipeService.GetRecipeItems(recipeDto.Id);
             }
             catch (Exception)
             {
@@ -235,7 +236,7 @@ namespace BarStockControl.Services
 
         private int GetNextRecipeItemId()
         {
-            var items = _recipeItemService.GetAllRecipeItems();
+            var items = _recipeItemService.GetAllRecipeItemDtos();
             return items.Any() ? items.Max(i => i.Id) + 1 : 1;
         }
     }
