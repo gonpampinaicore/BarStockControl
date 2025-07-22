@@ -281,7 +281,7 @@ namespace BarStockControl.UI
             try
             {
                 _assignments.Clear();
-                var existingAssignments = _assignmentService.GetAssignmentsByEventId(eventId);
+                var existingAssignments = _assignmentService.GetByEvent(eventId);
                 _assignments.AddRange(existingAssignments);
                 RefreshAssignmentGrid();
             }
@@ -306,7 +306,7 @@ namespace BarStockControl.UI
                 var selectedEvent = (EventDto)cmbEvent.SelectedItem;
                 var errores = new List<string>();
 
-                var existingAssignments = _assignmentService.GetAssignmentsByEventId(selectedEvent.Id);
+                var existingAssignments = _assignmentService.GetByEvent(selectedEvent.Id);
                 foreach (var existing in existingAssignments)
                 {
                     _assignmentService.DeleteAssignment(existing.Id);

@@ -6,13 +6,6 @@ using BarStockControl.DTOs;
 using BarStockControl.Mappers;
 using BarStockControl.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
-using BarStockControl.Models;
-using BarStockControl.DTOs;
-using BarStockControl.Mappers;
-using BarStockControl.Data;
 
 namespace BarStockControl.Services
 {
@@ -31,7 +24,7 @@ namespace BarStockControl.Services
             return ResourceAssignmentMapper.ToXml(entity);
         }
 
-        public List<string> Validate(ResourceAssignment assignment)
+        private List<string> Validate(ResourceAssignment assignment)
         {
             var errors = new List<string>();
 
@@ -45,78 +38,6 @@ namespace BarStockControl.Services
                 errors.Add("User ID is required.");
 
             return errors;
-        }
-
-        public List<ResourceAssignmentDto> GetAllAssignmentDtos()
-        {
-            return GetAll().Select(ResourceAssignmentMapper.ToDto).ToList();
-        }
-
-        public List<ResourceAssignmentDto> GetByEvent(int eventId)
-        {
-            return GetAll()
-                .Where(a => a.EventId == eventId)
-                .Select(ResourceAssignmentMapper.ToDto)
-                .ToList();
-        }
-
-        public List<ResourceAssignmentDto> GetAssignmentsByEventId(int eventId)
-        {
-            return GetByEvent(eventId);
-        }
-
-        public ResourceAssignmentDto GetByIdDto(int id)
-        {
-            var entity = GetById(id);
-            return ResourceAssignmentMapper.ToDto(entity);
-        }
-
-        public void UpdateFromDto(ResourceAssignmentDto dto)
-        {
-            var entity = ResourceAssignmentMapper.ToEntity(dto);
-            Update(entity.Id, entity);
-        }
-
-        public void DeleteById(int id)
-        {
-            Delete(id);
-        }
-
-        public void DeleteAssignment(int id)
-        {
-            Delete(id);
-        }
-
-        public ResourceAssignmentDto GetAssignment(int eventId, int resourceId, string resourceType)
-        {
-            var entity = GetAll().FirstOrDefault(a =>
-                a.EventId == eventId &&
-                a.ResourceId == resourceId &&
-                a.ResourceType == resourceType);
-
-            return entity != null ? ResourceAssignmentMapper.ToDto(entity) : null;
-        }
-
-        public void AssignOrUpdateUser(int eventId, int resourceId, string resourceType, int userId)
-        {
-            var existing = GetAssignment(eventId, resourceId, resourceType);
-            if (existing != null)
-            {
-                existing.UserId = userId;
-                UpdateFromDto(existing);
-            }
-            else
-            {
-                var result = CreateAssignment(new ResourceAssignmentDto
-                {
-                    EventId = eventId,
-                    ResourceId = resourceId,
-                    ResourceType = resourceType,
-                    UserId = userId
-                });
-                if (result.Any())
-                    throw new InvalidOperationException("Error al crear asignación: " + string.Join("; ", result));
-            }
         }
 
         public List<string> CreateAssignment(ResourceAssignmentDto dto)
@@ -140,5 +61,20 @@ namespace BarStockControl.Services
                 throw new InvalidOperationException($"Error al crear asignación de recurso: {ex.Message}", ex);
             }
         }
+
+        public void DeleteAssignment(int id)
+        {
+            Delete(id);
+        }
+
+        public List<ResourceAssignmentDto> GetByEvent(int eventId)
+        {
+            return GetAll()
+                .Where(a => a.EventId == eventId)
+                .Select(ResourceAssignmentMapper.ToDto)
+                .ToList();
+        }
+
+
     }
 }

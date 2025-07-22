@@ -5,6 +5,7 @@ using BarStockControl.Models;
 using BarStockControl.Mappers;
 using BarStockControl.Data;
 using BarStockControl.DTOs;
+using System;
 
 namespace BarStockControl.Services
 {
@@ -23,7 +24,7 @@ namespace BarStockControl.Services
             return StationMapper.ToXml(station);
         }
 
-        public List<string> ValidateStation(Station station, bool isUpdate = false)
+        private List<string> ValidateStation(Station station, bool isUpdate = false)
         {
             var errors = new List<string>();
 
@@ -45,26 +46,41 @@ namespace BarStockControl.Services
             return errors;
         }
 
-
-        public List<string> CreateStation(Station station)
+        public List<string> CreateStation(StationDto dto)
         {
-            var errors = ValidateStation(station);
-            if (errors.Any())
-                return errors;
+            try
+            {
+                var entity = StationMapper.ToEntity(dto);
+                var errors = ValidateStation(entity);
+                if (errors.Any())
+                    return errors;
 
-            station.Id = GetNextId();
-            Add(station);
-            return new List<string>();
+                entity.Id = GetNextId();
+                Add(entity);
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                return new List<string> { $"Error al crear estación: {ex.Message}" };
+            }
         }
 
-        public List<string> UpdateStation(Station station)
+        public List<string> UpdateStation(StationDto dto)
         {
-            var errors = ValidateStation(station, isUpdate: true);
-            if (errors.Any())
-                return errors;
+            try
+            {
+                var entity = StationMapper.ToEntity(dto);
+                var errors = ValidateStation(entity, isUpdate: true);
+                if (errors.Any())
+                    return errors;
 
-            Update(station.Id, station);
-            return new List<string>();
+                Update(entity.Id, entity);
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                return new List<string> { $"Error al actualizar estación: {ex.Message}" };
+            }
         }
 
         public void DeleteStation(int id)
@@ -72,19 +88,10 @@ namespace BarStockControl.Services
             Delete(id);
         }
 
-        public Station GetById(int id)
+        public StationDto GetById(int id)
         {
-            return GetAll().FirstOrDefault(s => s.Id == id);
-        }
-
-        public List<Station> GetAllStations()
-        {
-            return GetAll();
-        }
-
-        public List<Station> Search(Func<Station, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
+            var entity = GetAll().FirstOrDefault(s => s.Id == id);
+            return entity != null ? StationMapper.ToDto(entity) : null;
         }
 
         public List<StationDto> GetAllStationDtos()

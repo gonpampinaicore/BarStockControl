@@ -6,14 +6,12 @@ using System.Text.RegularExpressions;
 using BarStockControl.Security;
 using BarStockControl.DTOs;
 
-
 namespace BarStockControl.Services
 {
     public class UserService : BaseService<User>
     {
         private readonly RoleService _roleService;
         private readonly PermissionService _permissionService;
-
 
         public UserService(XmlDataManager xmlDataManager)
             : base(xmlDataManager, "users")
@@ -32,7 +30,7 @@ namespace BarStockControl.Services
             return UserMapper.ToXml(user);
         }
 
-        public List<string> ValidateUser(User user, bool isUpdate = false)
+        private List<string> ValidateUser(User user, bool isUpdate = false)
         {
             var errors = new List<string>();
 
@@ -150,46 +148,15 @@ namespace BarStockControl.Services
             }
         }
 
-        public List<UserDto> GetAllUserDtos()
+        public UserDto GetUserDtoById(int id)
         {
-            try
-            {
-                return GetAll().Select(UserMapper.ToDto).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al obtener todos los usuarios: {ex.Message}", ex);
-            }
+            var user = GetById(id);
+            return UserMapper.ToDto(user);
         }
 
-        public List<User> Search(Func<User, bool> predicate)
+        public UserDto ToDto(User user)
         {
-            try
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate), "El predicado de búsqueda no puede ser null.");
-
-                return GetAll().Where(predicate).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al buscar usuarios: {ex.Message}", ex);
-            }
-        }
-
-        public string DecryptPassword(string encryptedPassword)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(encryptedPassword))
-                    return string.Empty;
-
-                return PasswordEncryption.DecryptPassword(encryptedPassword);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error al desencriptar contraseña: {ex.Message}", ex);
-            }
+            return UserMapper.ToDto(user);
         }
 
         public User Authenticate(string email, string plainPassword)
@@ -215,22 +182,6 @@ namespace BarStockControl.Services
             {
                 throw new InvalidOperationException($"Error en autenticación: {ex.Message}", ex);
             }
-        }
-
-        public UserDto GetUserDtoById(int id)
-        {
-            var user = GetById(id);
-            return UserMapper.ToDto(user);
-        }
-
-        public UserDto ToDto(User user)
-        {
-            return UserMapper.ToDto(user);
-        }
-
-        public User ToEntity(UserDto dto)
-        {
-            return UserMapper.ToEntity(dto);
         }
 
         public void BuildPermissions(User user)

@@ -142,7 +142,7 @@ namespace BarStockControl.UI
                     .Select(bo => new
                     {
                         Orden = bo.OrderId,
-                        Barman = userService.GetById(bo.BarmanId)?.FirstName + " " + userService.GetById(bo.BarmanId)?.LastName,
+                        Barman = GetBarmanName(userService, bo.BarmanId),
                         Fecha = orders.FirstOrDefault(o => o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.CreatedAt.ToString("dd/MM/yyyy HH:mm") ?? "",
                         Estado = orders.FirstOrDefault(o => o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.Status.ToString() ?? ""
                     })
@@ -210,6 +210,12 @@ namespace BarStockControl.UI
             {
                 MessageBox.Show($"Error al cargar stock total: {ex.Message}");
             }
+        }
+
+        private string GetBarmanName(UserService userService, int barmanId)
+        {
+            var user = userService.GetUserDtoById(barmanId);
+            return user != null ? $"{user.FirstName} {user.LastName}" : $"Barman {barmanId}";
         }
     }
 }

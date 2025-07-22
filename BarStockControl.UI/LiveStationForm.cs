@@ -194,7 +194,7 @@ namespace BarStockControl.UI
                 return;
             }
             var barmanId = assignment.UserId;
-            var station = _stationService.GetAllStations().FirstOrDefault(s => s.Id == _stationId);
+            var station = _stationService.GetAllStationDtos().FirstOrDefault(s => s.Id == _stationId);
             int barId = station != null ? station.BarId : 0;
             
             var barmanOrderDto = new BarmanOrderDto
@@ -246,7 +246,8 @@ namespace BarStockControl.UI
                         var descontar = (double)item.Quantity / prod.EstimatedServings;
                         stockProd.Quantity -= descontar;
                         if (stockProd.Quantity < 0) stockProd.Quantity = 0;
-                        _stockService.UpdateStock(stockProd);
+                        var stockDto = StockMapper.ToDto(stockProd);
+                        _stockService.UpdateStock(stockDto);
                     }
                     var consumo = new StationProductConsumptionDto
                     {
@@ -257,7 +258,12 @@ namespace BarStockControl.UI
                         EventId = _currentOrder.EventId,
                         UserId = SessionContext.Instance.LoggedUser?.Id
                     };
-                    _stationProductConsumptionService.Create(consumo);
+                    var consumptionErrors = _stationProductConsumptionService.Create(consumo);
+                    if (consumptionErrors.Any())
+                    {
+                        MessageBox.Show($"Error al crear consumo de producto: {string.Join(", ", consumptionErrors)}");
+                        return;
+                    }
                 }
             }
             _currentOrder.Status = OrderStatus.Entregado;

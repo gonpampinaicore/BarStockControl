@@ -24,7 +24,7 @@ namespace BarStockControl.Services
             return StockMapper.ToXml(stock);
         }
 
-        public List<string> ValidateStock(Stock stock, bool isUpdate = false)
+        private List<string> ValidateStock(Stock stock, bool isUpdate = false)
         {
             var errors = new List<string>();
 
@@ -43,47 +43,6 @@ namespace BarStockControl.Services
             return errors;
         }
 
-        public List<string> CreateStock(Stock stock)
-        {
-            var errors = ValidateStock(stock);
-            if (errors.Any())
-                return errors;
-
-            stock.Id = GetNextId();
-            Add(stock);
-            return new List<string>();
-        }
-
-        public List<string> UpdateStock(Stock stock)
-        {
-            var errors = ValidateStock(stock, isUpdate: true);
-            if (errors.Any())
-                return errors;
-
-            Update(stock.Id, stock);
-            return new List<string>();
-        }
-
-        public void DeleteStock(int id)
-        {
-            Delete(id);
-        }
-
-        public Stock GetById(int id)
-        {
-            return GetAll().FirstOrDefault(s => s.Id == id);
-        }
-
-        public List<Stock> GetAllStock()
-        {
-            return GetAll();
-        }
-
-        public List<Stock> Search(Func<Stock, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
-        }
-
         public List<StockDto> GetAllStockDtos()
         {
             return GetAll().Select(StockMapper.ToDto).ToList();
@@ -91,25 +50,36 @@ namespace BarStockControl.Services
 
         public StockDto GetByIdDto(int id)
         {
-            var stock = GetById(id);
-            return StockMapper.ToDto(stock);
+            var stock = GetAll().FirstOrDefault(s => s.Id == id);
+            return stock != null ? StockMapper.ToDto(stock) : null;
         }
 
         public List<string> CreateStock(StockDto dto)
         {
             var entity = StockMapper.ToEntity(dto);
-            return CreateStock(entity);
+            var errors = ValidateStock(entity);
+            if (errors.Any())
+                return errors;
+
+            entity.Id = GetNextId();
+            Add(entity);
+            return new List<string>();
         }
 
         public List<string> UpdateStock(StockDto dto)
         {
             var entity = StockMapper.ToEntity(dto);
-            return UpdateStock(entity);
+            var errors = ValidateStock(entity, isUpdate: true);
+            if (errors.Any())
+                return errors;
+
+            Update(entity.Id, entity);
+            return new List<string>();
         }
 
         public void DeleteStockDto(int id)
         {
-            DeleteStock(id);
+            Delete(id);
         }
     }
 }

@@ -24,16 +24,66 @@ namespace BarStockControl.Services
             return StationProductConsumptionMapper.ToXml(entity);
         }
 
-        public void Create(StationProductConsumptionDto dto)
+        public List<string> Create(StationProductConsumptionDto dto)
         {
-            var entity = StationProductConsumptionMapper.FromDto(dto);
-            entity.Id = GetNextId();
-            Add(entity);
+            try
+            {
+                var errors = ValidateStationProductConsumption(dto);
+                if (errors.Any())
+                    return errors;
+
+                var entity = StationProductConsumptionMapper.FromDto(dto);
+                entity.Id = GetNextId();
+                Add(entity);
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                return new List<string> { $"Error al crear consumo de producto: {ex.Message}" };
+            }
         }
 
         public List<StationProductConsumptionDto> GetAllDtos()
         {
-            return GetAll().Select(StationProductConsumptionMapper.ToDto).ToList();
+            try
+            {
+                return GetAll().Select(StationProductConsumptionMapper.ToDto).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al obtener consumos de productos: {ex.Message}", ex);
+            }
+        }
+
+        private List<string> ValidateStationProductConsumption(StationProductConsumptionDto dto)
+        {
+            var errors = new List<string>();
+
+            if (dto == null)
+            {
+                errors.Add("El consumo de producto no puede ser null.");
+                return errors;
+            }
+
+            if (dto.StationId <= 0)
+                errors.Add("El ID de la estación debe ser mayor a 0.");
+
+            if (dto.ProductId <= 0)
+                errors.Add("El ID del producto debe ser mayor a 0.");
+
+            if (dto.OrderItemId <= 0)
+                errors.Add("El ID del ítem de orden debe ser mayor a 0.");
+
+            if (dto.EventId <= 0)
+                errors.Add("El ID del evento debe ser mayor a 0.");
+
+            if (dto.DateTime == default(DateTime))
+                errors.Add("La fecha y hora no puede ser la fecha por defecto.");
+
+            if (dto.DateTime > DateTime.Now.AddMinutes(5))
+                errors.Add("La fecha y hora no puede ser en el futuro.");
+
+            return errors;
         }
     }
 } 

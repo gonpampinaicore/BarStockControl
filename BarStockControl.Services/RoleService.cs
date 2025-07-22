@@ -34,12 +34,7 @@ namespace BarStockControl.Services
             return RoleMapper.ToXml(role);
         }
 
-        public RoleDto ToDto(Role role)
-        {
-            return RoleMapper.ToDto(role);
-        }
-
-        public Role ToEntity(RoleDto dto)
+        private Role ToEntity(RoleDto dto)
         {
             var allRoles = GetAll();
             var allPermissions = _permissionService.GetAll();
@@ -51,7 +46,7 @@ namespace BarStockControl.Services
             return role;
         }
 
-        public List<string> ValidateRole(Role role, bool isUpdate = false)
+        private List<string> ValidateRole(Role role, bool isUpdate = false)
         {
             var errors = new List<string>();
 
@@ -120,17 +115,12 @@ namespace BarStockControl.Services
         {
             try
             {
-                return GetAll().Select(ToDto).ToList();
+                return GetAll().Select(RoleMapper.ToDto).ToList();
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Error al obtener todos los roles: {ex.Message}", ex);
             }
-        }
-
-        public List<Role> Search(Func<Role, bool> predicate)
-        {
-            return GetAll().Where(predicate).ToList();
         }
 
         public int? GetRoleIdByName(string roleName)
@@ -146,23 +136,6 @@ namespace BarStockControl.Services
 
             var componentService = new ComponentService(_xmlDataManager);
             return componentService.GetIdsFromComponent(role);
-        }
-
-        public RoleDto ToDtoWithComponentService(Role role)
-        {
-            if (role == null) return null;
-
-            var (roleIds, permissionIds) = GetComponentIds(role);
-
-            return new RoleDto
-            {
-                Id = role.Id,
-                Name = role.Name,
-                Description = role.Description,
-                IsActive = role.IsActive,
-                PermissionIds = permissionIds,
-                RoleIds = roleIds
-            };
         }
 
         public Role GetByIdWithHierarchy(int id)

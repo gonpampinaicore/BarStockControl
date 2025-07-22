@@ -186,7 +186,7 @@ namespace BarStockControl.UI
                     return;
                 }
                 var orderObj = _orderService.GetOrderDtoById(orderId);
-                var user = _userService.GetById(orderObj.UserId);
+                var user = _userService.GetUserDtoById(orderObj.UserId);
                 var eventObj = _eventService.GetEventDtoById(orderObj.EventId);
                 var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
                 var invoiceItems = new List<InvoiceItemDto>();
@@ -211,7 +211,7 @@ namespace BarStockControl.UI
                     CreatedAt = orderObj.CreatedAt,
                     EventName = eventObj?.Name ?? "Evento desconocido",
                     CashRegisterName = "Caja no asignada",
-                    CashierName = user?.ToString() ?? "Usuario desconocido",
+                    CashierName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario desconocido",
                     PaymentMethod = orderObj.PaymentMethod,
                     Status = orderObj.Status.ToString(),
                     Total = totalFactura,

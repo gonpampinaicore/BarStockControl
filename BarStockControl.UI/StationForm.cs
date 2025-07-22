@@ -1,14 +1,12 @@
-﻿using BarStockControl.Data;
-using BarStockControl.DTOs;
-using BarStockControl.Mappers;
-using BarStockControl.Models;
-using BarStockControl.Models.Enums;
-using BarStockControl.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using System.Xml.Linq;
+using BarStockControl.Models;
+using BarStockControl.Models.Enums;
+using BarStockControl.Services;
+using BarStockControl.DTOs;
+using BarStockControl.Data;
 
 namespace BarStockControl.UI
 {
@@ -16,36 +14,29 @@ namespace BarStockControl.UI
     {
         private readonly StationService _stationService;
         private readonly BarService _barService;
-        private Station _selectedStation = new Station();
+        private StationDto _selectedStation = new StationDto();
 
         public StationForm()
         {
             InitializeComponent();
-            _stationService = new StationService(new XmlDataManager("Xml/data.xml"));
-            _barService = new BarService(new XmlDataManager("Xml/data.xml"));
-            LoadBars();
+            var dataManager = new XmlDataManager("Xml/data.xml");
+            _stationService = new StationService(dataManager);
+            _barService = new BarService(dataManager);
             LoadEnumCombos();
+            LoadBars();
             LoadStations();
         }
 
         private void LoadEnumCombos()
         {
-            try
-            {
-                cmbStatus.DataSource = Enum.GetValues(typeof(StationStatus));
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Error al cargar enumeraciones.", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            cmbStatus.DataSource = Enum.GetValues(typeof(StationStatus));
         }
 
         private void LoadBars()
         {
             try
             {
-                var bars = _barService.GetAllBars();
+                var bars = _barService.GetAllBars().Where(b => b.Active).ToList();
                 cmbBar.DataSource = bars;
                 cmbBar.DisplayMember = "Name";
                 cmbBar.ValueMember = "Id";
@@ -61,7 +52,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                var list = _stationService.GetAllStations();
+                var list = _stationService.GetAllStationDtos();
 
                 if (chkOnlyActive.Checked)
                     list = list.Where(s => s.Active).ToList();
@@ -100,7 +91,7 @@ namespace BarStockControl.UI
                     if (_selectedStation != null)
                     {
                         txtName.Text = _selectedStation.Name;
-                        cmbStatus.SelectedItem = _selectedStation.Status;
+                        cmbStatus.SelectedItem = Enum.Parse(typeof(StationStatus), _selectedStation.Status);
                         chkActive.Checked = _selectedStation.Active;
                         cmbBar.SelectedValue = _selectedStation.BarId;
                         txtComment.Text = _selectedStation.Comment;
@@ -113,12 +104,12 @@ namespace BarStockControl.UI
             }
         }
 
-        private Station GetStationFromForm()
+        private StationDto GetStationFromForm()
         {
-            return new Station
+            return new StationDto
             {
                 Name = txtName.Text.Trim(),
-                Status = (StationStatus)cmbStatus.SelectedItem,
+                Status = ((StationStatus)cmbStatus.SelectedItem).ToString(),
                 Active = chkActive.Checked,
                 BarId = (int)cmbBar.SelectedValue,
                 Comment = txtComment.Text.Trim()
@@ -129,8 +120,8 @@ namespace BarStockControl.UI
         {
             try
             {
-                var entity = GetStationFromForm();
-                var errors = _stationService.CreateStation(entity);
+                var dto = GetStationFromForm();
+                var errors = _stationService.CreateStation(dto);
 
                 if (errors.Any())
                 {
@@ -157,10 +148,9 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                var entity = GetStationFromForm();
-                entity.Id = _selectedStation.Id;
-                var errors = _stationService.UpdateStation(entity);
-
+                var dto = GetStationFromForm();
+                dto.Id = _selectedStation.Id;
+                var errors = _stationService.UpdateStation(dto);
 
                 if (errors.Any())
                 {
@@ -187,8 +177,13 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                var confirm = MessageBox.Show("¿Eliminar estación seleccionada?", "Confirmar", MessageBoxButtons.YesNo);
-                if (confirm == DialogResult.Yes)
+                var result = MessageBox.Show(
+                    $"¿Estás seguro de que querés eliminar la estación '{_selectedStation.Name}'?",
+                    "Confirmar eliminación",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
                 {
                     _stationService.DeleteStation(_selectedStation.Id);
                     ClearForm();
@@ -213,12 +208,12 @@ namespace BarStockControl.UI
 
         private void ClearForm()
         {
-            txtName.Clear();
+            txtName.Text = "";
             cmbStatus.SelectedIndex = 0;
-            cmbBar.SelectedIndex = 0;
             chkActive.Checked = true;
-            txtComment.Clear();
-            _selectedStation = new Station();
+            cmbBar.SelectedIndex = 0;
+            txtComment.Text = "";
+            _selectedStation = new StationDto();
         }
     }
 }

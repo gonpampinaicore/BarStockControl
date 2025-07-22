@@ -58,14 +58,6 @@ namespace BarStockControl.Services
             component.ClearChildren();
         }
 
-        public List<Component> GetChildren(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            return component.Children.ToList();
-        }
-
         public List<Component> GetAllChildrenRecursive(Component component)
         {
             if (component == null)
@@ -133,103 +125,6 @@ namespace BarStockControl.Services
             }
         }
 
-        public bool HasPermission(Component component, string permissionName)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            if (string.IsNullOrWhiteSpace(permissionName))
-                throw new ArgumentException("El nombre del permiso no puede estar vacío.", nameof(permissionName));
-
-            var allPermissions = GetAllPermissionsRecursive(component);
-            return allPermissions.Any(p => p.Name.Equals(permissionName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public bool HasPermission(Component component, PermissionType permissionType)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            var allPermissions = GetAllPermissionsRecursive(component);
-            return allPermissions.Any(p => p.Permission == permissionType);
-        }
-
-        public List<string> GetPermissionNames(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            var allPermissions = GetAllPermissionsRecursive(component);
-            return allPermissions.Select(p => p.Name).ToList();
-        }
-
-        public List<PermissionType> GetPermissionTypes(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            var allPermissions = GetAllPermissionsRecursive(component);
-            return allPermissions.Select(p => p.Permission).ToList();
-        }
-
-        public Component FindComponentById(Component root, int id)
-        {
-            if (root == null)
-                throw new ArgumentNullException(nameof(root), "El componente raíz no puede ser null.");
-
-            if (root.Id == id)
-                return root;
-
-            foreach (var child in root.Children)
-            {
-                var found = FindComponentById(child, id);
-                if (found != null)
-                    return found;
-            }
-
-            return null;
-        }
-
-        public Component FindComponentByName(Component root, string name)
-        {
-            if (root == null)
-                throw new ArgumentNullException(nameof(root), "El componente raíz no puede ser null.");
-
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("El nombre no puede estar vacío.", nameof(name));
-
-            if (root.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                return root;
-
-            foreach (var child in root.Children)
-            {
-                var found = FindComponentByName(child, name);
-                if (found != null)
-                    return found;
-            }
-
-            return null;
-        }
-
-        public int GetDepth(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            if (!component.Children.Any())
-                return 0;
-
-            return 1 + component.Children.Max(child => GetDepth(child));
-        }
-
-        public int GetTotalChildrenCount(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            return GetAllChildrenRecursive(component).Count;
-        }
-
         private bool WouldCreateCircularReference(Component parent, Component child)
         {
             return parent.Id == child.Id;
@@ -259,38 +154,6 @@ namespace BarStockControl.Services
             visited.Remove(component.Id);
         }
 
-        public void BuildComponentFromIds(Component component, List<int> roleIds, List<int> permissionIds)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            component.ClearChildren();
-
-            if (roleIds != null)
-            {
-                foreach (var roleId in roleIds)
-                {
-                    var role = _roleService.GetById(roleId);
-                    if (role != null)
-                    {
-                        component.AddChild(role);
-                    }
-                }
-            }
-
-            if (permissionIds != null)
-            {
-                foreach (var permissionId in permissionIds)
-                {
-                    var permission = _permissionService.GetById(permissionId);
-                    if (permission != null)
-                    {
-                        component.AddChild(permission);
-                    }
-                }
-            }
-        }
-
         public (List<int> RoleIds, List<int> PermissionIds) GetIdsFromComponent(Component component)
         {
             if (component == null)
@@ -312,91 +175,6 @@ namespace BarStockControl.Services
             }
 
             return (roleIds, permissionIds);
-        }
-
-        public List<string> ValidateComponentHierarchy(Component component)
-        {
-            var errors = new List<string>();
-
-            try
-            {
-                ValidateComponentStructure(component);
-            }
-            catch (InvalidOperationException ex)
-            {
-                errors.Add(ex.Message);
-            }
-
-            if (component is Role role)
-            {
-                if (string.IsNullOrWhiteSpace(role.Name))
-                    errors.Add("El nombre del rol es obligatorio.");
-
-                if (string.IsNullOrWhiteSpace(role.Description))
-                    errors.Add("La descripción del rol es obligatoria.");
-            }
-            else if (component is Permission permission)
-            {
-                if (string.IsNullOrWhiteSpace(permission.Name))
-                    errors.Add("El nombre del permiso es obligatorio.");
-
-                if (string.IsNullOrWhiteSpace(permission.Description))
-                    errors.Add("La descripción del permiso es obligatoria.");
-            }
-
-            return errors;
-        }
-
-        public void SaveComponentHierarchy(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            ValidateComponentStructure(component);
-
-            if (component is Role role)
-            {
-                _roleService.Update(role.Id, role);
-            }
-            else if (component is Permission permission)
-            {
-                _permissionService.Update(permission.Id, permission);
-            }
-        }
-
-        public Component CloneComponent(Component component)
-        {
-            if (component == null)
-                throw new ArgumentNullException(nameof(component), "El componente no puede ser null.");
-
-            if (component is Role role)
-            {
-                var clonedRole = new Role
-                {
-                    Name = role.Name + " (Copia)",
-                    Description = role.Description,
-                    IsActive = role.IsActive
-                };
-
-                foreach (var child in role.Children)
-                {
-                    clonedRole.AddChild(child);
-                }
-
-                return clonedRole;
-            }
-            else if (component is Permission permission)
-            {
-                return new Permission
-                {
-                    Name = permission.Name + " (Copia)",
-                    Description = permission.Description,
-                    IsActive = permission.IsActive,
-                    Permission = permission.Permission
-                };
-            }
-
-            throw new InvalidOperationException("Tipo de componente no soportado para clonación.");
         }
 
         public void BuildUserPermissions(User user, List<int> roleIds, List<int> permissionIds)
@@ -447,29 +225,6 @@ namespace BarStockControl.Services
             }
         }
 
-        public (List<int> RoleIds, List<int> PermissionIds) GetIdsFromUser(User user)
-        {
-            if (user == null)
-                return (new List<int>(), new List<int>());
-
-            var roleIds = new List<int>();
-            var permissionIds = new List<int>();
-
-            foreach (var component in user.Permissions)
-            {
-                if (component is Role role)
-                {
-                    roleIds.Add(role.Id);
-                }
-                else if (component is Permission permission)
-                {
-                    permissionIds.Add(permission.Id);
-                }
-            }
-
-            return (roleIds, permissionIds);
-        }
-
         public List<Permission> GetAllUserPermissionsRecursive(User user)
         {
             if (user == null)
@@ -511,24 +266,6 @@ namespace BarStockControl.Services
             }
 
             return allRoles.Distinct().ToList();
-        }
-
-        public bool UserHasPermission(User user, string permissionName)
-        {
-            if (user == null)
-                return false;
-
-            var allPermissions = GetAllUserPermissionsRecursive(user);
-            return allPermissions.Any(p => p.Name.Equals(permissionName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public bool UserHasPermission(User user, PermissionType permissionType)
-        {
-            if (user == null)
-                return false;
-
-            var allPermissions = GetAllUserPermissionsRecursive(user);
-            return allPermissions.Any(p => p.Permission == permissionType);
         }
     }
 } 

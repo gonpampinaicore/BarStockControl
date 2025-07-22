@@ -30,28 +30,15 @@ namespace BarStockControl.Services
             );
         }
 
-        public bool UserCanManageResourceType(User user, string resourceType)
-        {
-            var permissions = GetAll();
-            return user.RoleIds.Any(roleId => permissions.Any(p => p.RoleId == roleId && p.ResourceType == resourceType));
-        }
-
-        public List<User> GetUsersForResourceType(IEnumerable<User> users, string resourceType)
-        {
-            var permissions = GetAll();
-            return users.Where(u => UserCanManageResourceType(u, resourceType)).ToList();
-        }
-
-        public List<ResourceRolePermissionDto> GetAllDto()
-        {
-            return GetAll().Select(ResourceRolePermissionMapper.ToDto).ToList();
-        }
-
         public List<UserDto> GetUsersForResourceTypeDto(IEnumerable<UserDto> userDtos, string resourceType)
         {
-            var users = userDtos.Select(UserMapper.ToEntity).ToList();
-            var filtered = GetUsersForResourceType(users, resourceType);
-            return filtered.Select(UserMapper.ToDto).ToList();
+            var permissions = GetAll();
+            return userDtos
+                .Select(UserMapper.ToEntity)
+                .Where(u => u.RoleIds.Any(roleId => 
+                    permissions.Any(p => p.RoleId == roleId && p.ResourceType == resourceType)))
+                .Select(UserMapper.ToDto)
+                .ToList();
         }
     }
 } 

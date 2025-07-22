@@ -388,7 +388,7 @@ namespace BarStockControl.UI
 
                         foreach (var item in deliveriesByBarman)
                         {
-                            var user = userService.GetById(item.BarmanId);
+                            var user = userService.GetUserDtoById(item.BarmanId);
                             var barmanName = user != null ? $"{user.FirstName} {user.LastName}" : $"Barman {item.BarmanId}";
                             series.Points.AddXY(barmanName, item.TragosEntregados);
                         }

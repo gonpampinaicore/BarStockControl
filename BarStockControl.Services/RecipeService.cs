@@ -47,8 +47,7 @@ namespace BarStockControl.Services
             if (recipe.DrinkId <= 0)
                 errors.Add("El ID del trago debe ser mayor a 0.");
 
-            if (recipe.Description?.Length > 500)
-                errors.Add("La descripción no puede exceder 500 caracteres.");
+
 
             var existing = GetAll().FirstOrDefault(r => 
                 r.Name.Equals(recipe.Name, StringComparison.OrdinalIgnoreCase) && 

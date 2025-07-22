@@ -4,6 +4,7 @@ using BarStockControl.Models;
 using BarStockControl.Models.Enums;
 using BarStockControl.Services;
 using BarStockControl.DTOs;
+using BarStockControl.Mappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -137,7 +138,7 @@ namespace BarStockControl.UI
 
                 var dataManager = new XmlDataManager("Xml/data.xml");
                 var assignmentService = new ResourceAssignmentService(dataManager);
-                var assignments = assignmentService.GetAssignmentsByEventId(selectedEvent.Id)
+                var assignments = assignmentService.GetByEvent(selectedEvent.Id)
                     .Where(a => a.ResourceType == type)
                     .ToList();
 
@@ -249,7 +250,7 @@ namespace BarStockControl.UI
                 var deposits = _depositService.GetAllDeposits();
                 var stations = _stationService.GetAllStationDtos();
 
-                var users = _userService.GetAllUserDtos();
+                var users = _userService.GetAllUsers();
                 var movements = _movementService.GetAllMovementDtos()
                     .Where(m => m.EventId == selectedEvent.Id)
                     .Select(m => new
@@ -311,20 +312,21 @@ namespace BarStockControl.UI
                 }
 
                 var destination = _stockService
-                    .Search(s =>
+                    .GetAll().FirstOrDefault(s =>
                         s.ProductId == dto.ProductId &&
                         s.DepositId == dto.ToDepositId &&
                         s.StationId == dto.ToStationId
-                    ).FirstOrDefault();
+                    );
 
                 if (destination != null)
                 {
                     destination.Quantity += dto.Quantity;
-                    _stockService.UpdateStock(destination);
+                    var destinationDto = StockMapper.ToDto(destination);
+                    _stockService.UpdateStock(destinationDto);
                 }
                 else
                 {
-                    var nuevoStock = new Stock
+                    var nuevoStock = new StockDto
                     {
                         ProductId = dto.ProductId,
                         Quantity = dto.Quantity,

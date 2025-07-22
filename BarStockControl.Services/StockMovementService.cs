@@ -30,7 +30,7 @@ namespace BarStockControl.Services
             return StockMovementMapper.ToXml(movement);
         }
 
-        public List<string> Validate(StockMovement movement, bool isUpdate = false)
+        private List<string> Validate(StockMovement movement, bool isUpdate = false)
         {
             var errors = new List<string>();
 
@@ -59,11 +59,11 @@ namespace BarStockControl.Services
 
             if (movement.ProductId > 0 && movement.Quantity > 0)
             {
-                var stock = _stockService.Search(s =>
+                var stock = _stockService.GetAll().FirstOrDefault(s =>
                     s.ProductId == movement.ProductId &&
                     s.DepositId == movement.FromDepositId &&
                     s.StationId == movement.FromStationId
-                ).FirstOrDefault();
+                );
 
                 if (stock == null || stock.Quantity < movement.Quantity)
                     errors.Add("No hay stock suficiente en el origen para realizar el movimiento.");
@@ -88,7 +88,6 @@ namespace BarStockControl.Services
             return new List<string>();
         }
 
-
         public List<string> UpdateMovement(StockMovementDto dto)
         {
             var movement = StockMovementMapper.ToEntity(dto);
@@ -100,7 +99,6 @@ namespace BarStockControl.Services
             Update(movement.Id, movement);
             return new List<string>();
         }
-
 
         public void ChangeStatus(int movementId, StockMovementStatus newStatus)
         {
@@ -117,18 +115,6 @@ namespace BarStockControl.Services
             var movement = GetAll().FirstOrDefault(m => m.Id == id);
             return movement != null ? StockMovementMapper.ToDto(movement) : null;
         }
-        public List<StockMovement> GetAllMovements()
-        {
-            return GetAll();
-        }
-
-        public List<StockMovementDto> Search(Func<StockMovement, bool> predicate)
-        {
-            return GetAll()
-                .Where(predicate)
-                .Select(StockMovementMapper.ToDto)
-                .ToList();
-        }
 
         public List<StockMovementDto> GetAllMovementDtos()
         {
@@ -136,6 +122,5 @@ namespace BarStockControl.Services
                 .Select(StockMovementMapper.ToDto)
                 .ToList();
         }
-
     }
 }
