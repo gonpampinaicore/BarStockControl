@@ -49,7 +49,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                _drinks = _drinkService.GetAllDrinks().Where(d => d.IsActive).ToList();
+                _drinks = _drinkService.GetAllDrinkDtos().Where(d => d.IsActive).ToList();
                 dgvDrinks.DataSource = _drinks.Select(d => new { d.Id, d.Name, d.Price }).ToList();
                 dgvDrinks.Columns["Id"].Visible = false;
                 dgvDrinks.Columns["Name"].HeaderText = "Trago";

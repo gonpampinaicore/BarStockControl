@@ -6,6 +6,7 @@ using BarStockControl.DTOs;
 using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.Mappers;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl.UI
 {
@@ -17,6 +18,7 @@ namespace BarStockControl.UI
         private DrinkDto _selectedDrink = new DrinkDto();
         private bool _isLoading = false;
         private List<RecipeItemDto> _currentRecipeItems;
+        private bool _showOnlyActive = true;
 
         public DrinkForm(XmlDataManager xmlDataManager)
         {
@@ -86,8 +88,6 @@ namespace BarStockControl.UI
             try
             {
                 var toolTip = new ToolTip();
-                toolTip.SetToolTip(btnCalculateEstimatedCost,
-                    "Calcula automáticamente el costo estimado basado en los ingredientes de la receta.");
             }
             catch (Exception ex)
             {
@@ -114,7 +114,6 @@ namespace BarStockControl.UI
         {
             try
             {
-                // Drinks grid setup
                 dgvDrinks.AutoGenerateColumns = false;
                 dgvDrinks.MultiSelect = false;
                 dgvDrinks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -143,6 +142,12 @@ namespace BarStockControl.UI
                     HeaderText = "Es Compuesto",
                     Width = 100
                 });
+                dgvDrinks.Columns.Add(new DataGridViewCheckBoxColumn
+                {
+                    DataPropertyName = "IsActive",
+                    HeaderText = "Activo",
+                    Width = 80
+                });
                 dgvDrinks.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "EstimatedCost",
@@ -151,7 +156,6 @@ namespace BarStockControl.UI
                     DefaultCellStyle = new DataGridViewCellStyle { Format = "C2" }
                 });
 
-                // Recipe items grid setup
                 dgvRecipeItems.AutoGenerateColumns = false;
                 dgvRecipeItems.MultiSelect = false;
                 dgvRecipeItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -202,7 +206,7 @@ namespace BarStockControl.UI
             try
             {
                 _isLoading = true;
-                var drinks = _drinkService.GetAllDrinks();
+                var drinks = _showOnlyActive ? _drinkService.GetAllDrinkDtos() : _drinkService.GetAllDrinkDtosIncludingInactive();
                 if (!string.IsNullOrWhiteSpace(txtSearch.Text))
                 {
                     string filter = txtSearch.Text.ToLower();
@@ -242,21 +246,20 @@ namespace BarStockControl.UI
                 txtSearch.TextChanged += (s, e) => LoadDrinks();
                 dgvDrinks.CellClick += dgvDrinks_CellClick;
 
-                // Eliminar la lógica que oculta o limpia la receta al cambiar el check
                 chkIsComposed.CheckedChanged += (s, e) =>
                 {
-                    // Solo actualizar el panel si hay lógica visual, pero no ocultar ni limpiar
-                    // UpdateRecipePanel();
+                    pnlRecipe.Visible = true;
                 };
 
                 btnCreate.Click += btnCreate_Click;
                 btnUpdate.Click += btnUpdate_Click;
-                btnDelete.Click += btnDelete_Click;
                 btnClear.Click += btnClear_Click;
+                btnToggleView.Click += btnToggleView_Click;
+                btnRecalculateCosts.Click += btnRecalculateCosts_Click;
 
                 btnAddProduct.Click += btnAddProduct_Click;
                 btnRemoveProduct.Click += btnRemoveProduct_Click;
-                btnCalculateEstimatedCost.Click += (s, e) => UpdateEstimatedCost();
+
 
                 dgvRecipeItems.CellValueChanged += dgvRecipeItems_CellValueChanged;
                 dgvRecipeItems.CellValidating += dgvRecipeItems_CellValidating;
@@ -294,13 +297,13 @@ namespace BarStockControl.UI
             txtName.Text = drink.Name;
             numPrice.Value = drink.Price;
             chkIsComposed.Checked = drink.IsComposed;
+            chkIsActive.Checked = drink.IsActive;
 
-            // Siempre cargar la receta, sin importar si es compuesto o no
             _currentRecipeItems = _drinkService.GetRecipeItems(drink.Id).ToList();
 
+            pnlRecipe.Visible = true;
             RefreshRecipeGrid();
             UpdateEstimatedCost();
-            // No ocultar el panel de receta
         }
 
         private void ClearForm()
@@ -308,7 +311,9 @@ namespace BarStockControl.UI
             txtName.Clear();
             numPrice.Value = 0;
             chkIsComposed.Checked = false;
+            chkIsActive.Checked = true;
             _currentRecipeItems.Clear();
+            pnlRecipe.Visible = true;
             RefreshRecipeGrid();
             _selectedDrink = new DrinkDto();
             txtName.Focus();
@@ -323,7 +328,7 @@ namespace BarStockControl.UI
                 txtName.Focus();
                 return false;
             }
-            var existing = _drinkService.GetAllDrinks().Any(d => d.Name.Equals(txtName.Text.Trim(), StringComparison.OrdinalIgnoreCase));
+            var existing = _drinkService.GetAllDrinkDtos().Any(d => d.Name.Equals(txtName.Text.Trim(), StringComparison.OrdinalIgnoreCase));
             if (existing && (_selectedDrink == null || _selectedDrink.Name != txtName.Text.Trim()))
             {
                 MessageBox.Show("Ya existe un trago con ese nombre.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -337,9 +342,9 @@ namespace BarStockControl.UI
                 numPrice.Focus();
                 return false;
             }
-            if (chkIsComposed.Checked && !_currentRecipeItems.Any())
+            if (!_currentRecipeItems.Any())
             {
-                MessageBox.Show("Un trago compuesto debe tener al menos un ingrediente.", "Validación",
+                MessageBox.Show("Todo trago debe tener al menos un ingrediente.", "Validación",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -362,13 +367,29 @@ namespace BarStockControl.UI
 
         private DrinkDto GetDrinkFromForm()
         {
-            return new DrinkDto
+            var drinkDto = new DrinkDto
             {
                 Name = txtName.Text.Trim(),
                 Price = numPrice.Value,
                 IsComposed = chkIsComposed.Checked,
-                IsActive = true
+                IsActive = chkIsActive.Checked
             };
+            
+            if (_currentRecipeItems.Any())
+            {
+                decimal estimatedCost = 0;
+                var products = _productService.GetAllProductDtos().ToDictionary(p => p.Id);
+                foreach (var item in _currentRecipeItems)
+                {
+                    if (products.TryGetValue(item.ProductId, out var product))
+                    {
+                        estimatedCost += product.Price * item.Quantity;
+                    }
+                }
+                drinkDto.EstimatedCost = estimatedCost;
+            }
+            
+            return drinkDto;
         }
 
         private void btnCreate_Click(object sender, EventArgs e)
@@ -420,14 +441,11 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                if (drinkDto.IsComposed)
+                if (!_drinkService.SaveRecipeItems(drinkDto.Id, _currentRecipeItems))
                 {
-                    if (!_drinkService.SaveRecipeItems(drinkDto.Id, _currentRecipeItems))
-                    {
-                        MessageBox.Show("Error al guardar los ingredientes del trago", "Error",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                    MessageBox.Show("Error al guardar los ingredientes de la receta", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
 
                 MessageBox.Show("Trago actualizado exitosamente.", "Éxito",
@@ -442,38 +460,7 @@ namespace BarStockControl.UI
             }
         }
 
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (_selectedDrink == null)
-                {
-                    MessageBox.Show("Seleccioná un trago para eliminar.", "Aviso",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
 
-                var confirm = MessageBox.Show(
-                    $"¿Estás seguro de eliminar el trago '{_selectedDrink.Name}'?\n\nEsta acción no se puede deshacer.",
-                    "Confirmar eliminación",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (confirm == DialogResult.Yes)
-                {
-                                    _drinkService.DeleteDrink(_selectedDrink.Id);
-                MessageBox.Show("Trago eliminado exitosamente.", "Éxito",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ClearForm();
-                LoadDrinks();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al eliminar trago: {ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
 
         private void btnAddProduct_Click(object sender, EventArgs e)
         {
@@ -574,34 +561,27 @@ namespace BarStockControl.UI
         {
             try
             {
-                if (_selectedDrink != null && _selectedDrink.IsComposed)
+                decimal estimatedCost = 0;
+                
+                if (_currentRecipeItems.Any())
                 {
-                    decimal estimatedCost = _drinkService.CalculateEstimatedCost(_selectedDrink.Id);
-                    lblEstimatedCost.Text = $"Costo Estimado: ${estimatedCost:F2}";
-                }
-                else if (_currentRecipeItems.Any())
-                {
-                    decimal estimatedCost = 0;
                     var products = _productService.GetAllProductDtos().ToDictionary(p => p.Id);
+                    
                     foreach (var item in _currentRecipeItems)
                     {
-                        if (products.TryGetValue(item.ProductId, out var product) && product.EstimatedServings > 0)
+                        if (products.TryGetValue(item.ProductId, out var product))
                         {
-                            decimal costPerServing = product.Price / product.EstimatedServings;
-                            estimatedCost += costPerServing * item.Quantity;
+                            estimatedCost += product.Price * item.Quantity;
                         }
                     }
-                    lblEstimatedCost.Text = $"Costo Estimado: ${estimatedCost:F2}";
                 }
-                else
-                {
-                    lblEstimatedCost.Text = "Costo Estimado: $0.00";
-                }
+                
+                lblEstimatedCost.Text = $"Costo estimado: ${estimatedCost:F2}";
+                _selectedDrink.EstimatedCost = estimatedCost;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al calcular costo estimado: {ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblEstimatedCost.Text = "Error al calcular costo";
             }
         }
 
@@ -673,9 +653,34 @@ namespace BarStockControl.UI
             }
         }
 
+        private void btnToggleView_Click(object sender, EventArgs e)
+        {
+            _showOnlyActive = !_showOnlyActive;
+            btnToggleView.Text = _showOnlyActive ? "Ver Todos" : "Ver Activos";
+            LoadDrinks();
+        }
+
+        private void btnRecalculateCosts_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _drinkService.RecalculateAllEstimatedCosts();
+                MessageBox.Show("Costos estimados recalculados exitosamente.", "Éxito",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadDrinks();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al recalcular costos: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnClear_Click(object sender, EventArgs e)
         {
             ClearForm();
         }
+
+
     }
 }

@@ -52,14 +52,15 @@ namespace BarStockControl.UI
                     ("Productos", () => new ProductForm(), PermissionType.ProductFullAccess),
                     ("Stock", () => new StockForm(), PermissionType.StockFullAccess),
                     ("Movimientos de Stock", () => new StockMovementForm(), PermissionType.StockMovementFullAccess),
-                    ("Depósitos", () => new DepositForm(), PermissionType.DepositFullAccess),
                     ("Tragos", () => new DrinkForm(_xmlDataManager), PermissionType.DrinkFullAccess),
                     ("Recetas", () => new RecipeForm(), PermissionType.RecipeFullAccess)
                 };
 
                 foreach (var (label, formFactory, requiredPermission) in forms)
                 {
-                    if (permissionNames.Contains(requiredPermission.ToString()))
+                    var hasPermission = permissionNames.Contains(requiredPermission.ToString());
+                    
+                    if (hasPermission)
                     {
                         AddFormButton(label, formFactory);
                     }

@@ -44,6 +44,10 @@ namespace BarStockControl.UI
             LoadEvents();
             LoadResourceOptions();
 
+            cmbFromLocation.Enabled = false;
+            cmbToLocation.Enabled = false;
+
+            cmbEvent.SelectedIndexChanged += cmbEvent_SelectedIndexChanged;
             cmbFromLocation.SelectedIndexChanged += (s, e) => LoadFromStock();
             cmbToLocation.SelectedIndexChanged += (s, e) => LoadToStock();
             rdoFromDeposit.CheckedChanged += (s, e) => { if (rdoFromDeposit.Checked) LoadFromOptions(); };
@@ -66,7 +70,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar eventos: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar eventos: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -96,12 +100,12 @@ namespace BarStockControl.UI
                     _toOptions.Add(new ResourceSelectorOption { Id = station.Id, Type = "station", Name = fullName });
                 }
 
-                LoadFromOptions();
-                LoadToOptions();
+                cmbFromLocation.DataSource = null;
+                cmbToLocation.DataSource = null;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar opciones de recursos: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar opciones de recursos: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -110,16 +114,23 @@ namespace BarStockControl.UI
         {
             try
             {
+                if (cmbEvent.SelectedItem == null)
+                {
+                    cmbFromLocation.Enabled = false;
+                    return;
+                }
+
                 var type = rdoFromDeposit.Checked ? "deposit" : "station";
                 cmbFromLocation.DataSource = _fromOptions.Where(x => x.Type == type).ToList();
                 cmbFromLocation.DisplayMember = "Name";
                 cmbFromLocation.ValueMember = "Id";
                 cmbFromLocation.SelectedIndex = -1;
+                cmbFromLocation.Enabled = true;
                 dgvFromStock.DataSource = null;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar opciones de origen: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar opciones de origen: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -128,51 +139,24 @@ namespace BarStockControl.UI
         {
             try
             {
-                var type = rdoToDeposit.Checked ? "deposit" : "station";
-                var selectedEvent = cmbEvent.SelectedItem as EventDto;
-                if (selectedEvent == null)
+                if (cmbEvent.SelectedItem == null)
                 {
-                    cmbToLocation.DataSource = null;
+                    cmbToLocation.Enabled = false;
                     return;
                 }
 
-                var dataManager = new XmlDataManager("Xml/data.xml");
-                var assignmentService = new ResourceAssignmentService(dataManager);
-                var assignments = assignmentService.GetByEvent(selectedEvent.Id)
-                    .Where(a => a.ResourceType == type)
-                    .ToList();
-
-                List<ResourceSelectorOption> options;
-                if (type == "deposit")
-                {
-                    var allDeposits = _depositService.GetAllDeposits().Where(d => d.Active).ToList();
-                    options = allDeposits
-                        .Where(d => assignments.Any(a => a.ResourceId == d.Id))
-                        .Select(d => new ResourceSelectorOption { Id = d.Id, Type = "deposit", Name = "Depósito - " + d.Name })
-                        .ToList();
-                }
-                else
-                {
-                    var allStations = _stationService.GetAllStationDtos().Where(s => s.Active).ToList();
-                    options = allStations
-                        .Where(s => assignments.Any(a => a.ResourceId == s.Id))
-                        .Select(s => {
-                            var bar = _barService.GetById(s.BarId);
-                            var barName = bar != null ? bar.Name : "Sin Barra";
-                            return new ResourceSelectorOption { Id = s.Id, Type = "station", Name = $"Estación - {s.Name} ({barName})" };
-                        })
-                        .ToList();
-                }
-
-                cmbToLocation.DataSource = options;
+                var type = rdoToDeposit.Checked ? "deposit" : "station";
+                cmbToLocation.DataSource = _toOptions.Where(x => x.Type == type).ToList();
                 cmbToLocation.DisplayMember = "Name";
                 cmbToLocation.ValueMember = "Id";
                 cmbToLocation.SelectedIndex = -1;
+                cmbToLocation.Enabled = true;
                 dgvToStock.DataSource = null;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar opciones de destino: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar opciones de destino: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -203,7 +187,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar stock de origen: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar stock de origen: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -234,7 +218,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar stock de destino: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar stock de destino: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -270,7 +254,7 @@ namespace BarStockControl.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar movimientos: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al cargar movimientos: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -305,37 +289,6 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                if (fromStock != null)
-                {
-                    fromStock.Quantity -= dto.Quantity;
-                    _stockService.UpdateStock(fromStock);
-                }
-
-                var destination = _stockService
-                    .GetAll().FirstOrDefault(s =>
-                        s.ProductId == dto.ProductId &&
-                        s.DepositId == dto.ToDepositId &&
-                        s.StationId == dto.ToStationId
-                    );
-
-                if (destination != null)
-                {
-                    destination.Quantity += dto.Quantity;
-                    var destinationDto = StockMapper.ToDto(destination);
-                    _stockService.UpdateStock(destinationDto);
-                }
-                else
-                {
-                    var nuevoStock = new StockDto
-                    {
-                        ProductId = dto.ProductId,
-                        Quantity = dto.Quantity,
-                        DepositId = dto.ToDepositId,
-                        StationId = dto.ToStationId
-                    };
-                    _stockService.CreateStock(nuevoStock);
-                }
-
                 MessageBox.Show("Movimiento registrado correctamente.");
                 ClearForm();
                 LoadFromStock();
@@ -359,7 +312,22 @@ namespace BarStockControl.UI
 
         private void cmbEvent_SelectedIndexChanged(object sender, EventArgs e)
         {
-            LoadMovements();
+            try
+            {
+                cmbFromLocation.DataSource = null;
+                cmbToLocation.DataSource = null;
+                cmbFromLocation.Enabled = false;
+                cmbToLocation.Enabled = false;
+                dgvFromStock.DataSource = null;
+                dgvToStock.DataSource = null;
+
+                LoadMovements();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cambiar evento: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnChangeStatus_Click(object sender, EventArgs e)
@@ -394,64 +362,76 @@ namespace BarStockControl.UI
             }
 
             var id = Convert.ToInt32(dgvMovements.SelectedRows[0].Cells["Id"].Value);
-            var movimiento = _movementService.GetAllMovementDtos().FirstOrDefault(m => m.Id == id);
-            if (movimiento == null)
-            {
-                MessageBox.Show("No se encontró el movimiento seleccionado.");
-                return;
-            }
 
-            var evento = _eventService.GetEventDtoById(movimiento.EventId);
-            if (evento != null && evento.StartDate <= DateTime.Now)
+            try
             {
-                MessageBox.Show("No se puede deshacer un movimiento de un evento pasado.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var fromStock = _stockService.GetAllStockDtos().FirstOrDefault(s =>
-                s.ProductId == movimiento.ProductId &&
-                s.DepositId == movimiento.FromDepositId &&
-                s.StationId == movimiento.FromStationId
-            );
-
-            var toStock = _stockService.GetAllStockDtos().FirstOrDefault(s =>
-                s.ProductId == movimiento.ProductId &&
-                s.DepositId == movimiento.ToDepositId &&
-                s.StationId == movimiento.ToStationId
-            );
-
-            if (toStock == null || toStock.Quantity < movimiento.Quantity)
-            {
-                MessageBox.Show("No hay suficiente stock en el destino para deshacer el movimiento.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (fromStock != null)
-            {
-                fromStock.Quantity += movimiento.Quantity;
-                _stockService.UpdateStock(fromStock);
-            }
-            else
-            {
-                var nuevoStock = new StockDto
+                var errors = _movementService.RollbackMovement(id);
+                if (errors.Any())
                 {
-                    ProductId = movimiento.ProductId,
-                    Quantity = movimiento.Quantity,
-                    DepositId = movimiento.FromDepositId,
-                    StationId = movimiento.FromStationId
-                };
-                _stockService.CreateStock(nuevoStock);
+                    MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Movimiento deshecho correctamente.");
+                LoadFromStock();
+                LoadToStock();
+                LoadMovements();
+            }
+            catch (Exception ex)
+            {
+                var detalle = ex.Message;
+                if (ex.InnerException != null)
+                    detalle += "\nDetalle: " + ex.InnerException.Message;
+                MessageBox.Show($"Ocurrió un error al deshacer el movimiento:\n{detalle}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void LoadMovementDataToForm(StockMovementDto movement)
+        {
+            txtQuantity.Text = movement.Quantity.ToString();
+            txtComment.Text = movement.Comment ?? "";
+
+            if (movement.FromDepositId.HasValue)
+            {
+                rdoFromDeposit.Checked = true;
+                LoadFromOptions();
+                var depositOption = _fromOptions.FirstOrDefault(x => x.Type == "deposit" && x.Id == movement.FromDepositId.Value);
+                if (depositOption != null)
+                {
+                    cmbFromLocation.SelectedItem = depositOption;
+                }
+            }
+            else if (movement.FromStationId.HasValue)
+            {
+                rdoFromStation.Checked = true;
+                LoadFromOptions();
+                var stationOption = _fromOptions.FirstOrDefault(x => x.Type == "station" && x.Id == movement.FromStationId.Value);
+                if (stationOption != null)
+                {
+                    cmbFromLocation.SelectedItem = stationOption;
+                }
             }
 
-            toStock.Quantity -= movimiento.Quantity;
-            _stockService.UpdateStock(toStock);
-
-            _movementService.Delete(movimiento.Id);
-
-            MessageBox.Show("Movimiento deshecho correctamente.");
-            LoadFromStock();
-            LoadToStock();
-            LoadMovements();
+            if (movement.ToDepositId.HasValue)
+            {
+                rdoToDeposit.Checked = true;
+                LoadToOptions();
+                var depositOption = _toOptions.FirstOrDefault(x => x.Type == "deposit" && x.Id == movement.ToDepositId.Value);
+                if (depositOption != null)
+                {
+                    cmbToLocation.SelectedItem = depositOption;
+                }
+            }
+            else if (movement.ToStationId.HasValue)
+            {
+                rdoToStation.Checked = true;
+                LoadToOptions();
+                var stationOption = _toOptions.FirstOrDefault(x => x.Type == "station" && x.Id == movement.ToStationId.Value);
+                if (stationOption != null)
+                {
+                    cmbToLocation.SelectedItem = stationOption;
+                }
+            }
         }
     }
 

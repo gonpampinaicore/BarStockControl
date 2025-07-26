@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE data SYSTEM "data.dtd">
 <data>
     <users>
@@ -37,4 +37,6 @@
     </barmanOrders>
     <stationProductConsumptions>
     </stationProductConsumptions>
+    <stockMovements>
+    </stockMovements>
 </data>

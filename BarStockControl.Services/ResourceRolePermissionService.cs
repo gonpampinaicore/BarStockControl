@@ -10,8 +10,15 @@ namespace BarStockControl.Services
 {
     public class ResourceRolePermissionService : BaseService<ResourceRolePermission>
     {
+        private readonly XmlDataManager _xmlDataManager;
+        private readonly ComponentService _componentService;
+
         public ResourceRolePermissionService(XmlDataManager dataManager)
-            : base(dataManager, "resourceRolePermissions") { }
+            : base(dataManager, "resourceRolePermissions") 
+        {
+            _xmlDataManager = dataManager;
+            _componentService = new ComponentService(_xmlDataManager);
+        }
 
         protected override ResourceRolePermission MapFromXml(XElement element)
         {
@@ -32,13 +39,30 @@ namespace BarStockControl.Services
 
         public List<UserDto> GetUsersForResourceTypeDto(IEnumerable<UserDto> userDtos, string resourceType)
         {
-            var permissions = GetAll();
-            return userDtos
+            var resourcePermissions = GetAll();
+            
+            var result = userDtos
                 .Select(UserMapper.ToEntity)
-                .Where(u => u.RoleIds.Any(roleId => 
-                    permissions.Any(p => p.RoleId == roleId && p.ResourceType == resourceType)))
+                .Where(u => 
+                {
+                    // Construir la jerarquía de permisos del usuario
+                    _componentService.BuildUserPermissions(u, u.RoleIds, u.PermissionIds);
+                    
+                    // Obtener todos los roles recursivamente (directos y heredados)
+                    var allUserRoles = _componentService.GetAllUserRolesRecursive(u);
+                    
+                    // Verificar si el usuario tiene algún rol que tenga permiso para el tipo de recurso
+                    var hasPermission = allUserRoles.Any(role => 
+                        resourcePermissions.Any(rp => 
+                            rp.RoleId == role.Id && 
+                            rp.ResourceType == resourceType));
+                    
+                    return hasPermission;
+                })
                 .Select(UserMapper.ToDto)
                 .ToList();
+                
+            return result;
         }
     }
 } 

@@ -27,18 +27,32 @@ namespace BarStockControl.Services
         private List<string> ValidateStock(Stock stock, bool isUpdate = false)
         {
             var errors = new List<string>();
+            if (isUpdate)
+            {
+                var originalStock = GetById(stock.Id);
+                if (originalStock == null)
+                    errors.Add("Stock no encontrado.");
 
-            if (stock.ProductId <= 0)
-                errors.Add("Debe seleccionar un producto válido.");
+                if (stock.Quantity == originalStock.Quantity)
+                    return errors;
 
-            if (!stock.DepositId.HasValue && !stock.StationId.HasValue)
-                errors.Add("Debe especificar una ubicación (depósito o estación).");
+                if (stock.Quantity <= 0)
+                    errors.Add("La cantidad debe ser un número positivo.");
+            }
+            else
+            {
+                if (stock.ProductId <= 0)
+                    errors.Add("Debe seleccionar un producto válido.");
 
-            if (stock.DepositId.HasValue && stock.StationId.HasValue)
-                errors.Add("No se puede asignar a depósito y estación al mismo tiempo.");
+                if (!stock.DepositId.HasValue && !stock.StationId.HasValue)
+                    errors.Add("Debe especificar una ubicación (depósito o estación).");
 
-            if (stock.Quantity < 0)
-                errors.Add("La cantidad no puede ser negativa.");
+                if (stock.DepositId.HasValue && stock.StationId.HasValue)
+                    errors.Add("No se puede asignar a depósito y estación al mismo tiempo.");
+
+                if (stock.Quantity <= 0)
+                    errors.Add("La cantidad debe ser un número positivo.");
+            }
 
             return errors;
         }
@@ -61,6 +75,18 @@ namespace BarStockControl.Services
             if (errors.Any())
                 return errors;
 
+            var existingStock = GetAll().FirstOrDefault(s => 
+                s.ProductId == entity.ProductId && 
+                s.DepositId == entity.DepositId && 
+                s.StationId == entity.StationId);
+
+            if (existingStock != null)
+            {
+                existingStock.Quantity += entity.Quantity;
+                Update(existingStock.Id, existingStock);
+                return new List<string>();
+            }
+
             entity.Id = GetNextId();
             Add(entity);
             return new List<string>();
@@ -79,7 +105,21 @@ namespace BarStockControl.Services
 
         public void DeleteStockDto(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("ID de stock inválido.");
+            
             Delete(id);
+        }
+
+        public List<string> CreateFromMovement(StockDto dto) {
+            var entity = StockMapper.ToEntity(dto);
+            var errors = ValidateStock(entity);
+            if (errors.Any())
+                return errors;
+
+            entity.Id = GetNextId();
+            Add(entity);
+            return new List<string>();
         }
     }
 }

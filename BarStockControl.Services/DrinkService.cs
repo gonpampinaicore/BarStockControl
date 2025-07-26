@@ -32,7 +32,12 @@ namespace BarStockControl.Services
             return DrinkMapper.ToXml(drink);
         }
 
-        public List<DrinkDto> GetAllDrinks()
+        public List<DrinkDto> GetAllDrinkDtos()
+        {
+            return GetAll().Where(d => d.IsActive).Select(d => d.ToDto()).ToList();
+        }
+
+        public List<DrinkDto> GetAllDrinkDtosIncludingInactive()
         {
             return GetAll().Select(d => d.ToDto()).ToList();
         }
@@ -125,11 +130,13 @@ namespace BarStockControl.Services
         {
             try
             {
-                var errors = ValidateDrink(drinkDto, null, isUpdate: true);
+                var existingRecipeItems = GetRecipeItems(drinkDto.Id);
+                var errors = ValidateDrink(drinkDto, existingRecipeItems, isUpdate: true);
                 if (errors.Any())
                     return errors;
 
                 var drink = drinkDto.ToModel();
+                drink.EstimatedCost = CalculateEstimatedCost(drink.Id);
                 Update(drink.Id, drink);
                 return new List<string>();
             }
@@ -143,13 +150,14 @@ namespace BarStockControl.Services
         {
             try
             {
-                var recipes = _recipeService.GetAllRecipes();
-                var associatedRecipe = recipes.FirstOrDefault(r => r.DrinkId == id);
-                if (associatedRecipe != null)
+                var drink = GetById(id);
+                if (drink == null)
                 {
-                    _recipeService.DeleteRecipe(associatedRecipe.Id);
+                    throw new InvalidOperationException("El trago no existe.");
                 }
-                Delete(id);
+                
+                drink.IsActive = false;
+                Update(id, drink);
             }
             catch (Exception ex)
             {
@@ -162,27 +170,21 @@ namespace BarStockControl.Services
             try
             {
                 var drink = GetById(drinkId);
-                if (drink == null || !drink.IsComposed)
+                if (drink == null)
                     return 0;
 
-                var recipes = _recipeService.GetAllRecipes();
-                var recipeDto = recipes.FirstOrDefault(r => r.DrinkId == drinkId);
-                if (recipeDto == null)
+                var recipeItems = GetRecipeItems(drinkId);
+                if (!recipeItems.Any())
                     return 0;
 
                 decimal totalCost = 0;
                 var products = _productService.GetAll().ToDictionary(p => p.Id);
-                var recipeItems = GetRecipeItems(drinkId);
 
                 foreach (var item in recipeItems)
                 {
                     if (products.TryGetValue(item.ProductId, out var product))
                     {
-                        if (product.EstimatedServings > 0)
-                        {
-                            decimal costPerServing = product.Price / product.EstimatedServings;
-                            totalCost += costPerServing * item.Quantity;
-                        }
+                        totalCost += product.Price * item.Quantity;
                     }
                 }
 
@@ -191,6 +193,27 @@ namespace BarStockControl.Services
             catch (Exception)
             {
                 return 0;
+            }
+        }
+
+        public void RecalculateAllEstimatedCosts()
+        {
+            try
+            {
+                var allDrinks = GetAll();
+                foreach (var drink in allDrinks)
+                {
+                    var newEstimatedCost = CalculateEstimatedCost(drink.Id);
+                    if (drink.EstimatedCost != newEstimatedCost)
+                    {
+                        drink.EstimatedCost = newEstimatedCost;
+                        Update(drink.Id, drink);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error if needed
             }
         }
 

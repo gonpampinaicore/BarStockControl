@@ -3,19 +3,15 @@ using System.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Services;
 using BarStockControl.Models.Enums;
-using BarStockControl.Mappers;
 
 namespace BarStockControl.UI
 {
     public partial class LiveBarForm : Form
     {
         private readonly OrderService _orderService;
-        private readonly OrderItemService _orderItemService;
-        private readonly DrinkService _drinkService;
         private readonly StockService _stockService;
         private readonly StationService _stationService;
         private readonly ProductService _productService;
-        private readonly EventService _eventService;
         private readonly ResourceAssignmentService _assignmentService;
         private EventDto _currentEvent = new EventDto();
         private List<StationDto> _eventStations = new List<StationDto>();
@@ -25,12 +21,9 @@ namespace BarStockControl.UI
         {
             InitializeComponent();
             _orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
-            _orderItemService = new OrderItemService(new Data.XmlDataManager("Xml/data.xml"));
-            _drinkService = new DrinkService(new Data.XmlDataManager("Xml/data.xml"));
             _stockService = new StockService(new Data.XmlDataManager("Xml/data.xml"));
             _stationService = new StationService(new Data.XmlDataManager("Xml/data.xml"));
             _productService = new ProductService(new Data.XmlDataManager("Xml/data.xml"));
-            _eventService = new EventService(new Data.XmlDataManager("Xml/data.xml"));
             _assignmentService = new ResourceAssignmentService(new Data.XmlDataManager("Xml/data.xml"));
             _currentEvent = currentEvent;
             if (_currentEvent != null)
@@ -100,11 +93,7 @@ namespace BarStockControl.UI
                 var stationAssignments = assignments.Where(a => a.ResourceType == "station").ToList();
                 
                 var stationIds = stationAssignments.Select(a => a.ResourceId).Distinct().ToList();
-                _eventStations = stationIds.Select(id => 
-                {
-                    var station = _stationService.GetAll().FirstOrDefault(s => s.Id == id);
-                    return station != null ? StationMapper.ToDto(station) : null;
-                })
+                _eventStations = stationIds.Select(id => _stationService.GetById(id))
                 .Where(s => s != null)
                 .ToList();
 
@@ -170,7 +159,7 @@ namespace BarStockControl.UI
                         Producto = prod?.Name ?? "Desconocido",
                         Cantidad = s.Quantity,
                         TragosEstimados = estimados,
-                        Estación = _stationService.GetAll().FirstOrDefault(st => st.Id == s.StationId)?.Name ?? "Desconocida"
+                        Estación = _stationService.GetById(s.StationId.Value)?.Name ?? "Desconocida"
                     };
                 }).ToList();
                 dgvStationStock.DataSource = stockDisplay;
@@ -199,7 +188,7 @@ namespace BarStockControl.UI
                     {
                         Producto = _productService.GetAllProductDtos().FirstOrDefault(p => p.Id == g.Key)?.Name ?? "Desconocido",
                         Cantidad_Total = g.Sum(s => s.Quantity),
-                        Estaciones = string.Join(", ", g.Select(s => _stationService.GetAll().FirstOrDefault(st => st.Id == s.StationId)?.Name ?? "Desconocida").Distinct())
+                        Estaciones = string.Join(", ", g.Select(s => _stationService.GetById(s.StationId.Value)?.Name ?? "Desconocida").Distinct())
                     })
                     .OrderBy(x => x.Producto)
                     .ToList();

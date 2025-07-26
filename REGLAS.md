@@ -14,7 +14,7 @@
 - Nota: La carpeta BarStockControl solo contiene archivos de configuración necesarios para el funcionamiento del proyecto, pero no debe ser tenida en cuenta para el desarrollo. Las carpetas relevantes para la arquitectura y el desarrollo son: BarStockControl.UI, BarStockControl.DTOs, BarStockControl.Services, BarStockControl.Mappers, BarStockControl.Data, BarStockControl.Models y BarStockControl.Security.
 
 - Cada vez que se cree una nueva clase o entidad, se debe actualizar el archivo de estructura correspondiente en BarStockControl.Data/Xml (data.xml, data.dtd, backup_log.xml) para reflejar el nuevo formato y estructura. Estos archivos funcionan como plantilla o referencia de la estructura de datos.
-- Los datos reales de la aplicación se guardan y actualizan en tiempo de ejecución en la carpeta BarStockControl.UI/bin/Debug/net8.0-windows/Xml (o la carpeta de salida correspondiente según la configuración y build).
+- **IMPORTANTE**: Los datos reales de la aplicación se guardan y actualizan en tiempo de ejecución en la carpeta `BarStockControl.UI/bin/Debug/net8.0-windows/Xml/data.xml`. Este es el archivo XML principal que contiene todos los datos del sistema y debe ser usado como referencia para verificar la estructura y contenido real de los datos. El archivo en `BarStockControl.Data/Xml/data.xml` es solo una plantilla vacía.
 
 - Todos los servicios (Service) que se creen deben extender la clase BaseService<T> ubicada en BarStockControl.Services/BaseService.cs y aprovechar sus métodos para las operaciones CRUD y de manejo de datos.
 

@@ -22,9 +22,9 @@ namespace BarStockControl.UI
             txtName = new TextBox();
             numPrice = new NumericUpDown();
             chkIsComposed = new CheckBox();
+            chkIsActive = new CheckBox();
             btnCreate = new Button();
             btnUpdate = new Button();
-            btnDelete = new Button();
             lblSearch = new Label();
             lblName = new Label();
             lblPrice = new Label();
@@ -37,8 +37,10 @@ namespace BarStockControl.UI
             btnRemoveProduct = new Button();
             lblProduct = new Label();
             lblQuantity = new Label();
-            btnCalculateEstimatedCost = new Button();
-            btnClear = new Button();
+
+                         btnClear = new Button();
+             btnToggleView = new Button();
+             btnRecalculateCosts = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvDrinks).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numPrice).BeginInit();
             pnlRecipe.SuspendLayout();
@@ -97,6 +99,17 @@ namespace BarStockControl.UI
             chkIsComposed.TabIndex = 7;
             chkIsComposed.Text = "Es Compuesto";
             // 
+            // chkIsActive
+            // 
+            chkIsActive.AutoSize = true;
+            chkIsActive.Location = new Point(200, 358);
+            chkIsActive.Margin = new Padding(4, 3, 4, 3);
+            chkIsActive.Name = "chkIsActive";
+            chkIsActive.Size = new Size(82, 19);
+            chkIsActive.TabIndex = 8;
+            chkIsActive.Text = "Está Activo";
+            chkIsActive.Checked = true;
+            // 
             // btnCreate
             // 
             btnCreate.Location = new Point(14, 750);
@@ -116,16 +129,7 @@ namespace BarStockControl.UI
             btnUpdate.TabIndex = 19;
             btnUpdate.Text = "Actualizar";
             btnUpdate.UseVisualStyleBackColor = true;
-            // 
-            // btnDelete
-            // 
-            btnDelete.Location = new Point(203, 750);
-            btnDelete.Margin = new Padding(4, 3, 4, 3);
-            btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(88, 27);
-            btnDelete.TabIndex = 20;
-            btnDelete.Text = "Eliminar";
-            btnDelete.UseVisualStyleBackColor = true;
+
             // 
             // lblSearch
             // 
@@ -178,13 +182,13 @@ namespace BarStockControl.UI
             pnlRecipe.Controls.Add(lblProduct);
             pnlRecipe.Controls.Add(lblQuantity);
             pnlRecipe.Controls.Add(lblEstimatedCost);
-            pnlRecipe.Controls.Add(btnCalculateEstimatedCost);
+
             pnlRecipe.Location = new Point(14, 392);
             pnlRecipe.Margin = new Padding(4, 3, 4, 3);
             pnlRecipe.Name = "pnlRecipe";
             pnlRecipe.Size = new Size(583, 346);
             pnlRecipe.TabIndex = 8;
-            pnlRecipe.Visible = false;
+            pnlRecipe.Visible = true;
             // 
             // dgvRecipeItems
             // 
@@ -262,36 +266,50 @@ namespace BarStockControl.UI
             lblQuantity.TabIndex = 13;
             lblQuantity.Text = "Cantidad:";
             // 
-            // btnCalculateEstimatedCost
+
             // 
-            btnCalculateEstimatedCost.Location = new Point(175, 306);
-            btnCalculateEstimatedCost.Margin = new Padding(4, 3, 4, 3);
-            btnCalculateEstimatedCost.Name = "btnCalculateEstimatedCost";
-            btnCalculateEstimatedCost.Size = new Size(140, 27);
-            btnCalculateEstimatedCost.TabIndex = 17;
-            btnCalculateEstimatedCost.Text = "Calcular Costo";
-            btnCalculateEstimatedCost.UseVisualStyleBackColor = true;
+            // btnToggleView
+            // 
+            btnToggleView.Location = new Point(297, 750);
+            btnToggleView.Margin = new Padding(4, 3, 4, 3);
+            btnToggleView.Name = "btnToggleView";
+            btnToggleView.Size = new Size(88, 27);
+            btnToggleView.TabIndex = 21;
+            btnToggleView.Text = "Ver Activos";
+            btnToggleView.UseVisualStyleBackColor = true;
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(411, 313);
-            btnClear.Margin = new Padding(4, 3, 4, 3);
-            btnClear.Name = "btnClear";
-            btnClear.Size = new Size(114, 27);
-            btnClear.TabIndex = 0;
-            btnClear.Text = "Limpiar";
-            btnClear.UseVisualStyleBackColor = true;
+                         btnClear.Location = new Point(411, 313);
+             btnClear.Margin = new Padding(4, 3, 4, 3);
+             btnClear.Name = "btnClear";
+             btnClear.Size = new Size(114, 27);
+             btnClear.TabIndex = 0;
+             btnClear.Text = "Limpiar";
+             btnClear.UseVisualStyleBackColor = true;
+             // 
+             // btnRecalculateCosts
+             // 
+             btnRecalculateCosts.Location = new Point(411, 750);
+             btnRecalculateCosts.Margin = new Padding(4, 3, 4, 3);
+             btnRecalculateCosts.Name = "btnRecalculateCosts";
+             btnRecalculateCosts.Size = new Size(114, 27);
+             btnRecalculateCosts.TabIndex = 22;
+             btnRecalculateCosts.Text = "Recalcular Costos";
+             btnRecalculateCosts.UseVisualStyleBackColor = true;
             // 
             // DrinkForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(611, 790);
-            Controls.Add(btnClear);
-            Controls.Add(btnDelete);
-            Controls.Add(btnUpdate);
-            Controls.Add(btnCreate);
+                         Controls.Add(btnClear);
+             Controls.Add(btnToggleView);
+             Controls.Add(btnRecalculateCosts);
+             Controls.Add(btnUpdate);
+             Controls.Add(btnCreate);
             Controls.Add(pnlRecipe);
+            Controls.Add(chkIsActive);
             Controls.Add(chkIsComposed);
             Controls.Add(lblPrice);
             Controls.Add(numPrice);
@@ -323,9 +341,9 @@ namespace BarStockControl.UI
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.NumericUpDown numPrice;
         private System.Windows.Forms.CheckBox chkIsComposed;
+        private System.Windows.Forms.CheckBox chkIsActive;
         private System.Windows.Forms.Button btnCreate;
         private System.Windows.Forms.Button btnUpdate;
-        private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Label lblSearch;
         private System.Windows.Forms.Label lblName;
         private System.Windows.Forms.Label lblPrice;
@@ -338,7 +356,9 @@ namespace BarStockControl.UI
         private System.Windows.Forms.Button btnRemoveProduct;
         private System.Windows.Forms.Label lblProduct;
         private System.Windows.Forms.Label lblQuantity;
-        private System.Windows.Forms.Button btnCalculateEstimatedCost;
-        private System.Windows.Forms.Button btnClear;
+
+                 private System.Windows.Forms.Button btnClear;
+         private System.Windows.Forms.Button btnToggleView;
+         private System.Windows.Forms.Button btnRecalculateCosts;
     }
 } 

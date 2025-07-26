@@ -53,8 +53,8 @@ namespace BarStockControl.Mappers
                 new XAttribute("productId", movement.ProductId),
                 new XAttribute("quantity", movement.Quantity),
                 new XAttribute("eventId", movement.EventId),
-                new XAttribute("userId", movement.UserId),
-                new XAttribute("timestamp", movement.Timestamp.ToString("o")), // ISO 8601
+                new XAttribute("requestedByUserId", movement.UserId),
+                new XAttribute("timestamp", movement.Timestamp.ToString("o")),
                 new XAttribute("status", movement.Status.ToString())
             );
 
@@ -86,7 +86,7 @@ namespace BarStockControl.Mappers
                 ProductId = int.Parse(element.Attribute("productId")?.Value),
                 Quantity = double.Parse(element.Attribute("quantity")?.Value),
                 EventId = int.Parse(element.Attribute("eventId")?.Value),
-                UserId = int.Parse(element.Attribute("userId")?.Value),
+                UserId = int.Parse(element.Attribute("requestedByUserId")?.Value),
 
                 FromDepositId = element.Attribute("fromDepositId") != null ? int.Parse(element.Attribute("fromDepositId")?.Value) : (int?)null,
                 FromStationId = element.Attribute("fromStationId") != null ? int.Parse(element.Attribute("fromStationId")?.Value) : (int?)null,

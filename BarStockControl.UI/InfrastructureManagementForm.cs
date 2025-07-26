@@ -46,7 +46,8 @@ namespace BarStockControl.UI
                 {
                     ("Barras", () => new BarForm(), PermissionType.BarFullAccess),
                     ("Estaciones", () => new StationForm(), PermissionType.StationFullAccess),
-                    ("Cajas Registradoras", () => new CashRegisterForm(), PermissionType.CashRegisterFullAccess)
+                    ("Cajas Registradoras", () => new CashRegisterForm(), PermissionType.CashRegisterFullAccess),
+                    ("Depósitos", () => new DepositForm(), PermissionType.DepositFullAccess)
                 };
 
                 foreach (var (label, formFactory, requiredPermission) in forms)

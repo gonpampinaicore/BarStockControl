@@ -98,6 +98,10 @@ Este archivo registra, en orden cronológico, los cambios realizados en el proye
 
 - [2024-07-10] En LiveStationForm ahora se muestra el stock de todos los productos de la estación al abrir el formulario. Al buscar una orden, si la cantidad de tragos de algún ítem supera el stock estimado, se muestra un mensaje y se limpia la orden cargada. Solo se puede preparar la orden si está en estado Pagada. Los botones de preparar y entregar se habilitan o deshabilitan según corresponda para evitar errores de operación.
 
+- [2025-07-21] Se refactorizó StockMovementService para mejorar la separación de responsabilidades. Se movió toda la lógica de actualización de stock (decrementar origen, incrementar/crear destino) desde el formulario StockMovementForm al método CreateMovement del service. Ahora el formulario solo se encarga de la validación de UI y la llamada al service, mientras que el service maneja toda la lógica de negocio incluyendo la actualización de stock antes de crear el movimiento. Esto mejora la arquitectura en capas, facilita la reutilización del código y garantiza que stock y movimiento siempre estén sincronizados. Se actualizó el diagrama UML CrearMovimientoStock.puml para reflejar esta nueva arquitectura donde el service coordina todas las operaciones de stock.
+
+- [2025-07-21] Se completó el refactor de StockMovementService agregando el método RollbackMovement que encapsula toda la lógica de deshacer movimientos. Se movió la validación de eventos pasados, verificación de stock suficiente, actualización de stock de origen y destino, y eliminación del movimiento desde el formulario al service. El método maneja todos los errores de validación del stock y devuelve mensajes claros. Se agregó EventService al StockMovementService para validar fechas de eventos. El formulario ahora solo llama al service y maneja la respuesta, manteniendo la separación de responsabilidades y mejorando la robustez del sistema.
+
 
 
 - [2024-07-15] Se corrigió un problema crítico de recursión infinita en RoleService.MapFromXml que causaba que la aplicación se colgara al cargar roles con jerarquía. Se modificó el método para cargar solo IDs sin objetos completos, evitando llamadas recursivas a GetById.
@@ -180,5 +184,169 @@ Este archivo registra, en orden cronológico, los cambios realizados en el proye
 - [2025-07-21] Se refactorizó UserService eliminando métodos no utilizados y duplicados. Se eliminó el método Search() que no se usaba en ningún formulario, se eliminó el método GetAllUserDtos() que era duplicado de GetAllUsers(), se eliminó el método DecryptPassword() que solo se usaba internamente en UserMapper, y se eliminó el método ToEntity() que solo se usaba internamente. Se hizo privado el método ValidateUser() ya que solo se usa internamente. Se actualizó StockMovementForm para usar GetAllUsers() en lugar de GetAllUserDtos(). El servicio ahora mantiene solo los métodos públicos necesarios: CreateUser(), UpdateUser(), DeleteUser(), GetById(), GetAllUsers(), GetUserDtoById(), ToDto(), Authenticate() y BuildPermissions(). El servicio sigue completamente el patrón arquitectónico donde los formularios solo trabajan con DTOs.
 
 - [2025-07-21] Se corrigió una violación crítica de la arquitectura en capas donde varios formularios estaban usando UserService.GetById() que devuelve entidades User directamente. Se actualizaron OrderForm, StatisticsForm y LiveBarForm para usar UserService.GetUserDtoById() que devuelve UserDto, manteniendo la separación correcta entre capas. Se corrigió la construcción del nombre del usuario en OrderForm para usar las propiedades FirstName y LastName del DTO en lugar del método ToString() de la entidad. Se optimizó LiveBarForm agregando un método auxiliar GetBarmanName() para evitar llamadas múltiples al servicio. Ahora todos los formularios respetan completamente la arquitectura donde solo trabajan con DTOs.
+
+- [2025-07-21] Se corrigió una violación crítica de la arquitectura en capas en LiveBarForm donde se estaba llamando directamente a StationService.GetAll() (método del BaseService) y luego usando StationMapper.ToDto() desde el formulario. Se corrigieron tres usos incorrectos: en LoadEventStations() donde se obtenían estaciones por ID, en LoadStationStock() donde se obtenía el nombre de la estación, y en LoadTotalStock() donde se obtenían los nombres de las estaciones. Todos estos usos ahora llaman correctamente a StationService.GetById() que devuelve DTOs, manteniendo la separación correcta de capas donde los formularios solo trabajan con DTOs y nunca acceden directamente a entidades o mappers.
+
+- [2025-07-21] Se eliminaron servicios no utilizados en LiveBarForm para optimizar el código y eliminar instancias innecesarias. Se removieron _orderItemService, _drinkService y _eventService que se instanciaban en el constructor pero nunca se utilizaban en todo el formulario. Esto mejora el rendimiento al eliminar la creación de objetos innecesarios y mantiene el código más limpio y eficiente.
+
+- [2025-07-21] Se corrigió el error crítico en StockMovementForm que impedía cargar movimientos de stock. El problema era una inconsistencia entre el nombre del atributo en el XML (`requestedByUserId`) y el nombre buscado en el mapper (`userId`). Se actualizó StockMovementMapper.FromXml y StockMovementMapper.ToXml para usar `requestedByUserId` consistentemente, y se agregó la sección `<stockMovements>` al archivo XML de referencia. Ahora el formulario puede cargar correctamente los movimientos de stock sin errores de mapeo.
+
+- [2025-07-21] Se actualizaron las REGLAS.md para aclarar la ubicación del archivo XML principal. Se especificó que el archivo con los datos reales del sistema está en `BarStockControl.UI/bin/Debug/net8.0-windows/Xml/data.xml`, mientras que el archivo en `BarStockControl.Data/Xml/data.xml` es solo una plantilla vacía. Esto evita confusiones futuras sobre qué archivo usar como referencia para la estructura de datos.
+
+- [2025-07-21] Se eliminaron los mensajes de debug del formulario InventoryManagementForm que mostraban información de permisos y formularios disponibles. Se removió el MessageBox.Show que desplegaba "Formulario: {label}\nPermiso requerido: {requiredPermission}\nTiene permiso: {hasPermission}" para cada formulario, dejando el flujo limpio sin interrupciones de debug.
+
+- [2025-07-21] Se mejoró el manejo de errores en StockForm para mostrar mensajes específicos del servicio de validación. Se corrigió la validación en btnUpdate_Click para verificar que _selectedStock.Id > 0, se mejoraron los títulos de los MessageBox para distinguir entre "Errores de validación" y "Error", se agregaron mensajes de éxito al crear/actualizar stock, y se mejoró el manejo de excepciones para mostrar el mensaje específico del error en lugar de un mensaje genérico.
+
+- [2025-07-21] Se implementó lógica inteligente en StockService.CreateStock para evitar duplicados de stock. Ahora cuando se intenta crear stock de un producto que ya existe en la misma ubicación (depósito o estación), el sistema automáticamente suma la nueva cantidad al stock existente en lugar de crear un registro duplicado. Esto mejora la integridad de datos y evita inconsistencias en el inventario.
+
+- [2025-07-21] Se creó la estructura de documentación UML para el módulo de Stock. Se creó la carpeta "Gestion de Inventario/Modulo de Stock" con tres archivos PlantUML: CrearStock.puml, ActualizarStock.puml y EliminarStock.puml. Cada archivo contiene diagramas de secuencia detallados que modelan la interacción entre la UI, servicios, entidades y capa de datos, incluyendo la carga inicial de grillas y la recarga después de operaciones CRUD.
+
+## 2025-07-21
+
+### Corrección en ProductMapper.cs y data.xml - Estandarización a inglés
+- **Archivos modificados**: `BarStockControl.Mappers/ProductMapper.cs` y `BarStockControl.Data/Xml/data.xml`
+- **Problema identificado**: Inconsistencia entre atributos en español (`precio`) e inglés (`price`)
+- **Cambios realizados**:
+  - Corregido `ProductMapper.FromXml`: `element.Attribute("precio")` → `element.Attribute("price")`
+  - Corregido `ProductMapper.ToXml`: `new XAttribute("precio", ...)` → `new XAttribute("price", ...)`
+  - Actualizado XML: Reemplazado `precio=` por `price=` en todos los productos
+- **Resultado**: Estandarización completa a inglés y mapeo correcto de precios
+
+### Corrección en DrinkForm.cs - Agregado using para enums
+- **Archivo modificado**: `BarStockControl.UI/DrinkForm.cs`
+- **Problema identificado**: Error de compilación `UnitType` no existe en el contexto actual
+- **Cambios realizados**:
+  - Agregado `using BarStockControl.Models.Enums;` para acceder a `UnitType`
+  - Corregido `UnitType = "ml"` → `Unit = UnitType.Mililitro` en productos de prueba
+- **Resultado**: Proyecto compila correctamente sin errores de compilación
+
+### Corrección en DrinkService.cs - Guardado del costo estimado
+- **Archivo modificado**: `BarStockControl.Services/DrinkService.cs`
+- **Problema identificado**: El método `UpdateDrink` no estaba calculando ni guardando el `EstimatedCost` en la base de datos
+- **Cambios realizados**:
+  - Agregado cálculo automático del costo estimado en `UpdateDrink` para tragos compuestos
+  - El costo se calcula usando `CalculateEstimatedCost(drink.Id)` antes de guardar
+  - Solo se calcula para tragos marcados como `IsComposed = true`
+- **Resultado**: El costo estimado ahora se guarda correctamente en la base de datos al actualizar tragos
+
+### Mejoras en DrinkForm.cs - Cálculo automático de costo estimado
+- **Archivo modificado**: `BarStockControl.UI/DrinkForm.cs` y `BarStockControl.UI/DrinkForm.Designer.cs`
+- **Cambios realizados**:
+  - **Eliminado botón de calcular costo completamente**: Removido del Designer y del código
+  - **Cálculo automático mejorado**: El costo se calcula automáticamente cada vez que se agrega/quita un ingrediente
+  - **Lógica de cálculo robusta**: Maneja productos con y sin EstimatedServings configurado
+  - **Persistencia del costo**: El costo estimado se guarda siempre en el DTO del trago
+  - **Mejora en UpdateEstimatedCost()**: Calcula costo basado en ingredientes actuales, no en trago guardado
+  - **Mejora en GetDrinkFromForm()**: Calcula y asigna el costo estimado al crear/actualizar tragos
+- **Funcionalidad mejorada**:
+  - El costo se actualiza automáticamente al agregar productos (`btnAddProduct_Click`)
+  - El costo se actualiza automáticamente al quitar productos (`btnRemoveProduct_Click`)
+  - El costo se actualiza automáticamente al modificar cantidades (`dgvRecipeItems_CellValueChanged`)
+  - El costo se guarda automáticamente al crear/actualizar tragos
+  - El costo se calcula en tiempo real mientras se construye la receta
+- **Resultado**: Experiencia de usuario más fluida, costo visible en tiempo real sin necesidad de botón manual
+
+### Refactorización de DrinkForm.cs - Corrección de arquitectura DTO
+- **Archivo modificado**: `BarStockControl.UI/DrinkForm.cs`
+- **Cambios realizados**:
+  - Corregidas llamadas directas al BaseService: `_drinkService.GetAllDrinks()` → `_drinkService.GetAllDrinkDtos()`
+  - Renombrado método en DrinkService: `GetAllDrinks()` → `GetAllDrinkDtos()` para consistencia con convención DTO
+  - Mejorado mensaje de error: "Error al guardar los ingredientes del trago" → "Error al guardar los ingredientes de la receta"
+  - Corregida indentación incorrecta en método `btnDelete_Click`
+- **Archivos afectados**:
+  - `BarStockControl.Services/DrinkService.cs` - Renombrado método para consistencia
+  - `BarStockControl.UI/OrderForm.cs` - Actualizado para usar nuevo método
+  - `BarStockControl.UI/LiveStationForm.cs` - Actualizado para usar nuevo método
+- **Resultado**: Arquitectura DTO completamente implementada, sin llamadas directas al BaseService
+
+### Refactorización de LiveStationForm.cs - Corrección de arquitectura DTO
+- **Archivo modificado**: `BarStockControl.UI/LiveStationForm.cs`
+- **Cambios realizados**:
+  - Eliminadas llamadas directas al BaseService: `_stockService.GetAll()` → `_stockService.GetAllStockDtos()`
+  - Eliminadas llamadas directas al BaseService: `_drinkService.GetAllDrinks()` → `_drinkService.GetDrinkDtoById()`
+  - Eliminadas llamadas directas al BaseService: `_stationService.GetAllStationDtos().FirstOrDefault()` → `_stationService.GetById()`
+  - Eliminado uso directo de mappers: `StockMapper.ToDto()` removido antes de `_stockService.UpdateStock()`
+  - Corregida indentación inconsistente en todo el archivo
+- **Resultado**: Formulario respeta completamente la arquitectura DTO, sin violaciones de capas
+
+### Refactorización de LiveBarForm.cs - Limpieza de servicios no utilizados
+- **Archivo modificado**: `BarStockControl.UI/LiveBarForm.cs`
+- **Cambios realizados**:
+  - Eliminados servicios no utilizados: `_orderItemService`, `_drinkService`, `_eventService`
+  - Corregidas llamadas directas al BaseService: `_stationService.GetAll()` → `_stationService.GetById()`
+  - Optimizada obtención de nombres de barman con método helper `GetBarmanName`
+- **Resultado**: Código más limpio, sin servicios innecesarios y respetando arquitectura DTO
+
+### Refactorización de UserService.cs - Limpieza de métodos redundantes
+- **Archivo modificado**: `BarStockControl.Services/UserService.cs`
+- **Cambios realizados**:
+  - Eliminados métodos redundantes: `Search()`, `DecryptPassword()`, `ToEntity()`, `GetAllUserDtos()`
+  - Método `ValidateUser()` hecho privado
+  - Mantenido `GetById()` (retorna entity) por dependencia de BackupService
+  - Actualizados formularios UI para usar `GetUserDtoById()` en lugar de `GetById()`
+- **Archivos afectados**:
+  - `BarStockControl.UI/OrderForm.cs` - Actualizado para usar DTOs
+  - `BarStockControl.UI/StatisticsForm.cs` - Actualizado para usar DTOs
+  - `BarStockControl.UI/LiveBarForm.cs` - Optimizado con método helper
+- **Resultado**: Servicio más limpio, métodos públicos trabajan exclusivamente con DTOs
+
+### Refactorización de StockService.cs - Eliminación de métodos redundantes
+- **Archivo modificado**: `BarStockControl.Services/StockService.cs`
+- **Cambios realizados**:
+  - Eliminados métodos redundantes: `GetAllStock()`, `Search()`
+  - Eliminados métodos privados duplicados: `ValidateStock()`, `CreateStock(Stock)`, `UpdateStock(Stock)`, `DeleteStock(int)`, `GetById(int)`
+  - Mantenidos solo métodos públicos que trabajan con DTOs
+- **Archivo afectado**:
+  - `BarStockControl.Services/StockMovementService.cs` - Actualizado para usar `GetAll().FirstOrDefault()` en lugar de `Search()`
+- **Resultado**: Servicio más limpio, sin métodos duplicados
+
+### Refactorización de StockMovementService.cs - Limpieza de métodos
+- **Archivo modificado**: `BarStockControl.Services/StockMovementService.cs`
+- **Cambios realizados**:
+  - Eliminados métodos: `GetAllMovements()`, `Search()`
+  - Método `Validate()` hecho privado
+  - Actualizado uso de `_stockService.Search` a `_stockService.GetAll().FirstOrDefault()`
+- **Archivo afectado**:
+  - `BarStockControl.UI/StockMovementForm .cs` - Actualizado para usar `GetAll()` y `StockMapper.ToDto()`
+- **Resultado**: Servicio más limpio, métodos públicos trabajan con DTOs
+
+### Refactorización de StationService.cs - Implementación completa de arquitectura DTO
+- **Archivo modificado**: `BarStockControl.Services/StationService.cs`
+- **Cambios realizados**:
+  - Eliminado método `Search()` redundante
+  - Métodos públicos actualizados para trabajar con DTOs: `CreateStation(StationDto)`, `UpdateStation(StationDto)`, `GetById(int)` retorna `StationDto`
+  - Método `ValidateStation()` hecho privado
+  - Corregido uso de mapper: `StationMapper.FromDto` → `StationMapper.ToEntity`
+- **Archivos afectados**:
+  - `BarStockControl.UI/StationForm.cs` - Actualizado para usar DTOs y manejo de enums
+  - `BarStockControl.UI/LiveStationForm.cs` - Actualizado para usar DTOs
+- **Resultado**: Servicio completamente DTO-based, sin violaciones de arquitectura
+
+### Corrección de sintaxis en StationProductConsumptionService.cs
+- **Archivo modificado**: `BarStockControl.Services/StationProductConsumptionService.cs`
+- **Cambios realizados**:
+  - Corregido error de sintaxis: métodos `Create` y `GetAllDtos` movidos dentro de la definición de clase
+- **Resultado**: Error de compilación resuelto
+
+## 2025-07-20
+
+### Refactorización de servicios para implementar arquitectura DTO consistente
+- **Objetivo**: Asegurar que todos los servicios trabajen exclusivamente con DTOs en sus métodos públicos
+- **Cambios realizados**:
+  - Eliminación de métodos redundantes y no utilizados
+  - Conversión de métodos públicos para trabajar con DTOs
+  - Hacer privados los métodos de validación internos
+  - Actualización de formularios UI para usar métodos DTO
+- **Resultado**: Arquitectura más limpia y consistente en toda la aplicación
+
+## 2025-07-19
+
+### Implementación inicial de arquitectura DTO
+- **Objetivo**: Separar la capa de presentación de la capa de dominio usando DTOs
+- **Cambios realizados**:
+  - Creación de mappers para conversión entre entidades y DTOs
+  - Actualización de servicios para exponer métodos que trabajan con DTOs
+  - Refactorización de formularios para usar DTOs en lugar de entidades directamente
+- **Resultado**: Mejor separación de responsabilidades y arquitectura más mantenible
 
 

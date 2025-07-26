@@ -62,22 +62,25 @@ namespace BarStockControl.UI
             try
             {
                 var userDtos = _userService.GetAllUsers().Where(u => u.Active).ToList();
+                
                 if (!string.IsNullOrEmpty(resourceType))
                 {
                     userDtos = _resourceRolePermissionService.GetUsersForResourceTypeDto(userDtos, resourceType);
                 }
+                
                 var userList = userDtos.Select(u => new
                 {
                     Id = u.Id,
                     FullName = $"{u.FirstName} {u.LastName}"
                 }).ToList();
+                
                 cmbUser.DataSource = userList.Count > 0 ? userList : new List<object>();
                 cmbUser.DisplayMember = "FullName";
                 cmbUser.ValueMember = "Id";
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar usuarios.", "Error", 
+                MessageBox.Show($"Error al cargar usuarios: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -119,17 +122,19 @@ namespace BarStockControl.UI
             switch (selectedType)
             {
                 case "deposit":
-                    cmbResource.DataSource = _depositService.GetAllDeposits()
+                    var deposits = _depositService.GetAllDeposits()
                         .Where(d => !usedResourceIds.Contains(d.Id))
                         .ToList();
+                    cmbResource.DataSource = deposits;
                     cmbResource.DisplayMember = "Name";
                     cmbResource.ValueMember = "Id";
                     break;
 
                 case "bar":
-                    cmbResource.DataSource = _barService.GetAllBars()
+                    var bars = _barService.GetAllBars()
                         .Where(b => !usedResourceIds.Contains(b.Id))
                         .ToList();
+                    cmbResource.DataSource = bars;
                     cmbResource.DisplayMember = "Name";
                     cmbResource.ValueMember = "Id";
                     break;

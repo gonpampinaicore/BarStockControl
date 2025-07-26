@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Services;
 using BarStockControl.Models.Enums;
-using BarStockControl.Mappers;
 using BarStockControl.Core;
 
 namespace BarStockControl.UI
@@ -89,16 +80,19 @@ namespace BarStockControl.UI
                     return;
                 }
                 _orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
-                var orderItemsDisplay = _orderItems.Select(i => new {
-                    Trago = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Id == i.DrinkId)?.Name ?? "Desconocido",
-                    Cantidad = i.Quantity
+                var orderItemsDisplay = _orderItems.Select(i => {
+                    var drink = _drinkService.GetDrinkDtoById(i.DrinkId);
+                    return new {
+                        Trago = drink?.Name ?? "Desconocido",
+                        Cantidad = i.Quantity
+                    };
                 }).ToList();
                 dgvOrderItems.DataSource = orderItemsDisplay;
-                var stock = _stockService.GetAll().Where(s => s.StationId == _stationId).ToList();
+                var stock = _stockService.GetAllStockDtos().Where(s => s.StationId == _stationId).ToList();
                 var productos = _productService.GetAllProductDtos();
                 foreach (var item in _orderItems)
                 {
-                    var drink = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Id == item.DrinkId);
+                    var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
                     if (drink == null) continue;
                     var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                     if (recipe == null) continue;
@@ -133,7 +127,7 @@ namespace BarStockControl.UI
             {
                 if (dgvOrderItems.SelectedRows.Count == 0) return;
                 string drinkName = dgvOrderItems.SelectedRows[0].Cells["Trago"].Value.ToString();
-                var drink = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Name == drinkName);
+                var drink = _drinkService.GetAllDrinkDtos().FirstOrDefault(d => d.Name == drinkName);
                 if (drink == null) return;
                 _selectedDrink = drink;
                 var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
@@ -155,7 +149,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                var stock = _stockService.GetAll().Where(s => s.StationId == _stationId).ToList();
+                var stock = _stockService.GetAllStockDtos().Where(s => s.StationId == _stationId).ToList();
                 var productos = _productService.GetAllProductDtos();
                 var stockDisplay = stock.Select(s => {
                     var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
@@ -194,7 +188,7 @@ namespace BarStockControl.UI
                 return;
             }
             var barmanId = assignment.UserId;
-            var station = _stationService.GetAllStationDtos().FirstOrDefault(s => s.Id == _stationId);
+            var station = _stationService.GetById(_stationId);
             int barId = station != null ? station.BarId : 0;
             
             var barmanOrderDto = new BarmanOrderDto
@@ -231,7 +225,7 @@ namespace BarStockControl.UI
             var productos = _productService.GetAllProductDtos();
             foreach (var item in _orderItems)
             {
-                var drink = _drinkService.GetAllDrinks().FirstOrDefault(d => d.Id == item.DrinkId);
+                var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
                 if (drink == null) continue;
                 var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) continue;
@@ -240,14 +234,13 @@ namespace BarStockControl.UI
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
                     if (prod == null || prod.EstimatedServings <= 0) continue;
-                    var stockProd = _stockService.GetAll().FirstOrDefault(s => s.StationId == _stationId && s.ProductId == prod.Id);
+                    var stockProd = _stockService.GetAllStockDtos().FirstOrDefault(s => s.StationId == _stationId && s.ProductId == prod.Id);
                     if (stockProd != null)
                     {
                         var descontar = (double)item.Quantity / prod.EstimatedServings;
                         stockProd.Quantity -= descontar;
                         if (stockProd.Quantity < 0) stockProd.Quantity = 0;
-                        var stockDto = StockMapper.ToDto(stockProd);
-                        _stockService.UpdateStock(stockDto);
+                        _stockService.UpdateStock(stockProd);
                     }
                     var consumo = new StationProductConsumptionDto
                     {

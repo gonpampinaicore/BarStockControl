@@ -125,21 +125,29 @@ namespace BarStockControl.UI
         {
             try
             {
-                var stock = GetStockFromForm();
-                var errors = _stockService.CreateStock(stock);
-
-                if (errors.Any())
+                var formErrors = ValidateForm();
+                if (formErrors.Any())
                 {
-                    MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(string.Join("\n", formErrors), "Errores de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
+                var stock = GetStockFromForm();
+                var serviceErrors = _stockService.CreateStock(stock);
+
+                if (serviceErrors.Any())
+                {
+                    MessageBox.Show(string.Join("\n", serviceErrors), "Errores de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MessageBox.Show("Stock creado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
                 LoadStock();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al crear stock: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -147,28 +155,40 @@ namespace BarStockControl.UI
         {
             try
             {
-                if (_selectedStock == null)
+                if (_selectedStock == null || _selectedStock.Id <= 0)
                 {
-                    MessageBox.Show("Seleccioná un registro de stock para actualizar.");
+                    MessageBox.Show("Debe seleccionar un registro de stock para actualizar.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var formErrors = ValidateForm();
+                if (formErrors.Any())
+                {
+                    MessageBox.Show(string.Join("\n", formErrors), "Errores de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 var updated = GetStockFromForm();
                 updated.Id = _selectedStock.Id;
 
-                var errors = _stockService.UpdateStock(updated);
-                if (errors.Any())
+                var confirm = MessageBox.Show("Solo se actualiza cantidades. ¿Desea continuar?", "Confirmar actualización", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (confirm != DialogResult.Yes)
+                    return;
+
+                var serviceErrors = _stockService.UpdateStock(updated);
+                if (serviceErrors.Any())
                 {
-                    MessageBox.Show(string.Join("\n", errors), "Errores", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(string.Join("\n", serviceErrors), "Errores de validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
+                MessageBox.Show("Stock actualizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
                 LoadStock();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Lo siento, algo salió mal. Por favor, intenta nuevamente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al actualizar stock: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -176,7 +196,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                if (_selectedStock == null)
+                if (_selectedStock == null || _selectedStock.Id <= 0)
                 {
                     MessageBox.Show("Seleccioná un registro de stock para eliminar.");
                     return;
@@ -186,6 +206,7 @@ namespace BarStockControl.UI
                 if (confirm == DialogResult.Yes)
                 {
                     _stockService.DeleteStockDto(_selectedStock.Id);
+                    MessageBox.Show("Stock eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ClearForm();
                     LoadStock();
                 }
@@ -210,10 +231,29 @@ namespace BarStockControl.UI
             else if (rdoStation.Checked && selectedLocation != null)
                 stock.StationId = selectedLocation.Id;
 
-            if (double.TryParse(txtQuantity.Text, out double quantity))
-                stock.Quantity = quantity;
+            stock.Quantity = double.Parse(txtQuantity.Text);
 
             return stock;
+        }
+
+        private List<string> ValidateForm()
+        {
+            var errors = new List<string>();
+
+            if (dgvProducts.CurrentRow == null)
+                errors.Add("Debe seleccionar un producto.");
+
+            if (dgvLocations.CurrentRow == null)
+                errors.Add("Debe seleccionar una ubicación.");
+
+            if (string.IsNullOrWhiteSpace(txtQuantity.Text))
+                errors.Add("Debe ingresar una cantidad.");
+            else if (!double.TryParse(txtQuantity.Text, out double quantity))
+                errors.Add("La cantidad debe ser un número válido.");
+            else if (quantity < 0)
+                errors.Add("La cantidad no puede ser negativa.");
+
+            return errors;
         }
 
         private void dgvStock_CellClick(object sender, DataGridViewCellEventArgs e)

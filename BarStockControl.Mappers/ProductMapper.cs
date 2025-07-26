@@ -59,7 +59,7 @@ namespace BarStockControl.Mappers
                     Unit = Enum.TryParse<UnitType>((string)element.Attribute("unit"), out var unit) ? unit : UnitType.Unidad,
                     Category = Enum.TryParse<ProductCategory>((string)element.Attribute("category"), out var category) ? category : ProductCategory.BebidaAlcoholica,
                     Capacity = double.TryParse((string)element.Attribute("capacity"), out var capacity) ? capacity : 0,
-                    Price = decimal.TryParse((string)element.Attribute("price"), out var precio) ? precio : 0,
+                    Price = decimal.TryParse((string)element.Attribute("price"), out var price) ? price : 0,
                     EstimatedServings = int.TryParse((string)element.Attribute("estimatedServings"), out var servings) ? servings : 0,
                     IsActive = bool.TryParse((string)element.Attribute("isActive"), out var isActive) ? isActive : true
                 };
