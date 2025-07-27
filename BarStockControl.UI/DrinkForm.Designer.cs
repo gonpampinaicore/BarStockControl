@@ -290,7 +290,7 @@ namespace BarStockControl.UI
              // 
              // btnRecalculateCosts
              // 
-             btnRecalculateCosts.Location = new Point(411, 750);
+             btnRecalculateCosts.Location = new Point(411, 350);
              btnRecalculateCosts.Margin = new Padding(4, 3, 4, 3);
              btnRecalculateCosts.Name = "btnRecalculateCosts";
              btnRecalculateCosts.Size = new Size(114, 27);

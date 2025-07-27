@@ -63,9 +63,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                if (recipeDto == null)
-                    throw new ArgumentNullException(nameof(recipeDto), "La receta no puede ser null.");
-
                 var errors = ValidateRecipe(recipeDto);
                 if (errors.Any())
                     return errors;
@@ -85,9 +82,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                if (recipeDto == null)
-                    throw new ArgumentNullException(nameof(recipeDto), "La receta no puede ser null.");
-
                 var errors = ValidateRecipe(recipeDto, isUpdate: true);
                 if (errors.Any())
                     return errors;

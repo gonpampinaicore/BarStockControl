@@ -79,7 +79,7 @@
     unit CDATA #REQUIRED
     category CDATA #REQUIRED
     capacity CDATA #REQUIRED
-    precio CDATA #REQUIRED
+    price CDATA #REQUIRED
     estimatedServings CDATA #REQUIRED
     isActive (true|false) "true"
     type CDATA #REQUIRED

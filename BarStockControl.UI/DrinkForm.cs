@@ -294,6 +294,7 @@ namespace BarStockControl.UI
 
         private void LoadDrinkToForm(DrinkDto drink)
         {
+            _selectedDrink = drink;
             txtName.Text = drink.Name;
             numPrice.Value = drink.Price;
             chkIsComposed.Checked = drink.IsComposed;
@@ -303,7 +304,8 @@ namespace BarStockControl.UI
 
             pnlRecipe.Visible = true;
             RefreshRecipeGrid();
-            UpdateEstimatedCost();
+            
+            lblEstimatedCost.Text = $"Costo estimado: ${drink.EstimatedCost:F2}";
         }
 
         private void ClearForm()
@@ -328,13 +330,7 @@ namespace BarStockControl.UI
                 txtName.Focus();
                 return false;
             }
-            var existing = _drinkService.GetAllDrinkDtos().Any(d => d.Name.Equals(txtName.Text.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (existing && (_selectedDrink == null || _selectedDrink.Name != txtName.Text.Trim()))
-            {
-                MessageBox.Show("Ya existe un trago con ese nombre.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtName.Focus();
-                return false;
-            }
+
             if (numPrice.Value <= 0)
             {
                 MessageBox.Show("El precio debe ser mayor a 0.", "Validación",
@@ -342,13 +338,14 @@ namespace BarStockControl.UI
                 numPrice.Focus();
                 return false;
             }
+
             if (!_currentRecipeItems.Any())
             {
-                MessageBox.Show("Todo trago debe tener al menos un ingrediente.", "Validación",
+                MessageBox.Show("Debe agregar al menos un ingrediente.", "Validación",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
-            var productIds = new HashSet<int>();
+
             foreach (var item in _currentRecipeItems)
             {
                 if (item.Quantity <= 0)
@@ -356,40 +353,20 @@ namespace BarStockControl.UI
                     MessageBox.Show("La cantidad de cada ingrediente debe ser mayor a 0.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
-                if (!productIds.Add(item.ProductId))
-                {
-                    MessageBox.Show("No se puede repetir el mismo producto en la receta.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return false;
-                }
             }
+
             return true;
         }
 
         private DrinkDto GetDrinkFromForm()
         {
-            var drinkDto = new DrinkDto
+            return new DrinkDto
             {
                 Name = txtName.Text.Trim(),
                 Price = numPrice.Value,
                 IsComposed = chkIsComposed.Checked,
                 IsActive = chkIsActive.Checked
             };
-            
-            if (_currentRecipeItems.Any())
-            {
-                decimal estimatedCost = 0;
-                var products = _productService.GetAllProductDtos().ToDictionary(p => p.Id);
-                foreach (var item in _currentRecipeItems)
-                {
-                    if (products.TryGetValue(item.ProductId, out var product))
-                    {
-                        estimatedCost += product.Price * item.Quantity;
-                    }
-                }
-                drinkDto.EstimatedCost = estimatedCost;
-            }
-            
-            return drinkDto;
         }
 
         private void btnCreate_Click(object sender, EventArgs e)
@@ -433,17 +410,26 @@ namespace BarStockControl.UI
                 var drinkDto = GetDrinkFromForm();
                 drinkDto.Id = _selectedDrink.Id;
 
-                var errors = _drinkService.UpdateDrink(drinkDto);
-                if (errors.Any())
+                var recipes = _recipeService.GetAllRecipes();
+                var recipeDto = recipes.FirstOrDefault(r => r.DrinkId == drinkDto.Id);
+                if (recipeDto == null)
                 {
-                    MessageBox.Show($"Error al actualizar el trago:\n{string.Join("\n", errors)}", "Error",
+                    MessageBox.Show("Error: No se encontró la receta del trago", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                if (!_drinkService.SaveRecipeItems(drinkDto.Id, _currentRecipeItems))
+                if (!_recipeService.SaveRecipeItems(recipeDto.Id, _currentRecipeItems))
                 {
                     MessageBox.Show("Error al guardar los ingredientes de la receta", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var errors = _drinkService.UpdateDrink(drinkDto);
+                if (errors.Any())
+                {
+                    MessageBox.Show($"Error al actualizar el trago:\n{string.Join("\n", errors)}", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -571,13 +557,13 @@ namespace BarStockControl.UI
                     {
                         if (products.TryGetValue(item.ProductId, out var product))
                         {
-                            estimatedCost += product.Price * item.Quantity;
+                            var pricePerServing = product.Price / product.EstimatedServings;
+                            estimatedCost += pricePerServing * item.Quantity;
                         }
                     }
                 }
                 
                 lblEstimatedCost.Text = $"Costo estimado: ${estimatedCost:F2}";
-                _selectedDrink.EstimatedCost = estimatedCost;
             }
             catch (Exception ex)
             {
@@ -665,6 +651,7 @@ namespace BarStockControl.UI
             try
             {
                 _drinkService.RecalculateAllEstimatedCosts();
+                
                 MessageBox.Show("Costos estimados recalculados exitosamente.", "Éxito",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadDrinks();

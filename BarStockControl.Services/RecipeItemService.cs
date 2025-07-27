@@ -61,9 +61,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                if (itemDto == null)
-                    throw new ArgumentNullException(nameof(itemDto), "El ítem de receta no puede ser null.");
-
                 var errors = ValidateRecipeItem(itemDto);
                 if (errors.Any())
                     return errors;
