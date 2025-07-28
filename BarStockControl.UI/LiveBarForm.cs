@@ -65,7 +65,14 @@ namespace BarStockControl.UI
                 if (_currentEvent == null) return;
                 
                 var allOrders = _orderService.GetAllOrderDtos();
-                _eventOrders = allOrders.Where(o => o.EventId == _currentEvent.Id).ToList();
+                if (allOrders == null || !allOrders.Any())
+                {
+                    _eventOrders = new List<OrderDto>();
+                    dgvOrders.DataSource = new List<object>();
+                    return;
+                }
+                
+                _eventOrders = allOrders.Where(o => o != null && o.EventId == _currentEvent.Id).ToList();
 
                 var ordersDisplay = _eventOrders.Select(o => new
                 {
@@ -80,6 +87,7 @@ namespace BarStockControl.UI
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar órdenes: {ex.Message}");
+                dgvOrders.DataSource = new List<object>();
             }
         }
 
@@ -123,26 +131,42 @@ namespace BarStockControl.UI
             {
                 var barmanOrderService = new BarmanOrderService(new Data.XmlDataManager("Xml/data.xml"));
                 var barmanOrderDtos = barmanOrderService.GetByStationId(stationId);
+                
+                if (barmanOrderDtos == null || !barmanOrderDtos.Any())
+                {
+                    dgvBarmanOrders.DataSource = new List<object>();
+                    return;
+                }
+                
                 var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
                 var orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
                 var orders = orderService.GetAllOrderDtos();
+                
+                if (orders == null || !orders.Any())
+                {
+                    dgvBarmanOrders.DataSource = new List<object>();
+                    return;
+                }
+                
                 var barmanOrders = barmanOrderDtos
-                    .Where(bo => bo.EventId == _currentEvent.Id)
+                    .Where(bo => bo != null && bo.EventId == _currentEvent.Id)
                     .Select(bo => new
                     {
                         Orden = bo.OrderId,
                         Barman = GetBarmanName(userService, bo.BarmanId),
-                        Fecha = orders.FirstOrDefault(o => o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.CreatedAt.ToString("dd/MM/yyyy HH:mm") ?? "",
-                        Estado = orders.FirstOrDefault(o => o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.Status.ToString() ?? ""
+                        Fecha = orders.FirstOrDefault(o => o != null && o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.CreatedAt.ToString("dd/MM/yyyy HH:mm") ?? "",
+                        Estado = orders.FirstOrDefault(o => o != null && o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.Status.ToString() ?? ""
                     })
                     .Where(x => !string.IsNullOrEmpty(x.Fecha))
                     .OrderByDescending(x => x.Fecha)
                     .ToList();
+                    
                 dgvBarmanOrders.DataSource = barmanOrders;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar órdenes de barman: {ex.Message}");
+                dgvBarmanOrders.DataSource = new List<object>();
             }
         }
 

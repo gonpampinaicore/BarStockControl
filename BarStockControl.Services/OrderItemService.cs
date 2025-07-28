@@ -28,16 +28,16 @@ namespace BarStockControl.Services
             var errors = new List<string>();
 
             if (item.OrderId <= 0)
-                errors.Add("Order ID is required.");
+                errors.Add("El ID de la orden es requerido.");
 
             if (item.DrinkId <= 0)
-                errors.Add("Drink ID is required.");
+                errors.Add("El ID de la bebida es requerido.");
 
             if (item.Quantity <= 0)
-                errors.Add("Quantity must be greater than 0.");
+                errors.Add("La cantidad debe ser mayor a 0.");
 
             if (item.UnitPrice <= 0)
-                errors.Add("Unit price must be greater than 0.");
+                errors.Add("El precio unitario debe ser mayor a 0.");
 
             return errors;
         }

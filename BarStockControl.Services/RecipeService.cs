@@ -130,6 +130,21 @@ namespace BarStockControl.Services
             }
         }
 
+        public List<RecipeItemDto> GetRecipeItemsForDrink(int drinkId)
+        {
+            try
+            {
+                var recipe = GetAll().FirstOrDefault(r => r.DrinkId == drinkId);
+                if (recipe == null) return new List<RecipeItemDto>();
+
+                return _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
+            }
+            catch (Exception)
+            {
+                return new List<RecipeItemDto>();
+            }
+        }
+
         public List<RecipeDto> GetAllRecipes()
         {
             return GetAll().Select(r => r.ToDto()).ToList();

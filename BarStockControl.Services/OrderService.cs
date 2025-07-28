@@ -5,14 +5,18 @@ using System.Xml.Linq;
 using BarStockControl.DTOs;
 using System.Collections.Generic;
 using System.Linq;
+using BarStockControl.Models.Enums;
 
 namespace BarStockControl.Services
 {
     public class OrderService : BaseService<Order>
     {
+        private readonly XmlDataManager _xmlDataManager;
+
         public OrderService(XmlDataManager xmlDataManager)
             : base(xmlDataManager, "orders")
         {
+            _xmlDataManager = xmlDataManager;
         }
 
         protected override Order MapFromXml(XElement element)
@@ -30,18 +34,215 @@ namespace BarStockControl.Services
             var errors = new List<string>();
 
             if (order.EventId <= 0)
-                errors.Add("Event ID is required.");
+                errors.Add("El ID del evento es requerido.");
 
             if (order.UserId <= 0)
-                errors.Add("User ID is required.");
+                errors.Add("El ID del usuario es requerido.");
 
             if (order.Total <= 0)
-                errors.Add("Total must be greater than 0.");
+                errors.Add("El total debe ser mayor a 0.");
 
             return errors;
         }
 
-        public List<string> CreateOrder(OrderDto order)
+        public List<string> ValidateOrderForStation(int orderId, int stationId)
+        {
+            var errors = new List<string>();
+
+            var order = GetOrderDtoById(orderId);
+            if (order == null)
+            {
+                errors.Add("Orden no encontrada.");
+                return errors;
+            }
+
+            if (order.Status != OrderStatus.Pagado)
+            {
+                errors.Add("Solo se pueden preparar órdenes en estado Pagada.");
+                return errors;
+            }
+
+            var orderItemService = new OrderItemService(_xmlDataManager);
+            var drinkService = new DrinkService(_xmlDataManager);
+            var recipeService = new RecipeService(_xmlDataManager);
+            var recipeItemService = new RecipeItemService(_xmlDataManager);
+            var stockService = new StockService(_xmlDataManager);
+            var productService = new ProductService(_xmlDataManager);
+
+            var orderItems = orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
+            var stock = stockService.GetAllStockDtos().Where(s => s.StationId == stationId).ToList();
+            var productos = productService.GetAllProductDtos();
+
+            foreach (var item in orderItems)
+            {
+                var drink = drinkService.GetDrinkDtoById(item.DrinkId);
+                if (drink == null) continue;
+
+                var recipe = recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
+                if (recipe == null) continue;
+
+                var recipeItems = recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
+                foreach (var ri in recipeItems)
+                {
+                    var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
+                    if (prod == null) continue;
+
+                    var stockProd = stock.FirstOrDefault(s => s.ProductId == prod.Id);
+                    var tragosEstimados = stockProd != null ? prod.EstimatedServings * stockProd.Quantity : 0;
+
+                    if (item.Quantity > tragosEstimados)
+                    {
+                        errors.Add($"No se puede preparar el pedido: el stock de '{prod.Name}' solo permite {tragosEstimados} tragos y se requieren {item.Quantity}.");
+                        return errors;
+                    }
+                }
+            }
+
+            return errors;
+        }
+
+        public List<string> MarkOrderAsInPreparation(int orderId, int stationId)
+        {
+            var errors = new List<string>();
+
+            var order = GetOrderDtoById(orderId);
+            if (order == null)
+            {
+                errors.Add("Orden no encontrada.");
+                return errors;
+            }
+
+            if (order.Status != OrderStatus.Pagado)
+            {
+                errors.Add("Solo se pueden preparar órdenes en estado Pagada.");
+                return errors;
+            }
+
+            var resourceAssignmentService = new ResourceAssignmentService(_xmlDataManager);
+            var assignments = resourceAssignmentService.GetByEvent(order.EventId);
+            var assignment = assignments.FirstOrDefault(a => a.ResourceType == "station" && a.ResourceId == stationId);
+            
+            if (assignment == null)
+            {
+                errors.Add("No se encontró barman asignado a esta estación para el evento actual.");
+                return errors;
+            }
+
+            var stationService = new StationService(_xmlDataManager);
+            var station = stationService.GetById(stationId);
+            int barId = station != null ? station.BarId : 0;
+
+            var barmanOrderService = new BarmanOrderService(_xmlDataManager);
+            var barmanOrderDto = new BarmanOrderDto
+            {
+                OrderId = orderId,
+                BarmanId = assignment.UserId,
+                StationId = stationId,
+                BarId = barId,
+                EventId = order.EventId,
+                DateTime = DateTime.Now
+            };
+
+            var barmanErrors = barmanOrderService.CreateBarmanOrder(barmanOrderDto);
+            if (barmanErrors.Any())
+            {
+                errors.AddRange(barmanErrors);
+                return errors;
+            }
+
+            order.Status = OrderStatus.EnPreparacion;
+            var updateErrors = UpdateOrder(order);
+            if (updateErrors.Any())
+            {
+                errors.AddRange(updateErrors);
+                return errors;
+            }
+
+            return errors;
+        }
+
+        public List<string> MarkOrderAsDelivered(int orderId, int stationId, int userId)
+        {
+            var errors = new List<string>();
+
+            var order = GetOrderDtoById(orderId);
+            if (order == null)
+            {
+                errors.Add("Orden no encontrada.");
+                return errors;
+            }
+
+            var orderItemService = new OrderItemService(_xmlDataManager);
+            var drinkService = new DrinkService(_xmlDataManager);
+            var recipeService = new RecipeService(_xmlDataManager);
+            var recipeItemService = new RecipeItemService(_xmlDataManager);
+            var stockService = new StockService(_xmlDataManager);
+            var productService = new ProductService(_xmlDataManager);
+            var stationProductConsumptionService = new StationProductConsumptionService(_xmlDataManager);
+
+            var orderItems = orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
+            var productos = productService.GetAllProductDtos();
+
+            foreach (var item in orderItems)
+            {
+                var drink = drinkService.GetDrinkDtoById(item.DrinkId);
+                if (drink == null) continue;
+
+                var recipe = recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
+                if (recipe == null) continue;
+
+                var recipeItems = recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
+                foreach (var ri in recipeItems)
+                {
+                    var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
+                    if (prod == null || prod.EstimatedServings <= 0) continue;
+
+                    var stockProd = stockService.GetAllStockDtos().FirstOrDefault(s => s.StationId == stationId && s.ProductId == prod.Id);
+                    if (stockProd != null)
+                    {
+                        var descontar = (double)item.Quantity / prod.EstimatedServings;
+                        stockProd.Quantity -= descontar;
+                        if (stockProd.Quantity < 0) stockProd.Quantity = 0;
+                        
+                        var stockErrors = stockService.UpdateStock(stockProd);
+                        if (stockErrors.Any())
+                        {
+                            errors.AddRange(stockErrors);
+                            return errors;
+                        }
+                    }
+
+                    var consumo = new StationProductConsumptionDto
+                    {
+                        StationId = stationId,
+                        ProductId = prod.Id,
+                        OrderItemId = item.Id,
+                        DateTime = DateTime.Now,
+                        EventId = order.EventId,
+                        UserId = userId
+                    };
+
+                    var consumptionErrors = stationProductConsumptionService.Create(consumo);
+                    if (consumptionErrors.Any())
+                    {
+                        errors.AddRange(consumptionErrors);
+                        return errors;
+                    }
+                }
+            }
+
+            order.Status = OrderStatus.Entregado;
+            var updateErrors = UpdateOrder(order);
+            if (updateErrors.Any())
+            {
+                errors.AddRange(updateErrors);
+                return errors;
+            }
+
+            return errors;
+        }
+
+        public List<string> CreateOrder(OrderDto order, List<OrderItemDto> orderItems = null)
         {
             var errors = ValidateOrder(order);
             if (errors.Any())
@@ -50,6 +251,22 @@ namespace BarStockControl.Services
             var entity = OrderMapper.FromDto(order);
             entity.Id = GetNextId();
             Add(entity);
+            order.Id = entity.Id;
+
+            if (orderItems != null && orderItems.Any())
+            {
+                var orderItemService = new OrderItemService(_xmlDataManager);
+                foreach (var item in orderItems)
+                {
+                    item.OrderId = order.Id;
+                    var itemErrors = orderItemService.CreateOrderItem(item);
+                    if (itemErrors.Any())
+                    {
+                        return itemErrors;
+                    }
+                }
+            }
+
             return new List<string>();
         }
 
@@ -64,9 +281,9 @@ namespace BarStockControl.Services
             return new List<string>();
         }
 
-        public OrderDto GetOrderDtoById(int id)
+        public OrderDto? GetOrderDtoById(int id)
         {
-            var order = GetAll().FirstOrDefault(o => o.Id == id);
+            var order = GetById(id);
             return order != null ? OrderMapper.ToDto(order) : null;
         }
 

@@ -29,10 +29,10 @@ namespace BarStockControl.Services
             var errors = new List<string>();
 
             if (string.IsNullOrWhiteSpace(ev.Name))
-                errors.Add("The event name is required.");
+                errors.Add("El nombre del evento es requerido.");
 
             if (ev.StartDate == default)
-                errors.Add("Start date is required.");
+                errors.Add("La fecha de inicio es requerida.");
 
             return errors;
         }

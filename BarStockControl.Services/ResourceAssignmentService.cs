@@ -44,9 +44,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                if (dto == null)
-                    throw new ArgumentNullException(nameof(dto), "La asignación no puede ser null.");
-
                 var entity = ResourceAssignmentMapper.ToEntity(dto);
                 var errors = Validate(entity);
                 if (errors.Any())

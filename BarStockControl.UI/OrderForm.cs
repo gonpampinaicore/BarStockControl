@@ -18,6 +18,7 @@ namespace BarStockControl.UI
         private readonly OrderItemService _orderItemService;
         private readonly EventService _eventService;
         private readonly UserService _userService;
+        private readonly ResourceAssignmentDto _resourceAssignment;
 
         private List<OrderItemDto> _items = new();
         private List<DrinkDto> _drinks = new();
@@ -30,7 +31,8 @@ namespace BarStockControl.UI
                          OrderItemService orderItemService,
                          EventService eventService,
                          UserService userService,
-                         EventDto currentEvent)
+                         EventDto currentEvent,
+                         ResourceAssignmentDto resourceAssignment = null)
         {
             InitializeComponent();
             _drinkService = drinkService;
@@ -39,6 +41,7 @@ namespace BarStockControl.UI
             _eventService = eventService;
             _userService = userService;
             _currentEvent = currentEvent;
+            _resourceAssignment = resourceAssignment;
             _currentUserId = SessionContext.Instance.LoggedUser.Id;
             dgvDrinks.SelectionChanged += dgvDrinks_SelectionChanged;
             LoadDrinks();
@@ -150,45 +153,19 @@ namespace BarStockControl.UI
                     UserId = _currentUserId,
                     CreatedAt = DateTime.Now,
                     PaymentMethod = "Efectivo",
-                    Status = OrderStatus.PendienteDePago,
+                    Status = OrderStatus.Pagado,
                     Total = total
                 };
-                var errors = _orderService.CreateOrder(order);
+                var errors = _orderService.CreateOrder(order, _items);
                 if (errors.Any())
                 {
                     MessageBox.Show(string.Join("\n", errors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                int orderId = order.Id;
-                foreach (var item in _items)
-                {
-                    var orderItem = new OrderItemDto
-                    {
-                        OrderId = orderId,
-                        DrinkId = item.DrinkId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice,
-                        Discount = item.Discount,
-                        Subtotal = item.Subtotal
-                    };
-                    var itemErrors = _orderItemService.CreateOrderItem(orderItem);
-                    if (itemErrors.Any())
-                    {
-                        MessageBox.Show(string.Join("\n", itemErrors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-                }
-                order.Status = OrderStatus.Pagado;
-                var updateErrors = _orderService.UpdateOrder(order);
-                if (updateErrors.Any())
-                {
-                    MessageBox.Show(string.Join("\n", updateErrors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                var orderObj = _orderService.GetOrderDtoById(orderId);
+                var orderObj = _orderService.GetOrderDtoById(order.Id);
                 var user = _userService.GetUserDtoById(orderObj.UserId);
                 var eventObj = _eventService.GetEventDtoById(orderObj.EventId);
-                var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
+                var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == order.Id).ToList();
                 var invoiceItems = new List<InvoiceItemDto>();
                 decimal totalFactura = 0;
                 foreach (var item in orderItems)
@@ -210,7 +187,7 @@ namespace BarStockControl.UI
                     OrderId = orderObj.Id,
                     CreatedAt = orderObj.CreatedAt,
                     EventName = eventObj?.Name ?? "Evento desconocido",
-                    CashRegisterName = "Caja no asignada",
+                    CashRegisterName = GetCashRegisterName(),
                     CashierName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario desconocido",
                     PaymentMethod = orderObj.PaymentMethod,
                     Status = orderObj.Status.ToString(),
@@ -219,7 +196,7 @@ namespace BarStockControl.UI
                 };
                 MessageBox.Show("Orden registrada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 new InvoiceForm(invoice).ShowDialog();
-                LimpiarFormulario();
+                ClearForm();
             }
             catch (Exception ex)
             {
@@ -231,7 +208,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                Close();
+                ClearForm();
             }
             catch (Exception ex)
             {
@@ -239,7 +216,24 @@ namespace BarStockControl.UI
             }
         }
 
-        private void LimpiarFormulario()
+        private string GetCashRegisterName()
+        {
+            if (_resourceAssignment == null || _resourceAssignment.ResourceType != "cash_register")
+                return "Caja no asignada";
+
+            try
+            {
+                var cashRegisterService = new CashRegisterService(new Data.XmlDataManager("Xml/data.xml"));
+                var cashRegister = cashRegisterService.GetById(_resourceAssignment.ResourceId);
+                return cashRegister?.Name ?? "Caja no asignada";
+            }
+            catch
+            {
+                return "Caja no asignada";
+            }
+        }
+
+        private void ClearForm()
         {
             _items.Clear();
             dgvItems.Rows.Clear();

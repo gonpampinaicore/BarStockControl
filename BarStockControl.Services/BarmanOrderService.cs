@@ -85,8 +85,12 @@ namespace BarStockControl.Services
                 if (stationId <= 0)
                     throw new ArgumentException("El ID de la estación debe ser mayor a 0.", nameof(stationId));
 
-                var entities = GetAll().Where(bo => bo.StationId == stationId).ToList();
-                return entities.Select(BarmanOrderMapper.ToDto).ToList();
+                var allEntities = GetAll();
+                if (allEntities == null || !allEntities.Any())
+                    return new List<BarmanOrderDto>();
+
+                var entities = allEntities.Where(bo => bo != null && bo.StationId == stationId).ToList();
+                return entities.Select(bo => BarmanOrderMapper.ToDto(bo)).Where(dto => dto != null).ToList();
             }
             catch (Exception ex)
             {

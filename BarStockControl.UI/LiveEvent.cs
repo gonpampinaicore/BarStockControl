@@ -159,7 +159,7 @@ namespace BarStockControl.UI
                     var orderItemService = new OrderItemService(dataManager);
                     var eventService = new EventService(dataManager);
                     var userService = new UserService(dataManager);
-                    var orderForm = new BarStockControl.UI.OrderForm(drinkService, orderService, orderItemService, eventService, userService, _currentEvent);
+                    var orderForm = new BarStockControl.UI.OrderForm(drinkService, orderService, orderItemService, eventService, userService, _currentEvent, assignment);
                     orderForm.ShowDialog();
                     break;
                 default:

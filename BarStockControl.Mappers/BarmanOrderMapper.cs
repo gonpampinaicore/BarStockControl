@@ -40,16 +40,24 @@ namespace BarStockControl.Mappers
         public static BarmanOrder FromXml(XElement element)
         {
             if (element == null) return null;
-            return new BarmanOrder
+            
+            try
             {
-                Id = (int)element.Attribute("id"),
-                OrderId = (int)element.Attribute("orderId"),
-                BarmanId = (int)element.Attribute("barmanId"),
-                StationId = (int)element.Attribute("stationId"),
-                BarId = (int)element.Attribute("barId"),
-                EventId = (int)element.Attribute("eventId"),
-                DateTime = DateTime.Parse((string)element.Attribute("dateTime"))
-            };
+                return new BarmanOrder
+                {
+                    Id = int.Parse(element.Attribute("id")?.Value ?? "0"),
+                    OrderId = int.Parse(element.Attribute("orderId")?.Value ?? "0"),
+                    BarmanId = int.Parse(element.Attribute("barmanId")?.Value ?? "0"),
+                    StationId = int.Parse(element.Attribute("stationId")?.Value ?? "0"),
+                    BarId = int.Parse(element.Attribute("barId")?.Value ?? "0"),
+                    EventId = int.Parse(element.Attribute("eventId")?.Value ?? "0"),
+                    DateTime = DateTime.Parse(element.Attribute("dateTime")?.Value ?? DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss"))
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new FormatException($"Error al parsear elemento XML de BarmanOrder: {ex.Message}", ex);
+            }
         }
 
         public static XElement ToXml(BarmanOrder entity)

@@ -61,25 +61,24 @@ namespace BarStockControl.UI
             {
                 btnPreparar.Enabled = false;
                 btnEntregar.Enabled = false;
+                
                 if (!int.TryParse(txtOrderId.Text, out int orderId))
                 {
                     MessageBox.Show("Ingrese un ID de orden válido.");
                     return;
                 }
-                _currentOrder = _orderService.GetAllOrderDtos().FirstOrDefault(o => o.Id == orderId);
-                if (_currentOrder == null)
+
+                var errors = _orderService.ValidateOrderForStation(orderId, _stationId);
+                if (errors.Any())
                 {
-                    MessageBox.Show("Orden no encontrada.");
+                    MessageBox.Show(string.Join("\n", errors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     LimpiarOrden();
                     return;
                 }
-                if (_currentOrder.Status != OrderStatus.Pagado)
-                {
-                    MessageBox.Show("Solo se pueden preparar órdenes en estado Pagada.");
-                    LimpiarOrden();
-                    return;
-                }
+
+                _currentOrder = _orderService.GetOrderDtoById(orderId);
                 _orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
+                
                 var orderItemsDisplay = _orderItems.Select(i => {
                     var drink = _drinkService.GetDrinkDtoById(i.DrinkId);
                     return new {
@@ -88,29 +87,7 @@ namespace BarStockControl.UI
                     };
                 }).ToList();
                 dgvOrderItems.DataSource = orderItemsDisplay;
-                var stock = _stockService.GetAllStockDtos().Where(s => s.StationId == _stationId).ToList();
-                var productos = _productService.GetAllProductDtos();
-                foreach (var item in _orderItems)
-                {
-                    var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
-                    if (drink == null) continue;
-                    var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
-                    if (recipe == null) continue;
-                    var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
-                    foreach (var ri in recipeItems)
-                    {
-                        var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
-                        if (prod == null) continue;
-                        var stockProd = stock.FirstOrDefault(s => s.ProductId == prod.Id);
-                        var tragosEstimados = stockProd != null ? prod.EstimatedServings * stockProd.Quantity : 0;
-                        if (item.Quantity > tragosEstimados)
-                        {
-                            MessageBox.Show($"No se puede preparar el pedido: el stock de '{prod.Name}' solo permite {tragosEstimados} tragos y se requieren {item.Quantity}.");
-                            LimpiarOrden();
-                            return;
-                        }
-                    }
-                }
+                
                 btnPreparar.Enabled = true;
                 LoadStationStock();
             }
@@ -130,9 +107,8 @@ namespace BarStockControl.UI
                 var drink = _drinkService.GetAllDrinkDtos().FirstOrDefault(d => d.Name == drinkName);
                 if (drink == null) return;
                 _selectedDrink = drink;
-                var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
-                if (recipe == null) return;
-                var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
+                
+                var recipeItems = _recipeService.GetRecipeItemsForDrink(drink.Id);
                 var recipeDisplay = recipeItems.Select(ri => new {
                     Ingrediente = _productService.GetAllProductDtos().FirstOrDefault(p => p.Id == ri.ProductId)?.Name ?? "Desconocido",
                     Cantidad = ri.Quantity
@@ -173,47 +149,14 @@ namespace BarStockControl.UI
         private void BtnPreparar_Click(object sender, EventArgs e)
         {
             if (_currentOrder == null) return;
-            if (_currentOrder.Status != OrderStatus.Pagado)
-            {
-                MessageBox.Show("Solo se pueden preparar órdenes en estado Pagada.");
-                LimpiarOrden();
-                return;
-            }
-            var assignmentService = new ResourceAssignmentService(new Data.XmlDataManager("Xml/data.xml"));
-            var assignments = assignmentService.GetByEvent(_currentOrder.EventId);
-            var assignment = assignments.FirstOrDefault(a => a.ResourceType == "station" && a.ResourceId == _stationId);
-            if (assignment == null)
-            {
-                MessageBox.Show("No se encontró barman asignado a esta estación para el evento actual.");
-                return;
-            }
-            var barmanId = assignment.UserId;
-            var station = _stationService.GetById(_stationId);
-            int barId = station != null ? station.BarId : 0;
-            
-            var barmanOrderDto = new BarmanOrderDto
-            {
-                OrderId = _currentOrder.Id,
-                BarmanId = barmanId,
-                StationId = _stationId,
-                BarId = barId,
-                EventId = _currentOrder.EventId,
-                DateTime = DateTime.Now
-            };
-            
-            var errors = _barmanOrderService.CreateBarmanOrder(barmanOrderDto);
+
+            var errors = _orderService.MarkOrderAsInPreparation(_currentOrder.Id, _stationId);
             if (errors.Any())
             {
-                MessageBox.Show($"Error al crear orden de barman: {string.Join(", ", errors)}");
+                MessageBox.Show(string.Join("\n", errors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            _currentOrder.Status = OrderStatus.EnPreparacion;
-            var updateErrors = _orderService.UpdateOrder(_currentOrder);
-            if (updateErrors.Any())
-            {
-                MessageBox.Show(string.Join("\n", updateErrors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+
             MessageBox.Show("Orden marcada como En preparación.");
             btnPreparar.Enabled = false;
             btnEntregar.Enabled = true;
@@ -222,50 +165,14 @@ namespace BarStockControl.UI
         private void BtnEntregar_Click(object sender, EventArgs e)
         {
             if (_currentOrder == null) return;
-            var productos = _productService.GetAllProductDtos();
-            foreach (var item in _orderItems)
-            {
-                var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
-                if (drink == null) continue;
-                var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
-                if (recipe == null) continue;
-                var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
-                foreach (var ri in recipeItems)
-                {
-                    var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
-                    if (prod == null || prod.EstimatedServings <= 0) continue;
-                    var stockProd = _stockService.GetAllStockDtos().FirstOrDefault(s => s.StationId == _stationId && s.ProductId == prod.Id);
-                    if (stockProd != null)
-                    {
-                        var descontar = (double)item.Quantity / prod.EstimatedServings;
-                        stockProd.Quantity -= descontar;
-                        if (stockProd.Quantity < 0) stockProd.Quantity = 0;
-                        _stockService.UpdateStock(stockProd);
-                    }
-                    var consumo = new StationProductConsumptionDto
-                    {
-                        StationId = _stationId,
-                        ProductId = prod.Id,
-                        OrderItemId = item.Id,
-                        DateTime = DateTime.Now,
-                        EventId = _currentOrder.EventId,
-                        UserId = SessionContext.Instance.LoggedUser?.Id
-                    };
-                    var consumptionErrors = _stationProductConsumptionService.Create(consumo);
-                    if (consumptionErrors.Any())
-                    {
-                        MessageBox.Show($"Error al crear consumo de producto: {string.Join(", ", consumptionErrors)}");
-                        return;
-                    }
-                }
-            }
-            _currentOrder.Status = OrderStatus.Entregado;
-            var errors = _orderService.UpdateOrder(_currentOrder);
+
+            var errors = _orderService.MarkOrderAsDelivered(_currentOrder.Id, _stationId, SessionContext.Instance.LoggedUser?.Id ?? 0);
             if (errors.Any())
             {
                 MessageBox.Show(string.Join("\n", errors), "Errores de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
             MessageBox.Show("Orden marcada como Entregada.");
             LoadStationStock();
             txtOrderId.Clear();

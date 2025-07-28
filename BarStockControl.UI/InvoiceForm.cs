@@ -61,22 +61,26 @@ namespace BarStockControl.UI
         {
             try
             {
-                using (var sfd = new SaveFileDialog())
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string invoicesFolder = Path.Combine(documentsPath, "BarStockControl", "Facturas");
+                
+                if (!Directory.Exists(invoicesFolder))
                 {
-                    sfd.Filter = "Archivo PDF (*.pdf)|*.pdf";
-                    sfd.Title = "Guardar factura como PDF";
-                    sfd.FileName = $"Factura_{_invoice.OrderId}_{_invoice.CreatedAt:yyyyMMddHHmm}.pdf";
-                    if (sfd.ShowDialog() == DialogResult.OK)
-                    {
-                        GeneratePdfQuestPdf(sfd.FileName);
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = sfd.FileName,
-                            UseShellExecute = true
-                        });
-                        MessageBox.Show("Factura guardada como PDF correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
+                    Directory.CreateDirectory(invoicesFolder);
                 }
+                
+                string fileName = $"Factura_{_invoice.OrderId}_{_invoice.CreatedAt:yyyyMMddHHmm}.pdf";
+                string filePath = Path.Combine(invoicesFolder, fileName);
+                
+                GeneratePdfQuestPdf(filePath);
+                
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+                
+                MessageBox.Show($"Factura guardada automáticamente en:\n{filePath}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
