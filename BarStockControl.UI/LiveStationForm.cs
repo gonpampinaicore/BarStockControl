@@ -125,16 +125,11 @@ namespace BarStockControl.UI
         {
             try
             {
-                var stock = _stockService.GetAllStockDtos().Where(s => s.StationId == _stationId).ToList();
-                var productos = _productService.GetAllProductDtos();
-                var stockDisplay = stock.Select(s => {
-                    var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
-                    var estimados = prod != null ? prod.EstimatedServings * s.Quantity : 0;
-                    return new {
-                        Producto = prod?.Name ?? "Desconocido",
-                        Cantidad = s.Quantity,
-                        TragosEstimados = estimados
-                    };
+                var stockWithServings = _stockService.GetStationStockWithEstimatedServings(_stationId);
+                var stockDisplay = stockWithServings.Select(s => new {
+                    Producto = s.ProductName,
+                    Cantidad = s.Quantity,
+                    TragosEstimados = s.EstimatedServings
                 }).ToList();
                 dgvStock.DataSource = stockDisplay;
                 if (dgvStock.Columns["TragosEstimados"] != null)

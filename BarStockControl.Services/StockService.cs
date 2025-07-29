@@ -11,8 +11,13 @@ namespace BarStockControl.Services
 {
     public class StockService : BaseService<Stock>
     {
+        private readonly ProductService _productService;
+
         public StockService(XmlDataManager xmlDataManager)
-            : base(xmlDataManager, "stocks") { }
+            : base(xmlDataManager, "stocks") 
+        {
+            _productService = new ProductService(xmlDataManager);
+        }
 
         protected override Stock MapFromXml(XElement element)
         {
@@ -120,6 +125,24 @@ namespace BarStockControl.Services
             entity.Id = GetNextId();
             Add(entity);
             return new List<string>();
+        }
+
+        public List<StockWithEstimatedServingsDto> GetStationStockWithEstimatedServings(int stationId)
+        {
+            var stock = GetAllStockDtos().Where(s => s.StationId == stationId).ToList();
+            var productos = _productService.GetAllProductDtos();
+            
+            return stock.Select(s => {
+                var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
+                var estimados = prod != null ? (int)(prod.EstimatedServings * s.Quantity) : 0;
+                return new StockWithEstimatedServingsDto
+                {
+                    ProductId = s.ProductId,
+                    ProductName = prod?.Name ?? "Desconocido",
+                    Quantity = (decimal)s.Quantity,
+                    EstimatedServings = estimados
+                };
+            }).ToList();
         }
     }
 }

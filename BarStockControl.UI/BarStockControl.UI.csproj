@@ -19,6 +19,17 @@
 	  <PackageReference Include="PDFsharp" Version="6.2.0" />
 	  <PackageReference Include="QuestPDF" Version="2025.7.0" />
 	  <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-	  <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+		</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="WinForms.DataVisualization" Version="1.10.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="WinForms.DataVisualization">
+			<HintPath>..\packages\WinForms.DataVisualization.dll</HintPath>
+		</Reference>
+		<Reference Include="WinForms.DataVisualization.Utilities">
+			<HintPath>..\packages\WinForms.DataVisualization.Utilities.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 </Project>

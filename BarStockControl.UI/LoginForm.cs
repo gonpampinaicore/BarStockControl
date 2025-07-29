@@ -2,6 +2,7 @@
 using BarStockControl.Core;
 using BarStockControl.Models;
 using BarStockControl.Data;
+using System.Data;
 
 namespace BarStockControl.UI
 {
@@ -12,7 +13,7 @@ namespace BarStockControl.UI
         public LoginForm()
         {
             InitializeComponent();
-            _userService = new UserService(new XmlDataManager("Xml/data.xml"));
+            _userService = new UserService(new XmlDataManager(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Xml", "data.xml")));
         }
 
         private void btnLogin_Click(object sender, EventArgs e)

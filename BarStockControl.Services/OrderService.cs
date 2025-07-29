@@ -12,11 +12,31 @@ namespace BarStockControl.Services
     public class OrderService : BaseService<Order>
     {
         private readonly XmlDataManager _xmlDataManager;
+        private readonly OrderItemService _orderItemService;
+        private readonly DrinkService _drinkService;
+        private readonly RecipeService _recipeService;
+        private readonly RecipeItemService _recipeItemService;
+        private readonly StockService _stockService;
+        private readonly ProductService _productService;
+        private readonly StationProductConsumptionService _stationProductConsumptionService;
+        private readonly ResourceAssignmentService _resourceAssignmentService;
+        private readonly StationService _stationService;
+        private readonly BarmanOrderService _barmanOrderService;
 
         public OrderService(XmlDataManager xmlDataManager)
             : base(xmlDataManager, "orders")
         {
             _xmlDataManager = xmlDataManager;
+            _orderItemService = new OrderItemService(xmlDataManager);
+            _drinkService = new DrinkService(xmlDataManager);
+            _recipeService = new RecipeService(xmlDataManager);
+            _recipeItemService = new RecipeItemService(xmlDataManager);
+            _stockService = new StockService(xmlDataManager);
+            _productService = new ProductService(xmlDataManager);
+            _stationProductConsumptionService = new StationProductConsumptionService(xmlDataManager);
+            _resourceAssignmentService = new ResourceAssignmentService(xmlDataManager);
+            _stationService = new StationService(xmlDataManager);
+            _barmanOrderService = new BarmanOrderService(xmlDataManager);
         }
 
         protected override Order MapFromXml(XElement element)
@@ -62,26 +82,19 @@ namespace BarStockControl.Services
                 return errors;
             }
 
-            var orderItemService = new OrderItemService(_xmlDataManager);
-            var drinkService = new DrinkService(_xmlDataManager);
-            var recipeService = new RecipeService(_xmlDataManager);
-            var recipeItemService = new RecipeItemService(_xmlDataManager);
-            var stockService = new StockService(_xmlDataManager);
-            var productService = new ProductService(_xmlDataManager);
-
-            var orderItems = orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
-            var stock = stockService.GetAllStockDtos().Where(s => s.StationId == stationId).ToList();
-            var productos = productService.GetAllProductDtos();
+            var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
+            var stock = _stockService.GetAllStockDtos().Where(s => s.StationId == stationId).ToList();
+            var productos = _productService.GetAllProductDtos();
 
             foreach (var item in orderItems)
             {
-                var drink = drinkService.GetDrinkDtoById(item.DrinkId);
+                var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
                 if (drink == null) continue;
 
-                var recipe = recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
+                var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) continue;
 
-                var recipeItems = recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
+                var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
                 foreach (var ri in recipeItems)
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
@@ -118,8 +131,7 @@ namespace BarStockControl.Services
                 return errors;
             }
 
-            var resourceAssignmentService = new ResourceAssignmentService(_xmlDataManager);
-            var assignments = resourceAssignmentService.GetByEvent(order.EventId);
+            var assignments = _resourceAssignmentService.GetByEvent(order.EventId);
             var assignment = assignments.FirstOrDefault(a => a.ResourceType == "station" && a.ResourceId == stationId);
             
             if (assignment == null)
@@ -128,11 +140,9 @@ namespace BarStockControl.Services
                 return errors;
             }
 
-            var stationService = new StationService(_xmlDataManager);
-            var station = stationService.GetById(stationId);
+            var station = _stationService.GetById(stationId);
             int barId = station != null ? station.BarId : 0;
 
-            var barmanOrderService = new BarmanOrderService(_xmlDataManager);
             var barmanOrderDto = new BarmanOrderDto
             {
                 OrderId = orderId,
@@ -143,7 +153,7 @@ namespace BarStockControl.Services
                 DateTime = DateTime.Now
             };
 
-            var barmanErrors = barmanOrderService.CreateBarmanOrder(barmanOrderDto);
+            var barmanErrors = _barmanOrderService.CreateBarmanOrder(barmanOrderDto);
             if (barmanErrors.Any())
             {
                 errors.AddRange(barmanErrors);
@@ -172,39 +182,31 @@ namespace BarStockControl.Services
                 return errors;
             }
 
-            var orderItemService = new OrderItemService(_xmlDataManager);
-            var drinkService = new DrinkService(_xmlDataManager);
-            var recipeService = new RecipeService(_xmlDataManager);
-            var recipeItemService = new RecipeItemService(_xmlDataManager);
-            var stockService = new StockService(_xmlDataManager);
-            var productService = new ProductService(_xmlDataManager);
-            var stationProductConsumptionService = new StationProductConsumptionService(_xmlDataManager);
-
-            var orderItems = orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
-            var productos = productService.GetAllProductDtos();
+            var orderItems = _orderItemService.GetAllOrderItemDtos().Where(oi => oi.OrderId == orderId).ToList();
+            var productos = _productService.GetAllProductDtos();
 
             foreach (var item in orderItems)
             {
-                var drink = drinkService.GetDrinkDtoById(item.DrinkId);
+                var drink = _drinkService.GetDrinkDtoById(item.DrinkId);
                 if (drink == null) continue;
 
-                var recipe = recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
+                var recipe = _recipeService.GetAllRecipes().FirstOrDefault(r => r.DrinkId == drink.Id);
                 if (recipe == null) continue;
 
-                var recipeItems = recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
+                var recipeItems = _recipeItemService.GetRecipeItemDtosByRecipeId(recipe.Id);
                 foreach (var ri in recipeItems)
                 {
                     var prod = productos.FirstOrDefault(p => p.Id == ri.ProductId);
                     if (prod == null || prod.EstimatedServings <= 0) continue;
 
-                    var stockProd = stockService.GetAllStockDtos().FirstOrDefault(s => s.StationId == stationId && s.ProductId == prod.Id);
+                    var stockProd = _stockService.GetAllStockDtos().FirstOrDefault(s => s.StationId == stationId && s.ProductId == prod.Id);
                     if (stockProd != null)
                     {
                         var descontar = (double)item.Quantity / prod.EstimatedServings;
                         stockProd.Quantity -= descontar;
                         if (stockProd.Quantity < 0) stockProd.Quantity = 0;
                         
-                        var stockErrors = stockService.UpdateStock(stockProd);
+                        var stockErrors = _stockService.UpdateStock(stockProd);
                         if (stockErrors.Any())
                         {
                             errors.AddRange(stockErrors);
@@ -222,7 +224,7 @@ namespace BarStockControl.Services
                         UserId = userId
                     };
 
-                    var consumptionErrors = stationProductConsumptionService.Create(consumo);
+                    var consumptionErrors = _stationProductConsumptionService.Create(consumo);
                     if (consumptionErrors.Any())
                     {
                         errors.AddRange(consumptionErrors);
@@ -255,11 +257,10 @@ namespace BarStockControl.Services
 
             if (orderItems != null && orderItems.Any())
             {
-                var orderItemService = new OrderItemService(_xmlDataManager);
                 foreach (var item in orderItems)
                 {
                     item.OrderId = order.Id;
-                    var itemErrors = orderItemService.CreateOrderItem(item);
+                    var itemErrors = _orderItemService.CreateOrderItem(item);
                     if (itemErrors.Any())
                     {
                         return itemErrors;

@@ -61,8 +61,8 @@ namespace BarStockControl.UI
         {
             try
             {
-                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                string invoicesFolder = Path.Combine(documentsPath, "BarStockControl", "Facturas");
+                string applicationPath = Application.StartupPath;
+                string invoicesFolder = Path.Combine(applicationPath, "Facturas");
                 
                 if (!Directory.Exists(invoicesFolder))
                 {

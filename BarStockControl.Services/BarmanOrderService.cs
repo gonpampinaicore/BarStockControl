@@ -60,9 +60,6 @@ namespace BarStockControl.Services
         {
             try
             {
-                if (barmanOrderDto == null)
-                    throw new ArgumentNullException(nameof(barmanOrderDto), "La orden de barman no puede ser null.");
-
                 var barmanOrder = BarmanOrderMapper.FromDto(barmanOrderDto);
                 var errors = ValidateBarmanOrder(barmanOrder);
                 if (errors.Any())
