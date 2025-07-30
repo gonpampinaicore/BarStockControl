@@ -6,6 +6,7 @@ using BarStockControl.Services;
 using BarStockControl.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Models;
+using BarStockControl.Core;
 
 namespace BarStockControl.UI
 {
@@ -162,7 +163,7 @@ namespace BarStockControl.UI
             {
                 if (_selectedUser == null)
                 {
-                    MessageBox.Show("Seleccione un usuario para agregar permisos.", "Aviso", 
+                    MessageBox.Show("Seleccione un usuario primero.", "Aviso", 
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
@@ -175,24 +176,32 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                using (var form = new PermissionSelectionForm(availablePermissions, "Seleccionar Permiso"))
+                using (var form = new PermissionSelectionForm(availablePermissions, "Seleccionar Permisos"))
                 {
-                    if (form.ShowDialog() == DialogResult.OK && form.SelectedPermission != null)
+                    if (form.ShowDialog() == DialogResult.OK && form.SelectedPermissions.Any())
                     {
                         if (_selectedUser.PermissionIds == null)
                             _selectedUser.PermissionIds = new List<int>();
 
-                        if (!_selectedUser.PermissionIds.Contains(form.SelectedPermission.Id))
+                        foreach (var selectedPermission in form.SelectedPermissions)
                         {
-                            _selectedUser.PermissionIds.Add(form.SelectedPermission.Id);
-                            LoadUserHierarchy(_selectedUser);
+                            if (!_selectedUser.PermissionIds.Contains(selectedPermission.Id))
+                            {
+                                _selectedUser.PermissionIds.Add(selectedPermission.Id);
+                            }
                         }
+                        
+                        LoadUserHierarchy(_selectedUser);
+                        
+                        var count = form.SelectedPermissions.Count;
+                        var message = count == 1 ? "1 permiso agregado correctamente." : $"{count} permisos agregados correctamente.";
+                        MessageBox.Show(message, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al agregar permiso: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al agregar permisos: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -334,12 +343,32 @@ namespace BarStockControl.UI
                 return;
             }
 
+            // Validación: No se puede borrar al usuario logueado
+            var currentLoggedUser = SessionContext.Instance.LoggedUser;
+            if (currentLoggedUser != null && currentLoggedUser.Id == _selectedUser.Id)
+            {
+                MessageBox.Show("No se puede eliminar al usuario actualmente logueado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             var confirm = MessageBox.Show("¿Estás seguro de eliminar este usuario?", "Confirmar", MessageBoxButtons.YesNo);
             if (confirm == DialogResult.Yes)
             {
-                _userService.DeleteUser(_selectedUser.Id);
-                ClearForm();
-                LoadUsers();
+                try
+                {
+                    _userService.DeleteUser(_selectedUser.Id);
+                    ClearForm();
+                    LoadUsers();
+                    MessageBox.Show("Usuario eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al eliminar usuario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

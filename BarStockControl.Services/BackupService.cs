@@ -86,6 +86,14 @@ namespace BarStockControl.Services
                 if (user == null)
                     throw new InvalidOperationException("Usuario no encontrado.");
 
+                var backupInfo = GetBackupInfo(fileName);
+                if (backupInfo != null && backupInfo.CreatedByUserId != user.Id)
+                {
+                    throw new UnauthorizedAccessException(
+                        $"No puedes restaurar este backup. Fue creado por '{backupInfo.CreatedByUser}' el {backupInfo.CreatedDate:dd/MM/yyyy HH:mm}. " +
+                        "Solo el creador del backup puede restaurarlo.");
+                }
+
                 var source = Path.Combine(_backupFolder, fileName);
                 if (!File.Exists(source))
                     throw new FileNotFoundException($"Archivo de backup no encontrado: {fileName}");
@@ -158,6 +166,44 @@ namespace BarStockControl.Services
                 if (backup != null)
                     Delete(backup.Id);
             }
+        }
+
+        private BackupInfo GetBackupInfo(string fileName)
+        {
+            try
+            {
+                // Extraer fecha del nombre del archivo
+                var datePart = fileName.Split('_')[0] + "_" + fileName.Split('_')[1];
+                var backupDate = DateTime.ParseExact(datePart, "yyyyMMdd_HHmmss", null);
+                
+                // Buscar el backup en la base de datos
+                var allBackups = GetAll();
+                var backup = allBackups.FirstOrDefault(b => 
+                    b.Date.ToString("yyyyMMdd_HHmmss") == backupDate.ToString("yyyyMMdd_HHmmss") && 
+                    b.Detail == BackupType.Backup);
+                
+                if (backup != null)
+                {
+                    return new BackupInfo
+                    {
+                        CreatedDate = backup.Date,
+                        CreatedByUser = $"{backup.User.FirstName} {backup.User.LastName}",
+                        CreatedByUserId = backup.User.Id
+                    };
+                }
+            }
+            catch
+            {
+                // Si no se puede obtener información, retornar null
+            }
+            return null;
+        }
+
+        private class BackupInfo
+        {
+            public DateTime CreatedDate { get; set; }
+            public string CreatedByUser { get; set; }
+            public int CreatedByUserId { get; set; }
         }
     }
 }

@@ -90,6 +90,11 @@ namespace BarStockControl.UI
                 MessageBox.Show("Restauración completada.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadBackups();
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show($"Error de Autorización: {ex.Message}", "Acceso Denegado", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al restaurar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

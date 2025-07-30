@@ -24,7 +24,7 @@
             // topPanel
             // 
             this.topPanel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.topPanel.Height = 90;
+            this.topPanel.Height = 120;
             this.topPanel.BackColor = System.Drawing.Color.WhiteSmoke;
             this.topPanel.Controls.Add(this.lblWelcome);
             this.topPanel.Controls.Add(this.lblRole);
@@ -43,11 +43,12 @@
             // 
             // lblRole
             // 
-            this.lblRole.AutoSize = true;
-            this.lblRole.Font = new Font("Segoe UI", 12, FontStyle.Bold);
-            this.lblRole.TextAlign = ContentAlignment.TopCenter;
+            this.lblRole.AutoSize = false;
+            this.lblRole.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            this.lblRole.TextAlign = ContentAlignment.TopLeft;
             this.lblRole.Text = "";
-            this.lblRole.Location = new Point(220, 20);
+            this.lblRole.Location = new Point(10, 50);
+            this.lblRole.Size = new Size(400, 60);
             this.lblRole.Name = "lblRole";
 
             // 
@@ -73,9 +74,9 @@
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(20, 100);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(20, 130);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(800, 500);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(800, 470);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.AutoScroll = true;
 

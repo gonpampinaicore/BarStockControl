@@ -12,12 +12,14 @@ namespace BarStockControl.Services
     {
         private readonly RoleService _roleService;
         private readonly PermissionService _permissionService;
+        private readonly ComponentService _componentService;
 
         public UserService(XmlDataManager xmlDataManager)
             : base(xmlDataManager, "users")
         {
             _roleService = new RoleService(xmlDataManager);
             _permissionService = new PermissionService(xmlDataManager);
+            _componentService = new ComponentService(xmlDataManager);
         }
 
         protected override User MapFromXml(XElement element)
@@ -76,6 +78,31 @@ namespace BarStockControl.Services
             }
         }
 
+        private bool HasAdminRole(User user)
+        {
+            if (user == null) return false;
+            
+            _componentService.BuildUserPermissions(user, user.RoleIds, user.PermissionIds);
+            var allUserRoles = _componentService.GetAllUserRolesRecursive(user);
+            
+            var adminRoleId = _roleService.GetRoleIdByName("AdminAdmin");
+            return adminRoleId.HasValue && allUserRoles.Any(r => r.Id == adminRoleId.Value);
+        }
+
+        private bool IsLastActiveAdmin(User userToUpdate)
+        {
+            if (!HasAdminRole(userToUpdate)) return false;
+            
+            var allUsers = GetAll();
+            var activeAdminUsers = allUsers.Where(u => 
+                u.Id != userToUpdate.Id && 
+                u.Active && 
+                HasAdminRole(u)
+            ).ToList();
+            
+            return activeAdminUsers.Count == 0;
+        }
+
         public List<string> UpdateUser(UserDto userDto)
         {
             try
@@ -84,9 +111,15 @@ namespace BarStockControl.Services
                     throw new ArgumentNullException(nameof(userDto), "El usuario no puede ser null.");
 
                 var user = UserMapper.ToEntity(userDto);
-                var adminRoleId = _roleService.GetRoleIdByName("AdminAdmin");
-                if (adminRoleId.HasValue && user.RoleIds.Contains(adminRoleId.Value) && !user.Active)
-                    return new List<string> { "No se puede poner inactivo a un usuario con el rol AdminAdmin." };
+                
+                // Validación: No se puede poner inactivo a un usuario con rol Admin (considerando jerarquía)
+                if (!user.Active && HasAdminRole(user))
+                {
+                    if (IsLastActiveAdmin(user))
+                        return new List<string> { "No se puede desactivar al último usuario Admin activo del sistema." };
+                    
+                    return new List<string> { "No se puede poner inactivo a un usuario con el rol AdminAdmin (directo o heredado)." };
+                }
 
                 var errors = ValidateUser(user, isUpdate: true);
                 if (errors.Any())
@@ -109,9 +142,13 @@ namespace BarStockControl.Services
                 if (user == null)
                     throw new InvalidOperationException($"Usuario con ID {id} no encontrado.");
 
-                var adminRoleId = _roleService.GetRoleIdByName("AdminAdmin");
-                if (adminRoleId.HasValue && user.RoleIds.Contains(adminRoleId.Value))
-                    throw new InvalidOperationException("No se puede eliminar un usuario con el rol AdminAdmin.");
+                if (HasAdminRole(user))
+                {
+                    if (IsLastActiveAdmin(user))
+                        throw new InvalidOperationException("No se puede eliminar al último usuario Admin activo del sistema.");
+                    
+                    throw new InvalidOperationException("No se puede eliminar un usuario con el rol AdminAdmin (directo o heredado).");
+                }
 
                 Delete(id);
             }
@@ -190,6 +227,45 @@ namespace BarStockControl.Services
 
             var componentService = new ComponentService(_xmlDataManager);
             componentService.BuildUserPermissions(user, user.RoleIds, user.PermissionIds);
+        }
+
+        public List<string> ValidateUserDeletion(int userId, User? currentLoggedUser = null)
+        {
+            var errors = new List<string>();
+            
+            try
+            {
+                var user = GetById(userId);
+                if (user == null)
+                {
+                    errors.Add($"Usuario con ID {userId} no encontrado.");
+                    return errors;
+                }
+
+                if (currentLoggedUser != null && currentLoggedUser.Id == userId)
+                {
+                    errors.Add("No se puede eliminar al usuario actualmente logueado.");
+                }
+
+                if (HasAdminRole(user))
+                {
+                    if (IsLastActiveAdmin(user))
+                    {
+                        errors.Add("No se puede eliminar al último usuario Admin activo del sistema.");
+                    }
+                    else
+                    {
+                        errors.Add("No se puede eliminar un usuario con el rol AdminAdmin (directo o heredado).");
+                    }
+                }
+
+                return errors;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Error en validación: {ex.Message}");
+                return errors;
+            }
         }
     }
 }

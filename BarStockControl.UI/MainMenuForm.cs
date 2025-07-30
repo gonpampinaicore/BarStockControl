@@ -54,9 +54,45 @@ namespace BarStockControl.UI
                 var allUserRoles = _componentService.GetAllUserRolesRecursive(user);
                 var roleNames = allUserRoles.Select(r => r.Name).Where(name => !string.IsNullOrWhiteSpace(name));
 
-                lblRole.Text = roleNames.Any()
-                    ? $"Rol: {string.Join(", ", roleNames)}"
-                    : "Rol: (sin roles asignados)";                
+                if (roleNames.Any())
+                {
+                    var rolesText = string.Join(", ", roleNames);
+                    
+                    // Si hay muchos roles, usar múltiples líneas
+                    if (rolesText.Length > 50)
+                    {
+                        var rolesList = roleNames.ToList();
+                        var lines = new List<string>();
+                        var currentLine = "";
+                        
+                        foreach (var role in rolesList)
+                        {
+                            if (currentLine.Length + role.Length > 40)
+                            {
+                                if (!string.IsNullOrEmpty(currentLine))
+                                    lines.Add(currentLine.TrimEnd(',', ' '));
+                                currentLine = role + ", ";
+                            }
+                            else
+                            {
+                                currentLine += role + ", ";
+                            }
+                        }
+                        
+                        if (!string.IsNullOrEmpty(currentLine))
+                            lines.Add(currentLine.TrimEnd(',', ' '));
+                        
+                        lblRole.Text = $"Rol: {string.Join("\n", lines)}";
+                    }
+                    else
+                    {
+                        lblRole.Text = $"Rol: {rolesText}";
+                    }
+                }
+                else
+                {
+                    lblRole.Text = "Rol: (sin roles asignados)";
+                }
             }
             catch (Exception ex)
             {

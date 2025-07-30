@@ -173,22 +173,30 @@ namespace BarStockControl.UI
                     return;
                 }
 
-                using (var form = new PermissionSelectionForm(availablePermissions, "Seleccionar Permiso"))
+                using (var form = new PermissionSelectionForm(availablePermissions, "Seleccionar Permisos"))
                 {
-                    if (form.ShowDialog() == DialogResult.OK && form.SelectedPermission != null)
+                    if (form.ShowDialog() == DialogResult.OK && form.SelectedPermissions.Any())
                     {
-                        var selectedPermission = _permissionService.GetById(form.SelectedPermission.Id);
-                        if (selectedPermission != null)
+                        foreach (var selectedPermissionDto in form.SelectedPermissions)
                         {
-                            _componentService.AddChildToComponent(_currentRoleEntity, selectedPermission);
-                            LoadRoleHierarchy(_currentRoleEntity);
+                            var selectedPermission = _permissionService.GetById(selectedPermissionDto.Id);
+                            if (selectedPermission != null)
+                            {
+                                _componentService.AddChildToComponent(_currentRoleEntity, selectedPermission);
+                            }
                         }
+                        
+                        LoadRoleHierarchy(_currentRoleEntity);
+                        
+                        var count = form.SelectedPermissions.Count;
+                        var message = count == 1 ? "1 permiso agregado correctamente." : $"{count} permisos agregados correctamente.";
+                        MessageBox.Show(message, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al agregar permiso: {ex.Message}", "Error", 
+                MessageBox.Show($"Error al agregar permisos: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
