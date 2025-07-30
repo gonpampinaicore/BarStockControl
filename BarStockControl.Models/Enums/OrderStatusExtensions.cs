@@ -12,9 +12,9 @@ namespace BarStockControl.Models.Enums
             {
                 var attrs = memInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
                 if (attrs.Length > 0)
-                    return $"Estado de la orden: {((DescriptionAttribute)attrs[0]).Description}";
+                    return ((DescriptionAttribute)attrs[0]).Description;
             }
-            return "Estado de la orden: Desconocido";
+            return "Desconocido";
         }
     }
 } 

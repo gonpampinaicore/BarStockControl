@@ -3,28 +3,20 @@ using System.Data;
 using BarStockControl.DTOs;
 using BarStockControl.Services;
 using BarStockControl.Models.Enums;
+using BarStockControl.Core;
 
 namespace BarStockControl.UI
 {
     public partial class LiveBarForm : Form
     {
-        private readonly OrderService _orderService;
-        private readonly StockService _stockService;
-        private readonly StationService _stationService;
-        private readonly ProductService _productService;
-        private readonly ResourceAssignmentService _assignmentService;
+        private readonly BarManagementService _barManagementService;
         private EventDto _currentEvent = new EventDto();
         private List<StationDto> _eventStations = new List<StationDto>();
-        private List<OrderDto> _eventOrders = new List<OrderDto>();
 
         public LiveBarForm(EventDto currentEvent)
         {
             InitializeComponent();
-            _orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
-            _stockService = new StockService(new Data.XmlDataManager("Xml/data.xml"));
-            _stationService = new StationService(new Data.XmlDataManager("Xml/data.xml"));
-            _productService = new ProductService(new Data.XmlDataManager("Xml/data.xml"));
-            _assignmentService = new ResourceAssignmentService(new Data.XmlDataManager("Xml/data.xml"));
+            _barManagementService = new BarManagementService(new Data.XmlDataManager("Xml/data.xml"));
             _currentEvent = currentEvent;
             if (_currentEvent != null)
                 this.Text = "Evento en vivo: " + _currentEvent.Name;
@@ -62,22 +54,12 @@ namespace BarStockControl.UI
         {
             try
             {
-                if (_currentEvent == null) return;
+                var eventOrders = _barManagementService.GetEventOrders(_currentEvent.Id);
                 
-                var allOrders = _orderService.GetAllOrderDtos();
-                if (allOrders == null || !allOrders.Any())
-                {
-                    _eventOrders = new List<OrderDto>();
-                    dgvOrders.DataSource = new List<object>();
-                    return;
-                }
-                
-                _eventOrders = allOrders.Where(o => o != null && o.EventId == _currentEvent.Id).ToList();
-
-                var ordersDisplay = _eventOrders.Select(o => new
+                var ordersDisplay = eventOrders.Select(o => new
                 {
                     ID = o.Id,
-                    Estado = o.Status.ToFriendlyString(),
+                    Estado = o.Status,
                     Fecha = o.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
                     Total = o.Total
                 }).ToList();
@@ -95,15 +77,7 @@ namespace BarStockControl.UI
         {
             try
             {
-                if (_currentEvent == null) return;
-                
-                var assignments = _assignmentService.GetByEvent(_currentEvent.Id);
-                var stationAssignments = assignments.Where(a => a.ResourceType == "station").ToList();
-                
-                var stationIds = stationAssignments.Select(a => a.ResourceId).Distinct().ToList();
-                _eventStations = stationIds.Select(id => _stationService.GetById(id))
-                .Where(s => s != null)
-                .ToList();
+                _eventStations = _barManagementService.GetEventStations(_currentEvent.Id);
 
                 cboStations.DataSource = _eventStations;
                 cboStations.DisplayMember = "Name";
@@ -129,39 +103,20 @@ namespace BarStockControl.UI
         {
             try
             {
-                var barmanOrderService = new BarmanOrderService(new Data.XmlDataManager("Xml/data.xml"));
-                var barmanOrderDtos = barmanOrderService.GetByStationId(stationId);
+                var currentUserName = SessionContext.Instance.LoggedUser != null 
+                    ? $"{SessionContext.Instance.LoggedUser.FirstName} {SessionContext.Instance.LoggedUser.LastName}" 
+                    : "";
+                var barmanOrders = _barManagementService.GetBarmanOrdersForStation(stationId, _currentEvent.Id, currentUserName);
                 
-                if (barmanOrderDtos == null || !barmanOrderDtos.Any())
+                var barmanOrdersDisplay = barmanOrders.Select(bo => new
                 {
-                    dgvBarmanOrders.DataSource = new List<object>();
-                    return;
-                }
-                
-                var userService = new UserService(new Data.XmlDataManager("Xml/data.xml"));
-                var orderService = new OrderService(new Data.XmlDataManager("Xml/data.xml"));
-                var orders = orderService.GetAllOrderDtos();
-                
-                if (orders == null || !orders.Any())
-                {
-                    dgvBarmanOrders.DataSource = new List<object>();
-                    return;
-                }
-                
-                var barmanOrders = barmanOrderDtos
-                    .Where(bo => bo != null && bo.EventId == _currentEvent.Id)
-                    .Select(bo => new
-                    {
-                        Orden = bo.OrderId,
-                        Barman = GetBarmanName(userService, bo.BarmanId),
-                        Fecha = orders.FirstOrDefault(o => o != null && o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.CreatedAt.ToString("dd/MM/yyyy HH:mm") ?? "",
-                        Estado = orders.FirstOrDefault(o => o != null && o.Id == bo.OrderId && o.EventId == _currentEvent.Id)?.Status.ToString() ?? ""
-                    })
-                    .Where(x => !string.IsNullOrEmpty(x.Fecha))
-                    .OrderByDescending(x => x.Fecha)
-                    .ToList();
+                    Orden = bo.OrderId,
+                    Barman = bo.BarmanName,
+                    Fecha = bo.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "",
+                    Estado = bo.Status
+                }).ToList();
                     
-                dgvBarmanOrders.DataSource = barmanOrders;
+                dgvBarmanOrders.DataSource = barmanOrdersDisplay;
             }
             catch (Exception ex)
             {
@@ -174,18 +129,16 @@ namespace BarStockControl.UI
         {
             try
             {
-                var stock = _stockService.GetAll().Where(s => s.StationId == stationId).ToList();
-                var productos = _productService.GetAllProductDtos();
-                var stockDisplay = stock.Select(s => {
-                    var prod = productos.FirstOrDefault(p => p.Id == s.ProductId);
-                    var estimados = prod != null ? prod.EstimatedServings * s.Quantity : 0;
-                    return new {
-                        Producto = prod?.Name ?? "Desconocido",
-                        Cantidad = s.Quantity,
-                        TragosEstimados = estimados,
-                        Estación = _stationService.GetById(s.StationId.Value)?.Name ?? "Desconocida"
-                    };
+                var stationStock = _barManagementService.GetStationStock(stationId);
+                
+                var stockDisplay = stationStock.Select(s => new
+                {
+                    Producto = s.ProductName,
+                    Cantidad = s.Quantity,
+                    TragosEstimados = s.EstimatedServings,
+                    Estación = s.StationName
                 }).ToList();
+                
                 dgvStationStock.DataSource = stockDisplay;
                 if (dgvStationStock.Columns["TragosEstimados"] != null)
                     dgvStationStock.Columns["TragosEstimados"].HeaderText = "Tragos estimados";
@@ -200,22 +153,14 @@ namespace BarStockControl.UI
         {
             try
             {
-                if (_eventStations == null || !_eventStations.Any()) return;
+                var totalStock = _barManagementService.GetTotalStockForEvent(_currentEvent.Id);
                 
-                var allStock = _stockService.GetAll().ToList();
-                var eventStationIds = _eventStations.Select(s => s.Id).ToList();
-                var eventStock = allStock.Where(s => s.StationId.HasValue && eventStationIds.Contains(s.StationId.Value)).ToList();
-
-                var totalStockDisplay = eventStock
-                    .GroupBy(s => s.ProductId)
-                    .Select(g => new
-                    {
-                        Producto = _productService.GetAllProductDtos().FirstOrDefault(p => p.Id == g.Key)?.Name ?? "Desconocido",
-                        Cantidad_Total = g.Sum(s => s.Quantity),
-                        Estaciones = string.Join(", ", g.Select(s => _stationService.GetById(s.StationId.Value)?.Name ?? "Desconocida").Distinct())
-                    })
-                    .OrderBy(x => x.Producto)
-                    .ToList();
+                var totalStockDisplay = totalStock.Select(s => new
+                {
+                    Producto = s.ProductName,
+                    Cantidad_Total = s.TotalQuantity,
+                    Estaciones = s.StationNames
+                }).ToList();
 
                 dgvTotalStock.DataSource = totalStockDisplay;
             }
@@ -223,12 +168,6 @@ namespace BarStockControl.UI
             {
                 MessageBox.Show($"Error al cargar stock total: {ex.Message}");
             }
-        }
-
-        private string GetBarmanName(UserService userService, int barmanId)
-        {
-            var user = userService.GetUserDtoById(barmanId);
-            return user != null ? $"{user.FirstName} {user.LastName}" : $"Barman {barmanId}";
         }
     }
 }

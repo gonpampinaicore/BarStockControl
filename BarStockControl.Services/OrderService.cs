@@ -76,9 +76,9 @@ namespace BarStockControl.Services
                 return errors;
             }
 
-            if (order.Status != OrderStatus.Pagado)
+            if (order.Status != OrderStatus.Pagado && order.Status != OrderStatus.EnPreparacion)
             {
-                errors.Add("Solo se pueden preparar órdenes en estado Pagada.");
+                errors.Add("Solo se pueden preparar órdenes en estado Pagada o En preparación.");
                 return errors;
             }
 
@@ -125,9 +125,9 @@ namespace BarStockControl.Services
                 return errors;
             }
 
-            if (order.Status != OrderStatus.Pagado)
+            if (order.Status != OrderStatus.Pagado && order.Status != OrderStatus.EnPreparacion)
             {
-                errors.Add("Solo se pueden preparar órdenes en estado Pagada.");
+                errors.Add("Solo se pueden preparar órdenes en estado Pagada o En preparación.");
                 return errors;
             }
 
