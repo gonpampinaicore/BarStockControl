@@ -30,14 +30,15 @@ namespace BarStockControl.UI
                 else if (!chkOnlyBackups.Checked && chkOnlyRestores.Checked)
                     backups = backups.Where(b => b.Detail == "Restore").ToList();
 
-                dgvBackups.DataSource = backups.Select(b => new
-                {
-                    b.Id,
-                    b.Date,
-                    b.Detail,
-                    User = $"{b.User.FirstName} {b.User.LastName}",
-                    b.FileName
-                }).ToList();
+                dgvBackups.DataSource = backups.Where(b => b.User != null)
+                    .Select(b => new
+                    {
+                        b.Id,
+                        b.Date,
+                        b.Detail,
+                        User = $"{b.User.FirstName} {b.User.LastName}",
+                        b.FileName
+                    }).ToList();
 
                 dgvBackups.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             }

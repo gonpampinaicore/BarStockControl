@@ -343,7 +343,6 @@ namespace BarStockControl.UI
                 return;
             }
 
-            // Validación: No se puede borrar al usuario logueado
             var currentLoggedUser = SessionContext.Instance.LoggedUser;
             if (currentLoggedUser != null && currentLoggedUser.Id == _selectedUser.Id)
             {

@@ -89,9 +89,13 @@ namespace BarStockControl.Services
                 var backupInfo = GetBackupInfo(fileName);
                 if (backupInfo != null && backupInfo.CreatedByUserId != user.Id)
                 {
-                    throw new UnauthorizedAccessException(
-                        $"No puedes restaurar este backup. Fue creado por '{backupInfo.CreatedByUser}' el {backupInfo.CreatedDate:dd/MM/yyyy HH:mm}. " +
-                        "Solo el creador del backup puede restaurarlo.");
+                    string userMessage = backupInfo.CreatedByUserId == 0 
+                        ? $"No puedes restaurar este backup. Fue creado por un usuario que ya no existe el {backupInfo.CreatedDate:dd/MM/yyyy HH:mm}. " +
+                          "Solo el creador del backup puede restaurarlo."
+                        : $"No puedes restaurar este backup. Fue creado por '{backupInfo.CreatedByUser}' el {backupInfo.CreatedDate:dd/MM/yyyy HH:mm}. " +
+                          "Solo el creador del backup puede restaurarlo.";
+                    
+                    throw new UnauthorizedAccessException(userMessage);
                 }
 
                 var source = Path.Combine(_backupFolder, fileName);
@@ -172,11 +176,16 @@ namespace BarStockControl.Services
         {
             try
             {
-                // Extraer fecha del nombre del archivo
-                var datePart = fileName.Split('_')[0] + "_" + fileName.Split('_')[1];
+                if (string.IsNullOrWhiteSpace(fileName))
+                    return null;
+
+                var fileNameParts = fileName.Split('_');
+                if (fileNameParts.Length < 2)
+                    return null;
+
+                var datePart = fileNameParts[0] + "_" + fileNameParts[1];
                 var backupDate = DateTime.ParseExact(datePart, "yyyyMMdd_HHmmss", null);
                 
-                // Buscar el backup en la base de datos
                 var allBackups = GetAll();
                 var backup = allBackups.FirstOrDefault(b => 
                     b.Date.ToString("yyyyMMdd_HHmmss") == backupDate.ToString("yyyyMMdd_HHmmss") && 
@@ -184,18 +193,40 @@ namespace BarStockControl.Services
                 
                 if (backup != null)
                 {
+                    string userName = "Usuario eliminado";
+                    int userId = 0;
+                    
+                    if (backup.User != null)
+                    {
+                        userName = $"{backup.User.FirstName} {backup.User.LastName}";
+                        userId = backup.User.Id;
+                    }
+                    
                     return new BackupInfo
                     {
                         CreatedDate = backup.Date,
-                        CreatedByUser = $"{backup.User.FirstName} {backup.User.LastName}",
-                        CreatedByUserId = backup.User.Id
+                        CreatedByUser = userName,
+                        CreatedByUserId = userId
                     };
                 }
             }
-            catch
+            catch (IndexOutOfRangeException)
             {
-                // Si no se puede obtener información, retornar null
+                return null;
             }
+            catch (FormatException)
+            {
+                return null;
+            }
+            catch (ArgumentNullException)
+            {
+                return null;
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+            
             return null;
         }
 
